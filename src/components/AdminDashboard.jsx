@@ -123,10 +123,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     if (!file) return;
     setUploadingHero(true);
     const formData = new FormData();
-    formData.append('hero', file);
+    formData.append('image', file);
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/upload-hero`, {
+      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
         method: 'POST',
         body: formData
       });
