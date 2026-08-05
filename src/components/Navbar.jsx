@@ -1,7 +1,16 @@
 import React from 'react';
 import { QrCode, ShieldCheck, Ticket } from 'lucide-react';
 
-export default function Navbar({ currentView, setCurrentView, adminUser, onLogout }) {
+export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome }) {
+  const handleNavHome = () => {
+    window.history.pushState({}, '', '/');
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      setCurrentView('home');
+    }
+  };
+
   return (
     <header style={{
       backgroundColor: '#FFFFFF',
@@ -19,10 +28,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
       }}>
         {/* Brand Logo Only (Removed text title & subtitle) */}
         <div 
-          onClick={() => {
-            window.history.pushState({}, '', '/');
-            setCurrentView('home');
-          }} 
+          onClick={handleNavHome} 
           style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
           <img 
@@ -39,10 +45,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
         <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button 
             className={`btn-secondary ${currentView === 'home' ? 'active' : ''}`}
-            onClick={() => {
-              window.history.pushState({}, '', '/');
-              setCurrentView('home');
-            }}
+            onClick={handleNavHome}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
           >
             <Ticket size={18} />

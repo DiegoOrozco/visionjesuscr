@@ -101,6 +101,12 @@ export default function App() {
         setCurrentView={setCurrentView} 
         adminUser={adminUser}
         onLogout={handleAdminLogout}
+        onGoHome={() => {
+          setSelectedZone(null);
+          setAttendeeQuantity(1);
+          setChosenSeatCodes([]);
+          setCurrentView('home');
+        }}
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
