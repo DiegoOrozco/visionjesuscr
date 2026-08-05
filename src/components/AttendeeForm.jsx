@@ -142,18 +142,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
           textAlign: 'center',
           marginBottom: '24px'
         }}>
-          <div style={{ marginBottom: '16px' }}>
-            <img 
-              src="/logo-anual.png" 
-              alt="Logo Mujeres Auténticas 2026" 
-              style={{
-                height: '130px',
-                maxHeight: '160px',
-                maxWidth: '100%',
-                objectFit: 'contain'
-              }}
-            />
-          </div>
+
           <h2 style={{ fontSize: '1.9rem', marginTop: '4px', color: 'var(--accent-coffee)', fontFamily: 'var(--font-heading)' }}>
             CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026
           </h2>
