@@ -98,66 +98,77 @@ export default function TicketView({ qrHash, onGoHome }) {
             boxShadow: 'var(--shadow-md)'
           }}>
             <canvas ref={canvasRef} />
-            <div style={{ marginTop: '12px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                {ticket.zone_name}
-              </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
-                {ticket.attendees.map(a => a.assigned_ticket_code).join(' • ')}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Details Grid */}
-        <div style={{
-          backgroundColor: '#FAF8F5',
-          border: '1px solid var(--accent-beige-border)',
-          borderRadius: '16px',
-          padding: '20px',
-          marginBottom: '24px'
-        }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '14px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '8px' }}>
-            Resumen de la Reserva
-          </h3>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', fontSize: '0.9rem' }}>
-            <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>COMPRADOR:</span>
-              <strong>{ticket.purchaser_name}</strong>
-            </div>
-
-            <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CANTIDAD DE BOLETOS:</span>
-              <strong>{ticket.quantity} {ticket.quantity === 1 ? 'Persona' : 'Personas'}</strong>
-            </div>
-
-            <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>TOTAL PAGADO:</span>
-              <strong>₡{Number(ticket.total_amount).toLocaleString('es-CR')}</strong>
-            </div>
-
-            <div>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CONTACTO:</span>
-              <strong>{ticket.purchaser_phone}</strong>
-            </div>
-          </div>
-
-          {/* Attendee List */}
-          <div style={{ marginTop: '16px', borderTop: '1px dashed var(--accent-beige-border)', paddingTop: '12px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-coffee)' }}>
-              Lista de Asistentes:
-            </span>
-            <ul style={{ listStyle: 'none', marginTop: '8px', padding: 0 }}>
-              {ticket.attendees.map((att, i) => (
-                <li key={i} style={{ fontSize: '0.88rem', marginBottom: '4px', display: 'flex', justifyBetween: 'space-between' }}>
-                  <span>• <strong>{att.full_name}</strong> ({att.phone})</span>
-                  <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--accent-gold)' }}>{att.assigned_ticket_code}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+             <div style style={{ marginTop: '12px' }}>
+               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                 {ticket.zone_name}
+               </div>
+               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
+                 {ticket.attendees.map(a => {
+                   const t = a.assigned_ticket_code || '';
+                   return t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+                     ? t.split(' - ').slice(1).join(' - ') 
+                     : t;
+                 }).join(' • ')}
+               </div>
+             </div>
+           </div>
+         </div>
+ 
+         {/* Details Grid */}
+         <div style={{
+           backgroundColor: '#FAF8F5',
+           border: '1px solid var(--accent-beige-border)',
+           borderRadius: '16px',
+           padding: '20px',
+           marginBottom: '24px'
+         }}>
+           <h3 style={{ fontSize: '1.1rem', marginBottom: '14px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '8px' }}>
+             Resumen de la Reserva
+           </h3>
+ 
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', fontSize: '0.9rem' }}>
+             <div>
+               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>COMPRADOR:</span>
+               <strong>{ticket.purchaser_name}</strong>
+             </div>
+ 
+             <div>
+               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CANTIDAD DE BOLETOS:</span>
+               <strong>{ticket.quantity} {ticket.quantity === 1 ? 'Persona' : 'Personas'}</strong>
+             </div>
+ 
+             <div>
+               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>TOTAL PAGADO:</span>
+               <strong>₡{Number(ticket.total_amount).toLocaleString('es-CR')}</strong>
+             </div>
+ 
+             <div>
+               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CONTACTO:</span>
+               <strong>{ticket.purchaser_phone}</strong>
+             </div>
+           </div>
+ 
+           {/* Attendee List */}
+           <div style={{ marginTop: '16px', borderTop: '1px dashed var(--accent-beige-border)', paddingTop: '12px' }}>
+             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-coffee)' }}>
+               Lista de Asistentes:
+             </span>
+             <ul style={{ listStyle: 'none', marginTop: '8px', padding: 0 }}>
+               {ticket.attendees.map((att, i) => {
+                 const t = att.assigned_ticket_code || '';
+                 const cleanSeat = t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+                   ? t.split(' - ').slice(1).join(' - ') 
+                   : t;
+                 return (
+                   <li key={i} style={{ fontSize: '0.88rem', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                     <span>• <strong>{att.full_name}</strong> ({att.phone})</span>
+                     <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--accent-gold)' }}>{cleanSeat}</span>
+                   </li>
+                 );
+               })}
+             </ul>
+           </div>
+         </div>
 
         <button onClick={onGoHome} className="btn-secondary" style={{ width: '100%', padding: '12px' }}>
           Volver a Inicio

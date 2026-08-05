@@ -197,6 +197,7 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
         quantity: quantity,
         zone_name: zone.name,
         purchaser_name,
+        purchaser_phone,
         status: 'pendiente'
       }
     });

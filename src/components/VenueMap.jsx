@@ -130,7 +130,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
 
   const checkSeatOccupied = (zoneId, rowLabel, rowIndex, seatIndex) => {
     const seatNum = seatIndex + 1;
-    const seatCode = `${rowLabel} - Asiento #${seatNum}`;
+    const seatCode = `${zoneId} - ${rowLabel} - Asiento #${seatNum}`;
 
     const prefixMap = {
       'vip_central': 'VIP-CTR',
@@ -156,7 +156,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
     return occupiedSeats.some(occ => {
       if (!occ) return false;
       const s = String(occ).trim();
-      return s === seatCode || s === queueCode || s.includes(seatCode);
+      return s === seatCode || s === queueCode;
     });
   };
 
@@ -511,11 +511,14 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-coffee)' }}>
                 Asientos Marcados ({selectedSeats.length}):
               </span>
-              {selectedSeats.map(s => (
-                <span key={s} className="badge" style={{ backgroundColor: selectedZone.hoverColor, color: '#FFF' }}>
-                  ✓ {s}
-                </span>
-              ))}
+              {selectedSeats.map(s => {
+                const displayCode = s.includes(' - ') ? s.split(' - ').slice(1).join(' - ') : s;
+                return (
+                  <span key={s} className="badge" style={{ backgroundColor: selectedZone.hoverColor, color: '#FFF' }}>
+                    ✓ {displayCode}
+                  </span>
+                );
+              })}
             </div>
           )}
 
@@ -531,7 +534,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                     <div style={{ display: 'flex', gap: '6px' }}>
                       {Array.from({ length: r.seatsCount }, (_, i) => {
                         const seatNum = i + 1;
-                        const seatCode = `${r.rowLabel} - Asiento #${seatNum}`;
+                        const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
                         const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
                         const isSelected = selectedSeats.includes(seatCode);
 
@@ -540,7 +543,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                             key={seatNum}
                             disabled={isOccupied}
                             onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar ${seatCode}`}
+                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
                             style={{
                               width: '44px',
                               height: '44px',
@@ -579,7 +582,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                     <div style={{ display: 'flex', gap: '6px' }}>
                       {Array.from({ length: r.seatsCount }, (_, i) => {
                         const seatNum = i + 1;
-                        const seatCode = `${r.rowLabel} - Asiento #${seatNum}`;
+                        const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
                         const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
                         const isSelected = selectedSeats.includes(seatCode);
 
@@ -588,7 +591,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                             key={seatNum}
                             disabled={isOccupied}
                             onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar ${seatCode}`}
+                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
                             style={{
                               width: '44px',
                               height: '44px',
@@ -629,7 +632,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                   <div style={{ display: 'flex', gap: '6px' }}>
                     {Array.from({ length: 10 }, (_, i) => {
                       const seatNum = i + 1;
-                      const seatCode = `${rLabel} - Asiento #${seatNum}`;
+                      const seatCode = `${selectedZone.data.id} - ${rLabel} - Asiento #${seatNum}`;
                       const isOccupied = checkSeatOccupied(selectedZone.data.id, rLabel, rIdx, i);
                       const isSelected = selectedSeats.includes(seatCode);
 
@@ -638,7 +641,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                           key={seatNum}
                           disabled={isOccupied}
                           onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                          title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar ${seatCode}`}
+                          title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${rLabel} Asiento #${seatNum}`}
                           style={{
                             width: '44px',
                             height: '44px',

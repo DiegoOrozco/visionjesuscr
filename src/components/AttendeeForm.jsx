@@ -179,7 +179,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
             </h3>
 
             {attendees.map((att, index) => {
-              const seatBadge = att.assigned_ticket_code || (chosenSeatCodes && chosenSeatCodes[index]);
+              const rawSeatBadge = att.assigned_ticket_code || (chosenSeatCodes && chosenSeatCodes[index]);
+              const seatBadge = rawSeatBadge && rawSeatBadge.includes(' - ') && !rawSeatBadge.startsWith('Fila') && !rawSeatBadge.startsWith('Asiento') ? rawSeatBadge.split(' - ').slice(1).join(' - ') : rawSeatBadge;
 
               return (
                 <div key={index} style={{

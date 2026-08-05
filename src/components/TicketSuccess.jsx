@@ -30,21 +30,38 @@ export default function TicketSuccess({ reservation, onReset }) {
     });
   }, [reservation]);
 
-  // Clean WhatsApp handler preventing double-encoding of %20
+  // Clean WhatsApp handler opening direct chat with phone number
   const handleSendWhatsApp = (e) => {
     e.preventDefault();
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
+    const cleanPhone = (p) => {
+      if (!p) return '';
+      let cleaned = String(p).replace(/\D/g, '');
+      if (cleaned.length === 8) {
+        cleaned = '506' + cleaned;
+      }
+      return cleaned;
+    };
+
+    const phone = reservation.purchaser_phone ? cleanPhone(reservation.purchaser_phone) : '';
+    
+    // Format seats list nicely for message
+    const formattedTickets = reservation.assigned_tickets.map(t => 
+      t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+        ? t.split(' - ').slice(1).join(' - ') 
+        : t
+    ).join(', ');
+
     const message = `¡Hola! Confirmo mi reservación para el CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026.\n\n` +
       `🎟️ Zona: ${reservation.zone_name}\n` +
-      `🔢 Boletos: ${reservation.assigned_tickets.join(', ')}\n` +
+      `🔢 Boletos: ${formattedTickets}\n` +
       `👤 Responsable: ${reservation.purchaser_name}\n\n` +
       `🔗 Puedes abrir y visualizar mi boleto con código QR digital aquí:\n${ticketUrl}`;
 
     const encoded = encodeURIComponent(message);
-    const targetUrl = isMobile 
-      ? `https://wa.me/?text=${encoded}` 
-      : `https://web.whatsapp.com/send?text=${encoded}`;
+    const targetUrl = phone
+      ? `https://wa.me/${phone}?text=${encoded}`
+      : `https://wa.me/?text=${encoded}`;
 
     window.open(targetUrl, '_blank', 'noopener,noreferrer');
   };
@@ -112,7 +129,11 @@ export default function TicketSuccess({ reservation, onReset }) {
               BOLETOS ASIGNADOS
             </div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
-              {reservation.assigned_tickets.join(' • ')}
+              {reservation.assigned_tickets.map(t => 
+                t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+                  ? t.split(' - ').slice(1).join(' - ') 
+                  : t
+              ).join(' • ')}
             </div>
             <div style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 600, marginTop: '2px' }}>
               {reservation.zone_name} ({reservation.quantity} {reservation.quantity === 1 ? 'Persona' : 'Personas'})
@@ -125,7 +146,7 @@ export default function TicketSuccess({ reservation, onReset }) {
           <button
             onClick={handleSendWhatsApp}
             className="btn-primary"
-            style={{ backgroundColor: '#25D366', textDecoration: 'none', padding: '14px', border: 'none' }}
+            style={{ backgroundColor: '#25D366', textDecoration: 'none', padding: '14px', border: 'none', cursor: 'pointer' }}
           >
             <MessageCircle size={20} />
             <span>Enviar por WhatsApp</span>
@@ -166,7 +187,8 @@ export default function TicketSuccess({ reservation, onReset }) {
               fontSize: '0.8rem',
               fontWeight: 600,
               whiteSpace: 'nowrap',
-              marginLeft: '8px'
+              marginLeft: '8px',
+              cursor: 'pointer'
             }}
           >
             {copied ? '¡Copiado!' : 'Copiar Enlace'}
