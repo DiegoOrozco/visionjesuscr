@@ -7,7 +7,7 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const uploadsDir = path.join(__dirname, 'uploads', 'comprobantes');
+const uploadsDir = path.join(dbDir, 'uploads', 'comprobantes');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

@@ -12,7 +12,10 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const uploadsDir = path.join(__dirname, 'uploads', 'comprobantes');
+const uploadsDir = path.join(__dirname, 'data', 'uploads', 'comprobantes');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 app.use('/uploads/comprobantes', express.static(uploadsDir));
 
 const storage = multer.diskStorage({
