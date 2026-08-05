@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ZoomIn, RotateCcw, Check, MousePointerClick, Shield, Star, Ticket, Lock } from 'lucide-react';
+import { RotateCcw, Check, MousePointerClick, Star, Ticket } from 'lucide-react';
 
 export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
   const [hoveredZoneId, setHoveredZoneId] = useState(null);
@@ -27,6 +27,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
   const lateralIzquierda = getZone('lateral_izquierda', 'General Izquierda', 7500, '#F59E0B');
   const lateralDerecha = getZone('lateral_derecha', 'General Derecha', 7500, '#F59E0B');
 
+  // Uniform 10 rows for all sections!
   const seatLayouts = {
     vip_izquierda: [
       { rowLabel: "Fila 1", seatsCount: 8 },
@@ -34,15 +35,23 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       { rowLabel: "Fila 3", seatsCount: 8 },
       { rowLabel: "Fila 4", seatsCount: 8 },
       { rowLabel: "Fila 5", seatsCount: 8 },
-      { rowLabel: "Fila 6", seatsCount: 8 }
+      { rowLabel: "Fila 6", seatsCount: 8 },
+      { rowLabel: "Fila 7", seatsCount: 8 },
+      { rowLabel: "Fila 8", seatsCount: 8 },
+      { rowLabel: "Fila 9", seatsCount: 8 },
+      { rowLabel: "Fila 10", seatsCount: 8 }
     ],
     vip_central: {
       reservedRows: ["Fila 1 (RESERVADO)", "Fila 2 (RESERVADO)"],
       activeRows: [
-        { rowLabel: "Fila 3", seatsCount: 10 },
-        { rowLabel: "Fila 4", seatsCount: 10 },
-        { rowLabel: "Fila 5", seatsCount: 10 },
-        { rowLabel: "Fila 6", seatsCount: 10 }
+        { rowLabel: "Fila 3", seatsCount: 9 },
+        { rowLabel: "Fila 4", seatsCount: 9 },
+        { rowLabel: "Fila 5", seatsCount: 9 },
+        { rowLabel: "Fila 6", seatsCount: 9 },
+        { rowLabel: "Fila 7", seatsCount: 9 },
+        { rowLabel: "Fila 8", seatsCount: 9 },
+        { rowLabel: "Fila 9", seatsCount: 9 },
+        { rowLabel: "Fila 10", seatsCount: 9 }
       ]
     },
     vip_derecha: [
@@ -51,7 +60,11 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       { rowLabel: "Fila 3", seatsCount: 8 },
       { rowLabel: "Fila 4", seatsCount: 8 },
       { rowLabel: "Fila 5", seatsCount: 8 },
-      { rowLabel: "Fila 6", seatsCount: 8 }
+      { rowLabel: "Fila 6", seatsCount: 8 },
+      { rowLabel: "Fila 7", seatsCount: 8 },
+      { rowLabel: "Fila 8", seatsCount: 8 },
+      { rowLabel: "Fila 9", seatsCount: 8 },
+      { rowLabel: "Fila 10", seatsCount: 8 }
     ]
   };
 
@@ -67,14 +80,14 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       data: vipIzquierda,
       x: 70, y: 140, width: 180, height: 180, rx: 12,
       label: "VIP IZQUIERDA",
-      sublabel: "6 Filas x 8 Asientos",
+      sublabel: "10 Filas x 8 Asientos",
       hoverColor: "#9333EA"
     },
     {
       data: vipDerecha,
       x: 650, y: 140, width: 180, height: 180, rx: 12,
       label: "VIP DERECHA",
-      sublabel: "6 Filas x 8 Asientos",
+      sublabel: "10 Filas x 8 Asientos",
       hoverColor: "#9333EA"
     },
     {
@@ -122,12 +135,6 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
     }
   };
 
-  const handleConfirmSelectedSeats = () => {
-    if (!selectedZone) return;
-    const qty = selectedSeats.length > 0 ? selectedSeats.length : 1;
-    onSelectZone(selectedZone.data, qty, selectedSeats);
-  };
-
   const checkSeatOccupied = (zoneId, rowLabel, rowIndex, seatIndex) => {
     const seatNum = seatIndex + 1;
     const seatCode = `${zoneId} - ${rowLabel} - Asiento #${seatNum}`;
@@ -144,9 +151,13 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
 
     let queueIndex = 1;
     if (zoneId === 'vip_central') {
-      queueIndex = (rowIndex * 10) + seatNum;
+      // row index in React represents Fila 3 to 10 (which is index 0 to 7)
+      // We must add the 18 reserved seats of Row 1 & Row 2 (9 per row)
+      queueIndex = ((rowIndex + 2) * 9) + seatNum;
     } else if (zoneId === 'vip_izquierda' || zoneId === 'vip_derecha') {
       queueIndex = (rowIndex * 8) + seatNum;
+    } else if (zoneId === 'central_atras') {
+      queueIndex = (rowIndex * 15) + seatNum;
     } else {
       queueIndex = (rowIndex * 10) + seatNum;
     }
@@ -158,6 +169,83 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       const s = String(occ).trim();
       return s === seatCode || s === queueCode;
     });
+  };
+
+  // Validate single gaps of exactly 1 empty space
+  const validateRowGaps = () => {
+    const seatsByRow = {};
+    for (const seat of selectedSeats) {
+      const parts = seat.split(' - ');
+      if (parts.length < 3) continue;
+      const zId = parts[0];
+      const rLabel = parts[1];
+      const key = `${zId}::${rLabel}`;
+      if (!seatsByRow[key]) seatsByRow[key] = [];
+      seatsByRow[key].push(seat);
+    }
+
+    for (const [key, selectedInRow] of Object.entries(seatsByRow)) {
+      const [zId, rLabel] = key.split('::');
+      let maxSeats = 10;
+      let rowIndex = 0;
+
+      if (zId === 'vip_central') {
+        const activeRows = seatLayouts.vip_central.activeRows;
+        const activeRow = activeRows.find((r, idx) => {
+          if (r.rowLabel === rLabel) {
+            rowIndex = idx;
+            return true;
+          }
+          return false;
+        });
+        maxSeats = activeRow ? activeRow.seatsCount : 9;
+      } else if (zId === 'vip_izquierda' || zId === 'vip_derecha') {
+        const rows = seatLayouts[zId];
+        const row = rows.find((r, idx) => {
+          if (r.rowLabel === rLabel) {
+            rowIndex = idx;
+            return true;
+          }
+          return false;
+        });
+        maxSeats = row ? row.seatsCount : 8;
+      } else {
+        const rows = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+        rowIndex = rows.indexOf(rLabel);
+        if (zId === 'central_atras') maxSeats = 15;
+        else maxSeats = 10;
+      }
+
+      const rowState = [];
+      for (let i = 0; i < maxSeats; i++) {
+        const seatCode = `${zId} - ${rLabel} - Asiento #${i + 1}`;
+        const isOccupied = checkSeatOccupied(zId, rLabel, rowIndex, i);
+        const isSelected = selectedSeats.includes(seatCode);
+        rowState.push(isOccupied || isSelected);
+      }
+
+      for (let i = 0; i < maxSeats; i++) {
+        if (rowState[i] === false) {
+          const leftIsBoundOrTaken = (i === 0 || rowState[i - 1] === true);
+          const rightIsBoundOrTaken = (i === maxSeats - 1 || rowState[i + 1] === true);
+          if (leftIsBoundOrTaken && rightIsBoundOrTaken) {
+            alert(`⚠️ No se permite dejar asientos vacíos individuales (fila: ${rLabel}, asiento: ${i + 1}). Por favor selecciona este asiento o reorganiza tus selecciones para no dejar huecos aislados.`);
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  const handleConfirmSelectedSeats = () => {
+    if (!selectedZone) return;
+    if (selectedSeats.length === 0) {
+      alert("Por favor selecciona al menos un asiento.");
+      return;
+    }
+    if (!validateRowGaps()) return;
+    onSelectZone(selectedZone.data, selectedSeats.length, selectedSeats);
   };
 
   // Render SVG Labels with strictly unified typography and font size (12.5px)
@@ -488,7 +576,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                     FILAS 1 Y 2 RESERVADAS (INVITADOS ESPECIALES / PASTORES)
                   </div>
                   <div style={{ fontSize: '0.82rem', opacity: 0.85 }}>
-                    Las 2 primeras filas están bloqueadas. Puedes seleccionar asientos en las Filas 3, 4, 5 y 6 (10 asientos por fila).
+                    Las 2 primeras filas están bloqueadas. Puedes seleccionar asientos en las Filas 3 a la 10 (9 asientos por fila).
                   </div>
                 </div>
               </div>
@@ -623,54 +711,57 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                 ))
               )
             ) : (
-              // General Zones
-              ["Fila A", "Fila B", "Fila C", "Fila D"].map((rLabel, rIdx) => (
-                <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
-                    {rLabel}
-                  </span>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {Array.from({ length: 10 }, (_, i) => {
-                      const seatNum = i + 1;
-                      const seatCode = `${selectedZone.data.id} - ${rLabel} - Asiento #${seatNum}`;
-                      const isOccupied = checkSeatOccupied(selectedZone.data.id, rLabel, rIdx, i);
-                      const isSelected = selectedSeats.includes(seatCode);
+              // General Zones (Uniform 10 rows: Fila A to J)
+              ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"].map((rLabel, rIdx) => {
+                const cols = selectedZone.data.id === 'central_atras' ? 15 : 10;
+                return (
+                  <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                      {rLabel}
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      {Array.from({ length: cols }, (_, i) => {
+                        const seatNum = i + 1;
+                        const seatCode = `${selectedZone.data.id} - ${rLabel} - Asiento #${seatNum}`;
+                        const isOccupied = checkSeatOccupied(selectedZone.data.id, rLabel, rIdx, i);
+                        const isSelected = selectedSeats.includes(seatCode);
 
-                      return (
-                        <button
-                          key={seatNum}
-                          disabled={isOccupied}
-                          onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                          title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${rLabel} Asiento #${seatNum}`}
-                          style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '10px',
-                            border: isOccupied 
-                              ? '1px solid #374151' 
-                              : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                            backgroundColor: isOccupied 
-                              ? '#4B5563' 
-                              : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                            color: isOccupied 
-                              ? '#9CA3AF' 
-                              : isSelected ? '#FFFFFF' : '#1F2937',
-                            fontWeight: 900,
-                            fontSize: '0.85rem',
-                            boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                            transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                            transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                            cursor: isOccupied ? 'not-allowed' : 'pointer',
-                            opacity: isOccupied ? 0.7 : 1
-                          }}
-                        >
-                          {isOccupied ? '🔒' : seatNum}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={seatNum}
+                            disabled={isOccupied}
+                            onClick={() => toggleSeatSelection(seatCode, isOccupied)}
+                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${rLabel} Asiento #${seatNum}`}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              borderRadius: '10px',
+                              border: isOccupied 
+                                ? '1px solid #374151' 
+                                : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
+                              backgroundColor: isOccupied 
+                                ? '#4B5563' 
+                                : isSelected ? selectedZone.hoverColor : '#FFFFFF',
+                              color: isOccupied 
+                                ? '#9CA3AF' 
+                                : isSelected ? '#FFFFFF' : '#1F2937',
+                              fontWeight: 900,
+                              fontSize: '0.85rem',
+                              boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
+                              transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                              transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                              cursor: isOccupied ? 'not-allowed' : 'pointer',
+                              opacity: isOccupied ? 0.7 : 1
+                            }}
+                          >
+                            {isOccupied ? '🔒' : seatNum}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 

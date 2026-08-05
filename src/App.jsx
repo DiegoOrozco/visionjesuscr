@@ -7,13 +7,15 @@ import TicketSuccess from './components/TicketSuccess';
 import TicketView from './components/TicketView';
 import AdminDashboard from './components/AdminDashboard';
 import DoorScanner from './components/DoorScanner';
+import ChurchLanding from './components/ChurchLanding';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('home');
+  const [currentView, setCurrentView] = useState('landing');
   const [zones, setZones] = useState([]);
   const [occupiedSeats, setOccupiedSeats] = useState([]);
+  const [homepageConfig, setHomepageConfig] = useState({});
   
   // Modal & Reservation state
   const [selectedZone, setSelectedZone] = useState(null);
@@ -45,8 +47,20 @@ export default function App() {
       .catch(console.error);
   };
 
+  const fetchConfig = () => {
+    fetch(`${API_URL}/api/homepage/config`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setHomepageConfig(data.config);
+        }
+      })
+      .catch(console.error);
+  };
+
   useEffect(() => {
     fetchZones();
+    fetchConfig();
 
     const path = window.location.pathname;
     if (path.startsWith('/ticket/')) {
@@ -59,6 +73,10 @@ export default function App() {
       setCurrentView('admin');
     } else if (path === '/escanear') {
       setCurrentView('scanner');
+    } else if (path === '/autenticas') {
+      setCurrentView('home');
+    } else {
+      setCurrentView('landing');
     }
   }, []);
 
@@ -71,7 +89,7 @@ export default function App() {
   const handleAdminLogout = () => {
     setAdminUser(null);
     localStorage.removeItem('admin_user');
-    setCurrentView('home');
+    setCurrentView('landing');
   };
 
   const handleSelectZone = (zone, qty = 1, seatCodes = []) => {
@@ -96,6 +114,11 @@ export default function App() {
     setCurrentView('success');
   };
 
+  const handleGoToTickets = () => {
+    window.history.pushState({}, '', '/autenticas');
+    setCurrentView('home');
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar 
@@ -107,12 +130,21 @@ export default function App() {
           setSelectedZone(null);
           setAttendeeQuantity(1);
           setChosenSeatCodes([]);
-          setCurrentView('home');
+          window.history.pushState({}, '', '/');
+          setCurrentView('landing');
         }}
       />
 
-      <main style={{ flex: 1, paddingBottom: '60px' }}>
+      <main style={{ flex: 1, paddingBottom: currentView === 'landing' ? '0px' : '60px' }}>
         
+        {/* VIEW 0: CHURCH LANDING PAGE */}
+        {currentView === 'landing' && (
+          <ChurchLanding 
+            config={homepageConfig} 
+            onGoToTickets={handleGoToTickets}
+          />
+        )}
+
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
         {currentView === 'home' && (
           <div className="container" style={{ paddingTop: '20px' }}>
@@ -128,7 +160,6 @@ export default function App() {
               marginBottom: '24px',
               background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF5EF 100%)'
             }}>
-
 
               <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-gold)', color: '#FFFFFF', marginBottom: '12px', fontSize: '0.9rem', padding: '6px 18px' }}>
                 ✦ PREVENTA ABIERTA • CONGRESO ANUAL 2026 ✦
@@ -169,7 +200,10 @@ export default function App() {
               zone={selectedZone}
               quantity={attendeeQuantity}
               chosenSeatCodes={chosenSeatCodes}
-              onBack={() => setCurrentView('home')}
+              onBack={() => {
+                window.history.pushState({}, '', '/autenticas');
+                setCurrentView('home');
+              }}
               onSuccess={handleReservationSuccess}
             />
           </div>
@@ -180,7 +214,10 @@ export default function App() {
           <div className="container">
             <TicketSuccess 
               reservation={activeReservation}
-              onReset={() => setCurrentView('home')}
+              onReset={() => {
+                window.history.pushState({}, '', '/autenticas');
+                setCurrentView('home');
+              }}
             />
           </div>
         )}
@@ -191,7 +228,7 @@ export default function App() {
             qrHash={ticketQrHash}
             onGoHome={() => {
               window.history.pushState({}, '', '/');
-              setCurrentView('home');
+              setCurrentView('landing');
             }}
           />
         )}
@@ -202,6 +239,10 @@ export default function App() {
             adminUser={adminUser}
             onLogin={handleAdminLogin}
             onLogout={handleAdminLogout}
+            homepageConfig={homepageConfig}
+            onSaveConfig={(updated) => {
+              setHomepageConfig(updated);
+            }}
           />
         )}
 
@@ -213,18 +254,20 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer style={{
-        backgroundColor: 'var(--bg-dark)',
-        color: '#FAF8F5',
-        textAlign: 'center',
-        padding: '24px 20px',
-        fontSize: '0.88rem',
-        marginTop: 'auto'
-      }}>
-        <div className="container">
-          <p style={{ margin: 0 }}>© 2026 Conferencia de Mujeres Auténticas</p>
-        </div>
-      </footer>
+      {currentView !== 'landing' && (
+        <footer style={{
+          backgroundColor: 'var(--bg-dark)',
+          color: '#FAF8F5',
+          textAlign: 'center',
+          padding: '24px 20px',
+          fontSize: '0.88rem',
+          marginTop: 'auto'
+        }}>
+          <div className="container">
+            <p style={{ margin: 0 }}>© 2026 Conferencia de Mujeres Auténticas</p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

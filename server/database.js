@@ -82,6 +82,11 @@ function initDb() {
       role TEXT NOT NULL DEFAULT 'staff',
       full_name TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS homepage_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `);
 
   // Migrations for columns
@@ -102,13 +107,16 @@ function initDb() {
   const vipPrice = isPresale ? 12000.00 : 15000.00;
   const generalPrice = isPresale ? 7500.00 : 10000.00;
 
+  // New Capacities: VIP = 250 Total, General = 350 Total.
+  // VIP Central: 90 seats, VIP Izquierda: 80 seats, VIP Derecha: 80 seats. (Sum = 250)
+  // General Central: 150 seats, General Izquierda: 100 seats, General Derecha: 100 seats. (Sum = 350)
   const zoneList = [
-    { id: 'vip_central', name: 'VIP Central', price: vipPrice, regular_price: 15000.00, capacity: 40, prefix: 'VIP-CTR', color: '#DB2777', desc: 'Ubicación preferencial en el centro del altar (40 asientos).' },
-    { id: 'vip_izquierda', name: 'VIP Izquierda', price: vipPrice, regular_price: 15000.00, capacity: 48, prefix: 'VIP-IZQ', color: '#9333EA', desc: 'Sector VIP lateral izquierdo (6 filas x 8 asientos).' },
-    { id: 'vip_derecha', name: 'VIP Derecha', price: vipPrice, regular_price: 15000.00, capacity: 48, prefix: 'VIP-DER', color: '#9333EA', desc: 'Sector VIP lateral derecho (6 filas x 8 asientos).' },
-    { id: 'central_atras', name: 'General Central', price: generalPrice, regular_price: 10000.00, capacity: 200, prefix: 'GEN-CTR', color: '#10B981', desc: 'Área general central.' },
-    { id: 'lateral_izquierda', name: 'General Izquierda', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-IZQ', color: '#F59E0B', desc: 'Área general lateral izquierda.' },
-    { id: 'lateral_derecha', name: 'General Derecha', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-DER', color: '#F59E0B', desc: 'Área general lateral derecha.' }
+    { id: 'vip_central', name: 'VIP Central', price: vipPrice, regular_price: 15000.00, capacity: 90, prefix: 'VIP-CTR', color: '#DB2777', desc: 'Ubicación preferencial en el centro del altar (90 asientos).' },
+    { id: 'vip_izquierda', name: 'VIP Izquierda', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'VIP-IZQ', color: '#9333EA', desc: 'Sector VIP lateral izquierdo (80 asientos).' },
+    { id: 'vip_derecha', name: 'VIP Derecha', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'VIP-DER', color: '#9333EA', desc: 'Sector VIP lateral derecho (80 asientos).' },
+    { id: 'central_atras', name: 'General Central', price: generalPrice, regular_price: 10000.00, capacity: 150, prefix: 'GEN-CTR', color: '#10B981', desc: 'Área general central (150 asientos).' },
+    { id: 'lateral_izquierda', name: 'General Izquierda', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-IZQ', color: '#F59E0B', desc: 'Área general lateral izquierda (100 asientos).' },
+    { id: 'lateral_derecha', name: 'General Derecha', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-DER', color: '#F59E0B', desc: 'Área general lateral derecha (100 asientos).' }
   ];
 
   const insertZoneStmt = db.prepare(`
@@ -122,11 +130,15 @@ function initDb() {
 
   db.transaction(() => {
     for (const z of zoneList) {
-      insertZoneStmt.run(z.id, z.name, z.price, z.regular_price, z.capacity, z.capacity, z.desc, z.color);
+      // Calculate active available_capacity based on existing assigned seats
+      const occupiedCount = db.prepare('SELECT COUNT(*) as c FROM seat_queues WHERE zone_id = ? AND is_assigned = 1').get(z.id).c;
+      const newAvailable = Math.max(0, z.capacity - occupiedCount);
+      
+      insertZoneStmt.run(z.id, z.name, z.price, z.regular_price, z.capacity, newAvailable, z.desc, z.color);
       
       const count = db.prepare('SELECT COUNT(*) as c FROM seat_queues WHERE zone_id = ?').get(z.id).c;
-      if (count === 0) {
-        for (let i = 1; i <= z.capacity; i++) {
+      if (count < z.capacity) {
+        for (let i = count + 1; i <= z.capacity; i++) {
           const code = `${z.prefix}-${String(i).padStart(3, '0')}`;
           insertQueueStmt.run(z.id, i, code);
         }
@@ -143,6 +155,37 @@ function initDb() {
       ('admin', 'admin123', 'admin', 'Administrador Principal'),
       ('scanner', 'puerta123', 'scanner', 'Personal de Puerta / Escáner')
     `).run();
+  }
+
+  // Seed default homepage config values
+  const configCount = db.prepare('SELECT COUNT(*) as count FROM homepage_config').get();
+  if (configCount.count === 0) {
+    const defaultConfig = {
+      hero_bg: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+      hero_title: 'Bienvenido a TU CASA',
+      hero_subtitle: 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración',
+      about_text: 'Somos una comunidad apasionada por compartir el mensaje de esperanza, amor y gracia de Jesucristo en Costa Rica y el mundo entero. ¡Nuestras puertas están abiertas para ti!',
+      social_fb: 'https://facebook.com/visionjesus',
+      social_ig: 'https://instagram.com/visionjesus',
+      social_yt: 'https://youtube.com/visionjesus',
+      social_spotify: 'https://spotify.com/visionjesus',
+      schedule_thursday: 'Jueves 7:30 PM',
+      schedule_saturday: 'Sábado 5:30 PM',
+      schedule_sunday_1: 'Domingo 9:00 AM',
+      schedule_sunday_2: 'Domingo 11:00 AM',
+      schedule_sunday_virtual: 'Domingo (Virtual) 5:30 PM',
+      contact_address: '50 norte y 50 oeste de la Cruz Roja de Desamparados. Auditorio Principal.',
+      contact_email: 'info@somosimpact.com',
+      contact_phone_1: '+506 4115 1212',
+      contact_phone_2: '+506 6453 1212'
+    };
+
+    const insertConfig = db.prepare('INSERT OR IGNORE INTO homepage_config (key, value) VALUES (?, ?)');
+    db.transaction(() => {
+      for (const [key, val] of Object.entries(defaultConfig)) {
+        insertConfig.run(key, val);
+      }
+    })();
   }
 }
 

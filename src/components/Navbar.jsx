@@ -1,14 +1,20 @@
 import React from 'react';
-import { QrCode, ShieldCheck, Ticket } from 'lucide-react';
+import { QrCode, ShieldCheck, Ticket, Home } from 'lucide-react';
 
 export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome }) {
-  const handleNavHome = () => {
+  
+  const handleNavLanding = () => {
     window.history.pushState({}, '', '/');
     if (onGoHome) {
       onGoHome();
     } else {
-      setCurrentView('home');
+      setCurrentView('landing');
     }
+  };
+
+  const handleNavTickets = () => {
+    window.history.pushState({}, '', '/autenticas');
+    setCurrentView('home');
   };
 
   return (
@@ -28,12 +34,12 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
       }}>
         {/* Brand Logo Only (Removed text title & subtitle) */}
         <div 
-          onClick={handleNavHome} 
+          onClick={handleNavLanding} 
           style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
           <img 
             src="/logo-anual.png" 
-            alt="Logo Mujeres Auténticas 2026" 
+            alt="Logo Iglesia Visión Jesús" 
             style={{
               height: '62px',
               objectFit: 'contain'
@@ -43,13 +49,23 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
 
         {/* Navigation Buttons */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          
           <button 
-            className={`btn-secondary ${currentView === 'home' ? 'active' : ''}`}
-            onClick={handleNavHome}
+            className={`btn-secondary ${currentView === 'landing' ? 'active' : ''}`}
+            onClick={handleNavLanding}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
+          >
+            <Home size={18} />
+            <span>Inicio</span>
+          </button>
+
+          <button 
+            className={`btn-secondary ${currentView === 'home' || currentView === 'attendees' || currentView === 'success' ? 'active' : ''}`}
+            onClick={handleNavTickets}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
           >
             <Ticket size={18} />
-            <span>Reservar</span>
+            <span>Congreso Mujeres</span>
           </button>
 
           {/* Render admin links ONLY if logged in */}

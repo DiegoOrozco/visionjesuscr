@@ -450,9 +450,38 @@ app.post('/api/scan', (req, res) => {
       }
     });
 
-  } catch (error) {
-    console.error('Scan error:', error);
-    res.status(500).json({ success: false, code: 'SERVER_ERROR', message: 'Error interno durante el escaneo.' });
+});
+
+// --- HOMEPAGE CONFIGURATION API ---
+app.get('/api/homepage/config', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT key, value FROM homepage_config').all();
+    const config = {};
+    rows.forEach(r => {
+      config[r.key] = r.value;
+    });
+    res.json({ success: true, config });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.post('/api/admin/homepage/config', (req, res) => {
+  try {
+    const { config } = req.body;
+    if (!config) {
+      return res.status(400).json({ success: false, message: 'Configuración no provista.' });
+    }
+    const updateStmt = db.prepare('INSERT OR REPLACE INTO homepage_config (key, value) VALUES (?, ?)');
+    const tx = db.transaction(() => {
+      for (const [key, val] of Object.entries(config)) {
+        updateStmt.run(key, String(val));
+      }
+    });
+    tx();
+    res.json({ success: true, message: 'Configuración de portada guardada con éxito.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 
