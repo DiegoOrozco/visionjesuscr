@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, HelpCircle, Compass, Users, Flame, ArrowRight, Music, PlayCircle } from 'lucide-react';
+import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, HelpCircle, Compass, Users, Flame, ArrowRight, Music, PlayCircle, Ticket } from 'lucide-react';
 
 export default function ChurchLanding({ config, onGoToTickets }) {
   const [modalType, setModalType] = useState(null); // 'nuevo' | 'creyente' | 'ofrendar' | 'pregunta'
