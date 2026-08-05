@@ -22,6 +22,24 @@ export default function ChurchLanding({ config, onGoToTickets }) {
 
   const heroBg = config.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
 
+  let schedules = [];
+  try {
+    if (config.schedules) {
+      schedules = typeof config.schedules === 'string' ? JSON.parse(config.schedules) : config.schedules;
+    }
+  } catch (e) {
+    console.error('Failed to parse schedules:', e);
+  }
+  if (!schedules || schedules.length === 0) {
+    schedules = [
+      { id: '1', text: config.schedule_thursday || 'JUEVES 7:30PM', isVirtual: false },
+      { id: '2', text: config.schedule_saturday || 'SÁBADOS 5:30PM', isVirtual: false },
+      { id: '3', text: config.schedule_sunday_1 || 'DOMINGOS 9:00AM', isVirtual: false },
+      { id: '4', text: config.schedule_sunday_2 || 'DOMINGOS 11:00AM', isVirtual: false },
+      { id: '5', text: config.schedule_sunday_virtual || 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
+    ];
+  }
+
   return (
     <div style={{ 
       backgroundColor: '#0A0B10', 
@@ -293,26 +311,21 @@ export default function ChurchLanding({ config, onGoToTickets }) {
             fontWeight: 800,
             letterSpacing: '0.5px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-              <PlayCircle size={28} color="#B91C1C" />
-              <span>{config.schedule_thursday || 'JUEVES 7:30PM'}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-              <PlayCircle size={28} color="#B91C1C" />
-              <span>{config.schedule_saturday || 'SÁBADOS 5:30PM'}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-              <PlayCircle size={28} color="#B91C1C" />
-              <span>{config.schedule_sunday_1 || 'DOMINGOS 9:00AM'}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-              <PlayCircle size={28} color="#B91C1C" />
-              <span>{config.schedule_sunday_2 || 'DOMINGOS 11:00AM'}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', color: 'var(--accent-gold)' }}>
-              <Music size={28} color="var(--accent-gold)" />
-              <span>{config.schedule_sunday_virtual || 'DOMINGOS (VIRTUAL) 5:30PM'}</span>
-            </div>
+            {schedules.map((s, idx) => (
+              <div 
+                key={s.id || idx} 
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  gap: '16px',
+                  color: s.isVirtual ? 'var(--accent-gold)' : '#FFFFFF'
+                }}
+              >
+                {s.isVirtual ? <Music size={28} color="var(--accent-gold)" /> : <PlayCircle size={28} color="#B91C1C" />}
+                <span>{s.text}</span>
+              </div>
+            ))}
           </div>
 
           <button 

@@ -21,16 +21,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     social_ig: '',
     social_yt: '',
     social_spotify: '',
-    schedule_thursday: '',
-    schedule_saturday: '',
-    schedule_sunday_1: '',
-    schedule_sunday_2: '',
-    schedule_sunday_virtual: '',
     contact_address: '',
     contact_email: '',
     contact_phone_1: '',
     contact_phone_2: ''
   });
+
+  const [localSchedules, setLocalSchedules] = useState([]);
+  const [uploadingHero, setUploadingHero] = useState(false);
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
@@ -68,6 +66,25 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   // Sync configFields with incoming homepageConfig prop
   useEffect(() => {
     if (homepageConfig && Object.keys(homepageConfig).length > 0) {
+      let parsedSchedules = [];
+      try {
+        if (homepageConfig.schedules) {
+          parsedSchedules = typeof homepageConfig.schedules === 'string' ? JSON.parse(homepageConfig.schedules) : homepageConfig.schedules;
+        }
+      } catch (e) {
+        console.error('Error parsing schedules:', e);
+      }
+      if (!parsedSchedules || parsedSchedules.length === 0) {
+        parsedSchedules = [
+          { id: '1', text: homepageConfig.schedule_thursday || 'JUEVES 7:30PM', isVirtual: false },
+          { id: '2', text: homepageConfig.schedule_saturday || 'SÁBADOS 5:30PM', isVirtual: false },
+          { id: '3', text: homepageConfig.schedule_sunday_1 || 'DOMINGOS 9:00AM', isVirtual: false },
+          { id: '4', text: homepageConfig.schedule_sunday_2 || 'DOMINGOS 11:00AM', isVirtual: false },
+          { id: '5', text: homepageConfig.schedule_sunday_virtual || 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
+        ];
+      }
+      setLocalSchedules(parsedSchedules);
+
       setConfigFields({
         hero_bg: homepageConfig.hero_bg || '',
         hero_title: homepageConfig.hero_title || '',
@@ -77,11 +94,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         social_ig: homepageConfig.social_ig || '',
         social_yt: homepageConfig.social_yt || '',
         social_spotify: homepageConfig.social_spotify || '',
-        schedule_thursday: homepageConfig.schedule_thursday || '',
-        schedule_saturday: homepageConfig.schedule_saturday || '',
-        schedule_sunday_1: homepageConfig.schedule_sunday_1 || '',
-        schedule_sunday_2: homepageConfig.schedule_sunday_2 || '',
-        schedule_sunday_virtual: homepageConfig.schedule_sunday_virtual || '',
         contact_address: homepageConfig.contact_address || '',
         contact_email: homepageConfig.contact_email || '',
         contact_phone_1: homepageConfig.contact_phone_1 || '',
@@ -89,6 +101,48 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       });
     }
   }, [homepageConfig]);
+
+  const handleAddSchedule = () => {
+    setLocalSchedules([...localSchedules, { id: Date.now().toString(), text: 'NUEVO HORARIO 7:00 PM', isVirtual: false }]);
+  };
+
+  const handleRemoveSchedule = (id) => {
+    setLocalSchedules(localSchedules.filter(s => s.id !== id));
+  };
+
+  const handleScheduleTextChange = (id, text) => {
+    setLocalSchedules(localSchedules.map(s => s.id === id ? { ...s, text } : s));
+  };
+
+  const handleScheduleVirtualToggle = (id) => {
+    setLocalSchedules(localSchedules.map(s => s.id === id ? { ...s, isVirtual: !s.isVirtual } : s));
+  };
+
+  const handleHeroUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingHero(true);
+    const formData = new FormData();
+    formData.append('hero', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/admin/homepage/upload-hero`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfigFields(prev => ({ ...prev, hero_bg: data.url }));
+        alert('¡Imagen de la iglesia subida y actualizada con éxito!');
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingHero(false);
+    }
+  };
 
   // 2. CONDITIONAL LOGIN FORM (AFTER ALL HOOKS DECLARED)
   if (!adminUser) {
@@ -225,12 +279,22 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config: configFields })
+        body: JSON.stringify({ 
+          config: {
+            ...configFields,
+            schedules: JSON.stringify(localSchedules)
+          } 
+        })
       });
       const data = await res.json();
       if (data.success) {
         setSaveSuccessMsg('¡Configuración guardada y publicada exitosamente en la portada!');
-        if (onSaveConfig) onSaveConfig(configFields);
+        if (onSaveConfig) {
+          onSaveConfig({
+            ...configFields,
+            schedules: JSON.stringify(localSchedules)
+          });
+        }
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
         alert(data.message || 'Error al guardar la configuración.');
@@ -655,8 +719,48 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>URL de la Imagen de Fondo (Hero Banner)</label>
-                <input type="text" name="hero_bg" value={configFields.hero_bg} onChange={handleConfigChange} placeholder="Escribe la URL de una foto o imagen de Unsplash" required />
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo (Hero Banner)</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input 
+                    type="text" 
+                    name="hero_bg" 
+                    value={configFields.hero_bg} 
+                    onChange={handleConfigChange} 
+                    placeholder="URL de la imagen o ruta del archivo" 
+                    required 
+                    style={{ flex: 1 }}
+                  />
+                  <label style={{
+                    backgroundColor: 'var(--accent-coffee)',
+                    color: '#FFFFFF',
+                    padding: '12px 20px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: '0.88rem',
+                    display: 'inline-block',
+                    textAlign: 'center'
+                  }}>
+                    {uploadingHero ? 'Subiendo...' : '📁 Subir Imagen Iglesia'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleHeroUpload} 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingHero}
+                    />
+                  </label>
+                </div>
+                {configFields.hero_bg && (
+                  <div style={{ marginTop: '10px' }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vista previa:</span>
+                    <img 
+                      src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
+                      alt="Vista previa fondo" 
+                      style={{ display: 'block', maxHeight: '120px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
+                    />
+                  </div>
+                )}
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
@@ -666,32 +770,63 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
               {/* SECTION: WEEKLY SCHEDULES */}
               <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Horarios de Servicios Semanales</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Horarios de Servicios Semanales</h4>
+                  <button 
+                    type="button" 
+                    onClick={handleAddSchedule}
+                    className="btn-secondary"
+                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                  >
+                    ➕ Agregar Culto / Servicio
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Servicio Jueves</label>
-                <input type="text" name="schedule_thursday" value={configFields.schedule_thursday} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Servicio Sábado</label>
-                <input type="text" name="schedule_saturday" value={configFields.schedule_saturday} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Servicio Domingo #1</label>
-                <input type="text" name="schedule_sunday_1" value={configFields.schedule_sunday_1} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Servicio Domingo #2</label>
-                <input type="text" name="schedule_sunday_2" value={configFields.schedule_sunday_2} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Servicio Domingo Virtual</label>
-                <input type="text" name="schedule_sunday_virtual" value={configFields.schedule_sunday_virtual} onChange={handleConfigChange} required />
+              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {localSchedules.length === 0 ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
+                    No hay horarios creados. Presiona "Agregar Culto" para registrar uno.
+                  </div>
+                ) : (
+                  localSchedules.map((s, idx) => (
+                    <div key={s.id || idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', backgroundColor: '#FAF8F5', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 800, color: 'var(--accent-coffee)', minWidth: '24px' }}>#{idx + 1}</span>
+                      <input 
+                        type="text" 
+                        value={s.text} 
+                        onChange={(e) => handleScheduleTextChange(s.id, e.target.value)} 
+                        placeholder="Ej. DOMINGOS 9:00 AM" 
+                        required 
+                        style={{ flex: 1, padding: '8px' }}
+                      />
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+                        <input 
+                          type="checkbox" 
+                          checked={!!s.isVirtual} 
+                          onChange={() => handleScheduleVirtualToggle(s.id)}
+                        />
+                        ¿Virtual? (Adoración/Spotify)
+                      </label>
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveSchedule(s.id)}
+                        style={{
+                          backgroundColor: 'var(--color-red-light)',
+                          color: 'var(--color-red)',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* SECTION: CONTACT & SOCIAL MEDIA */}

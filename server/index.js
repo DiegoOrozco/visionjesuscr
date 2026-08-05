@@ -470,6 +470,18 @@ app.get('/api/homepage/config', (req, res) => {
   }
 });
 
+app.post('/api/admin/homepage/upload-hero', upload.single('hero'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Archivo no subido.' });
+    }
+    const fileUrl = `/uploads/comprobantes/${req.file.filename}`;
+    res.json({ success: true, url: fileUrl });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.post('/api/admin/homepage/config', (req, res) => {
   try {
     const { config } = req.body;

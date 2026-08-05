@@ -187,6 +187,18 @@ function initDb() {
       }
     })();
   }
+
+  // Ensure schedules key exists
+  db.prepare(`
+    INSERT OR IGNORE INTO homepage_config (key, value)
+    VALUES ('schedules', ?)
+  `).run(JSON.stringify([
+    { id: '1', text: 'JUEVES 7:30PM', isVirtual: false },
+    { id: '2', text: 'SÁBADOS 5:30PM', isVirtual: false },
+    { id: '3', text: 'DOMINGOS 9:00AM', isVirtual: false },
+    { id: '4', text: 'DOMINGOS 11:00AM', isVirtual: false },
+    { id: '5', text: 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
+  ]));
 }
 
 initDb();
