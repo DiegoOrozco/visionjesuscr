@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" width="100%" height="100%" style="background-color: #0f172a; font-family: system-ui, sans-serif;">
+  <style>
+    .escenario { fill: #334155; stroke: #94a3b8; stroke-width: 2; }
+    .zona { cursor: pointer; transition: all 0.3s ease; }
+    .vip-bg { fill: #1e293b; stroke: #3b82f6; stroke-width: 3; }
+    .general-bg { fill: #1e293b; stroke: #10b981; stroke-width: 3; }
+    
+    /* Efecto HOVER para cambiar de color */
+    .vip-group:hover .vip-bg { fill: #2563eb; stroke: #60a5fa; }
+    .general-group:hover .general-bg { fill: #059669; stroke: #34d399; }
+    
+    .label { fill: #ffffff; font-size: 28px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .sublabel { fill: #94a3b8; font-size: 16px; text-anchor: middle; pointer-events: none; }
+    
+    .consola { fill: #475569; stroke: #64748b; stroke-width: 2; }
+  </style>
+
+  <!-- ESCENARIO -->
+  <g id="escenario-group">
+    <rect class="escenario" x="150" y="30" width="500" height="40" rx="6" />
+    <text x="400" y="50" class="label" style="font-size: 18px; fill: #e2e8f0;">ESCENARIO / TARIMA</text>
+  </g>
+
+  <!-- ZONA VIP -->
+  <g class="zona vip-group" id="zona-vip">
+    <!-- Bloque Principal VIP -->
+    <rect class="vip-bg" x="60" y="110" width="680" height="220" rx="12" />
+    
+    <!-- Consola / Control (Sombra superior centrada del croquis) -->
+    <rect class="consola" x="250" y="125" width="300" height="45" rx="4" />
+    <text x="400" y="147" class="sublabel" style="fill: #cbd5e1; font-size: 13px;">MESA DE CONTROL / SONIDO</text>
+    
+    <!-- Etiqueta VIP -->
+    <text x="400" y="230" class="label">ZONA VIP</text>
+    <text x="400" y="265" class="sublabel">Haz clic para seleccionar boletos VIP</text>
+  </g>
+
+  <!-- ZONA GENERAL -->
+  <g class="zona general-group" id="zona-general">
+    <!-- Bloque Principal General -->
+    <rect class="general-bg" x="60" y="360" width="680" height="220" rx="12" />
+    
+    <!-- Etiqueta General `-->
+    <text x="400" y="460" class="label">ZONA GENERAL</text>
+    <text x="400" y="495" class="sublabel">Haz clic para seleccionar boletos General</text>
+  </g>
+</svg>

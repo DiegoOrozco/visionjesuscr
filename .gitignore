@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/dist
+
+# Miscellaneous
+.DS_Store
+*.pem
+
+# Local Databases
+*.db
+*.sqlite
+*.db-journal
+*.sqlite3
+server/database.db
+
+# User Uploads
+server/uploads/
+uploads/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
