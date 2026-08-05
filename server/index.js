@@ -450,6 +450,10 @@ app.post('/api/scan', (req, res) => {
       }
     });
 
+  } catch (error) {
+    console.error('Scan error:', error);
+    res.status(500).json({ success: false, code: 'SERVER_ERROR', message: 'Error interno durante el escaneo.' });
+  }
 });
 
 // --- HOMEPAGE CONFIGURATION API ---
