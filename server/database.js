@@ -213,6 +213,12 @@ function initDb() {
     INSERT OR IGNORE INTO homepage_config (key, value)
     VALUES ('news_items', ?)
   `).run(JSON.stringify([]));
+
+  // Ensure schedule_bg key exists (background image for schedules section)
+  db.prepare(`
+    INSERT OR IGNORE INTO homepage_config (key, value)
+    VALUES ('schedule_bg', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600')
+  `).run();
 }
 
 initDb();

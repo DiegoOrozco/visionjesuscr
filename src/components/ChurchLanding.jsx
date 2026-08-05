@@ -28,6 +28,10 @@ export default function ChurchLanding({ config, onGoToTickets }) {
     ? (config.hero_bg.startsWith('http') ? config.hero_bg : `${API_URL}${config.hero_bg}`)
     : 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
 
+  const scheduleBg = config.schedule_bg
+    ? (config.schedule_bg.startsWith('http') ? config.schedule_bg : `${API_URL}${config.schedule_bg}`)
+    : 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600';
+
   // Parse schedules
   let schedules = [];
   try {
@@ -273,14 +277,14 @@ export default function ChurchLanding({ config, onGoToTickets }) {
               <div style={{ width: '60px', height: '4px', background: 'linear-gradient(90deg, #B91C1C, #F59E0B)', borderRadius: '4px', margin: '0 auto' }} />
             </div>
 
-            {/* Gallery Carousel */}
+            {/* Gallery Cards */}
             <div style={{ position: 'relative' }}>
               <div 
                 ref={galleryRef}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: `repeat(${Math.min(newsItems.length, 3)}, 1fr)`,
-                  gap: '24px'
+                  gridTemplateColumns: newsItems.length === 1 ? '1fr' : newsItems.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(320px, 1fr))',
+                  gap: '28px'
                 }}
               >
                 {newsItems.map((item, idx) => {
@@ -321,23 +325,63 @@ export default function ChurchLanding({ config, onGoToTickets }) {
                         e.currentTarget.style.borderColor = 'rgba(185, 28, 28, 0.2)';
                       }}
                     >
-                      {imageUrl && (
+                      {imageUrl ? (
                         <div style={{
                           width: '100%',
-                          height: '220px',
-                          backgroundImage: `url(${imageUrl})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
+                          height: '260px',
+                          overflow: 'hidden',
                           position: 'relative'
                         }}>
+                          <img 
+                            src={imageUrl} 
+                            alt={item.title || 'Noticia'}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              transition: 'transform 0.4s ease'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                          />
                           {item.badge && (
                             <span style={{
                               position: 'absolute',
-                              top: '12px',
-                              left: '12px',
+                              top: '14px',
+                              left: '14px',
                               backgroundColor: '#B91C1C',
                               color: '#FFF',
-                              padding: '4px 12px',
+                              padding: '5px 14px',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 800,
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                            }}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: '100%',
+                          height: '180px',
+                          background: 'linear-gradient(135deg, #1A1025 0%, #2D1B3D 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative'
+                        }}>
+                          <Calendar size={48} color="rgba(185,28,28,0.4)" />
+                          {item.badge && (
+                            <span style={{
+                              position: 'absolute',
+                              top: '14px',
+                              left: '14px',
+                              backgroundColor: '#B91C1C',
+                              color: '#FFF',
+                              padding: '5px 14px',
                               borderRadius: '8px',
                               fontSize: '0.75rem',
                               fontWeight: 800,
@@ -428,7 +472,7 @@ export default function ChurchLanding({ config, onGoToTickets }) {
 
       {/* 4. SCHEDULES SECTION */}
       <div style={{
-        backgroundImage: 'linear-gradient(180deg, rgba(10, 11, 16, 0.9) 0%, rgba(10, 11, 16, 0.95) 100%), url("https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600")',
+        backgroundImage: `linear-gradient(180deg, rgba(10, 11, 16, 0.85) 0%, rgba(10, 11, 16, 0.95) 100%), url(${scheduleBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '100px 20px',

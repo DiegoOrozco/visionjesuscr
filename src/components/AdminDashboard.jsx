@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Eye, Filter, Lock, LogOut, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, Users, X, XCircle, LayoutGrid, Globe } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -17,6 +17,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     hero_title: '',
     hero_subtitle: '',
     about_text: '',
+    schedule_bg: '',
     social_fb: '',
     social_ig: '',
     social_yt: '',
@@ -26,6 +27,11 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     contact_phone_1: '',
     contact_phone_2: ''
   });
+
+  // User management state
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [newUser, setNewUser] = useState({ username: '', password: '', full_name: '', role: 'tickets' });
+  const [uploadingScheduleBg, setUploadingScheduleBg] = useState(false);
 
   const [localSchedules, setLocalSchedules] = useState([]);
   const [localButtons, setLocalButtons] = useState([]);
@@ -111,6 +117,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         hero_title: homepageConfig.hero_title || '',
         hero_subtitle: homepageConfig.hero_subtitle || '',
         about_text: homepageConfig.about_text || '',
+        schedule_bg: homepageConfig.schedule_bg || '',
         social_fb: homepageConfig.social_fb || '',
         social_ig: homepageConfig.social_ig || '',
         social_yt: homepageConfig.social_yt || '',
@@ -182,6 +189,85 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     } finally {
       setUploadingNewsImage(null);
     }
+  };
+
+  // --- SCHEDULE BG UPLOAD ---
+  const handleScheduleBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingScheduleBg(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfigFields(prev => ({ ...prev, schedule_bg: data.url }));
+        alert('¡Imagen de fondo de horarios actualizada!');
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingScheduleBg(false);
+    }
+  };
+
+  // --- USER MANAGEMENT ---
+  const fetchAdminUsers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users`);
+      const data = await res.json();
+      if (data.success) setAdminUsers(data.users);
+    } catch (err) {
+      console.error('Error fetching admin users:', err);
+    }
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        setNewUser({ username: '', password: '', full_name: '', role: 'tickets' });
+        fetchAdminUsers();
+      } else {
+        alert(data.message || 'Error al crear usuario.');
+      }
+    } catch (err) {
+      alert('Error de red al crear usuario.');
+    }
+  };
+
+  const handleDeleteUser = async (userId, username) => {
+    if (!window.confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        fetchAdminUsers();
+      } else {
+        alert(data.message || 'Error al eliminar usuario.');
+      }
+    } catch (err) {
+      alert('Error de red al eliminar usuario.');
+    }
+  };
+
+  // --- CSV EXPORT ---
+  const handleExportCSV = () => {
+    window.open(`${API_URL}/api/admin/export/csv`, '_blank');
   };
 
   const handleHeroUpload = async (e) => {
@@ -412,11 +498,16 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {activeTab === 'reservations' && (
-            <button onClick={fetchReservations} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <RefreshCw size={16} /> Actualizar Lista
-            </button>
+            <>
+              <button onClick={fetchReservations} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <RefreshCw size={16} /> Actualizar
+              </button>
+              <button onClick={handleExportCSV} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10B981', color: '#FFF', borderColor: '#10B981' }}>
+                <Download size={16} /> Exportar CSV
+              </button>
+            </>
           )}
           <button onClick={onLogout} className="btn-secondary" style={{ color: 'var(--color-red)', borderColor: 'var(--color-red)' }}>
             <LogOut size={16} /> Salir
@@ -429,7 +520,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         display: 'flex',
         borderBottom: '2px solid var(--accent-beige-border)',
         marginBottom: '24px',
-        gap: '20px'
+        gap: '20px',
+        flexWrap: 'wrap'
       }}>
         <button
           onClick={() => setActiveTab('reservations')}
@@ -451,25 +543,51 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           Reservaciones Congreso
         </button>
 
-        <button
-          onClick={() => setActiveTab('church_web')}
-          style={{
-            background: 'none',
-            border: 'none',
-            borderBottom: activeTab === 'church_web' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-            color: activeTab === 'church_web' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-            fontWeight: 800,
-            fontSize: '1rem',
-            padding: '10px 16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <Globe size={18} />
-          Diseño Web Iglesia
-        </button>
+        {/* Only admin role can edit website */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('church_web')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'church_web' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'church_web' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Globe size={18} />
+            Diseño Web Iglesia
+          </button>
+        )}
+
+        {/* Only admin role can manage users */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => { setActiveTab('users'); fetchAdminUsers(); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'users' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'users' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Users size={18} />
+            Gestión de Usuarios
+          </button>
+        )}
       </div>
 
       {/* TAB 1: RESERVATIONS MANAGER */}
@@ -838,6 +956,51 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 <textarea name="about_text" rows="3" value={configFields.about_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
               </div>
 
+              {/* SCHEDULE BG IMAGE */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo — Sección Horarios</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input 
+                    type="text" 
+                    name="schedule_bg" 
+                    value={configFields.schedule_bg} 
+                    onChange={handleConfigChange} 
+                    placeholder="URL de la imagen o ruta del archivo" 
+                    style={{ flex: 1 }}
+                  />
+                  <label style={{
+                    backgroundColor: 'var(--accent-coffee)',
+                    color: '#FFFFFF',
+                    padding: '12px 20px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: '0.88rem',
+                    display: 'inline-block',
+                    textAlign: 'center'
+                  }}>
+                    {uploadingScheduleBg ? 'Subiendo...' : '📁 Subir Fondo Horarios'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleScheduleBgUpload} 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingScheduleBg}
+                    />
+                  </label>
+                </div>
+                {configFields.schedule_bg && (
+                  <div style={{ marginTop: '10px' }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vista previa:</span>
+                    <img 
+                      src={configFields.schedule_bg.startsWith('http') || configFields.schedule_bg.startsWith('/') ? (configFields.schedule_bg.startsWith('/') ? `${API_URL}${configFields.schedule_bg}` : configFields.schedule_bg) : `${API_URL}/${configFields.schedule_bg}`} 
+                      alt="Vista previa fondo horarios" 
+                      style={{ display: 'block', maxHeight: '100px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
+                    />
+                  </div>
+                )}
+              </div>
+
               {/* SECTION: WEEKLY SCHEDULES */}
               <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1172,6 +1335,138 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               {saveLoading ? 'Guardando...' : '💾 Guardar Cambios Web Portada'}
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB 3: USER MANAGEMENT (admin only) */}
+      {activeTab === 'users' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ padding: '32px', borderRadius: '20px' }}>
+          <h3 style={{ color: 'var(--accent-coffee)', marginBottom: '24px', fontSize: '1.4rem' }}>
+            <UserPlus size={22} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+            Gestión de Usuarios del Panel
+          </h3>
+
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
+            Los usuarios con rol <strong>"tickets"</strong> solo pueden ver, aprobar y rechazar reservaciones del congreso. 
+            Los usuarios con rol <strong>"admin"</strong> tienen acceso completo (reservaciones + diseño web + usuarios). 
+            Los usuarios con rol <strong>"scanner"</strong> solo pueden escanear boletos en la puerta.
+          </p>
+
+          {/* CREATE NEW USER FORM */}
+          <form onSubmit={handleCreateUser} style={{
+            backgroundColor: '#FAF8F5',
+            padding: '20px',
+            borderRadius: '16px',
+            border: '1px solid var(--accent-beige-border)',
+            marginBottom: '28px'
+          }}>
+            <h4 style={{ color: 'var(--accent-gold)', margin: '0 0 16px 0' }}>Crear Nuevo Usuario</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Nombre Completo</label>
+                <input 
+                  type="text" 
+                  value={newUser.full_name} 
+                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })} 
+                  placeholder="Ej. María García" 
+                  required 
+                  style={{ padding: '8px 12px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Usuario</label>
+                <input 
+                  type="text" 
+                  value={newUser.username} 
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} 
+                  placeholder="Ej. maria" 
+                  required 
+                  style={{ padding: '8px 12px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Contraseña</label>
+                <input 
+                  type="text" 
+                  value={newUser.password} 
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} 
+                  placeholder="Contraseña segura" 
+                  required 
+                  style={{ padding: '8px 12px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Rol / Permisos</label>
+                <select 
+                  value={newUser.role} 
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CCC', width: '100%' }}
+                >
+                  <option value="tickets">🎟️ Solo Tickets (ver/aprobar/rechazar)</option>
+                  <option value="scanner">📱 Solo Escáner (puerta)</option>
+                  <option value="admin">👑 Administrador Total</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" className="btn-primary" style={{ marginTop: '16px', padding: '10px 24px' }}>
+              <UserPlus size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+              Crear Usuario
+            </button>
+          </form>
+
+          {/* EXISTING USERS LIST */}
+          <h4 style={{ color: 'var(--accent-coffee)', marginBottom: '12px' }}>Usuarios Registrados</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {adminUsers.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
+                Cargando usuarios...
+              </div>
+            ) : (
+              adminUsers.map(u => (
+                <div key={u.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: '#FAF8F5',
+                  padding: '14px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--accent-beige-border)',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>{u.full_name}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      @{u.username} · Rol: <span style={{ 
+                        backgroundColor: u.role === 'admin' ? '#F59E0B' : u.role === 'tickets' ? '#3B82F6' : '#10B981',
+                        color: '#FFF',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700
+                      }}>{u.role === 'admin' ? '👑 Admin' : u.role === 'tickets' ? '🎟️ Tickets' : '📱 Scanner'}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteUser(u.id, u.username)}
+                    style={{
+                      backgroundColor: 'var(--color-red-light)',
+                      color: 'var(--color-red)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 14px',
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    <Trash2 size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    Eliminar
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

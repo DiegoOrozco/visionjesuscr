@@ -504,6 +504,115 @@ app.post('/api/admin/homepage/config', (req, res) => {
   }
 });
 
+// --- ADMIN USER MANAGEMENT ---
+
+// List all admin users (no passwords)
+app.get('/api/admin/users', (req, res) => {
+  try {
+    const users = db.prepare('SELECT id, username, full_name, role FROM admin_users').all();
+    res.json({ success: true, users });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Create new admin user
+app.post('/api/admin/users', (req, res) => {
+  try {
+    const { username, password, full_name, role } = req.body;
+    if (!username || !password || !full_name || !role) {
+      return res.status(400).json({ success: false, message: 'Todos los campos son requeridos.' });
+    }
+
+    const validRoles = ['admin', 'tickets', 'scanner'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: 'Rol no válido. Use: admin, tickets, scanner.' });
+    }
+
+    const existing = db.prepare('SELECT id FROM admin_users WHERE username = ?').get(username);
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'El nombre de usuario ya existe.' });
+    }
+
+    db.prepare('INSERT INTO admin_users (username, password_hash, full_name, role) VALUES (?, ?, ?, ?)').run(username, password, full_name, role);
+    res.json({ success: true, message: `Usuario "${username}" creado con rol "${role}".` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Delete admin user
+app.delete('/api/admin/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado.' });
+    }
+    db.prepare('DELETE FROM admin_users WHERE id = ?').run(id);
+    res.json({ success: true, message: `Usuario "${user.username}" eliminado.` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// --- CSV EXPORT ---
+app.get('/api/admin/export/csv', (req, res) => {
+  try {
+    const reservations = db.prepare(`
+      SELECT r.id, r.purchaser_name, r.purchaser_email, r.purchaser_phone, r.quantity, r.total_amount, r.status, r.created_at, r.approved_at, z.name as zone_name
+      FROM reservations r
+      JOIN zones z ON r.zone_id = z.id
+      ORDER BY r.created_at DESC
+    `).all();
+
+    // CSV Header
+    const headers = [
+      'Reserva ID', 'Comprador', 'Email Comprador', 'Teléfono Comprador',
+      'Zona', 'Cantidad', 'Monto Total', 'Estado', 'Fecha Reserva', 'Fecha Aprobación',
+      'Asistente Nombre', 'Edad', 'Teléfono', 'Residencia', 'Estado Civil',
+      '¿Visión Jesús?', 'Red', '¿Quién Invitó?', '¿Fue a Encuentro?', 'Asiento'
+    ];
+
+    let csvContent = '\uFEFF' + headers.join(',') + '\n'; // BOM for Excel UTF-8
+
+    for (const resv of reservations) {
+      const attendees = db.prepare('SELECT * FROM attendees WHERE reservation_id = ?').all(resv.id);
+      
+      if (attendees.length === 0) {
+        // Reservation with no attendees
+        const row = [
+          resv.id, resv.purchaser_name, resv.purchaser_email, resv.purchaser_phone,
+          resv.zone_name, resv.quantity, resv.total_amount, resv.status,
+          resv.created_at || '', resv.approved_at || '',
+          '', '', '', '', '', '', '', '', '', ''
+        ].map(v => `"${String(v || '').replace(/"/g, '""')}"`);
+        csvContent += row.join(',') + '\n';
+      } else {
+        for (const att of attendees) {
+          const row = [
+            resv.id, resv.purchaser_name, resv.purchaser_email, resv.purchaser_phone,
+            resv.zone_name, resv.quantity, resv.total_amount, resv.status,
+            resv.created_at || '', resv.approved_at || '',
+            att.full_name || '', att.age || '', att.phone || '', att.residence || '', att.civil_status || '',
+            att.is_vision_jesus || '', att.church_network || '', att.invited_by || '', att.attended_encounter || '',
+            att.assigned_ticket_code || ''
+          ].map(v => `"${String(v || '').replace(/"/g, '""')}"`);
+          csvContent += row.join(',') + '\n';
+        }
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=reservaciones_autenticas.csv');
+    res.send(csvContent);
+  } catch (e) {
+    console.error('CSV export error:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Express API Server listening on port ${PORT}`);
 });
+
