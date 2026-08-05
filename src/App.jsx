@@ -8,6 +8,8 @@ import TicketView from './components/TicketView';
 import AdminDashboard from './components/AdminDashboard';
 import DoorScanner from './components/DoorScanner';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [zones, setZones] = useState([]);
@@ -30,7 +32,7 @@ export default function App() {
 
   // Fetch zones & occupied seats on mount
   const fetchZones = () => {
-    fetch('/api/zones')
+    fetch(`${API_URL}/api/zones`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

@@ -94,7 +94,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
       formData.append('attendees', JSON.stringify(attendees));
       formData.append('comprobante', file);
 
-      const res = await fetch('/api/reservations', {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/reservations`, {
         method: 'POST',
         body: formData
       });

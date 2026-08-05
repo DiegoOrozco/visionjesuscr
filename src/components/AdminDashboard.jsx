@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Eye, Filter, Lock, LogOut, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, Users, X, XCircle } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
   // 1. ALL HOOKS MUST BE DECLARED AT THE VERY TOP (RULES OF HOOKS)
   const [username, setUsername] = useState('');
@@ -19,7 +21,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/reservations');
+      const res = await fetch(`${API_URL}/api/admin/reservations`);
       const data = await res.json();
       if (data.success) {
         setReservations(data.reservations);
@@ -43,7 +45,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
       e.preventDefault();
       setLoginError('');
       try {
-        const res = await fetch('/api/admin/login', {
+        const res = await fetch(`${API_URL}/api/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -126,7 +128,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
     if (!window.confirm(confirmMsg)) return;
 
     try {
-      const res = await fetch(`/api/admin/reservations/${reservationId}/status`, {
+      const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -149,7 +151,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
     }
 
     try {
-      const res = await fetch(`/api/admin/reservations/${reservationId}`, {
+      const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -538,7 +540,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout }) {
               </div>
               
               <img 
-                src={selectedReceipt.comprobante_url} 
+                src={`${API_URL}${selectedReceipt.comprobante_url}`} 
                 alt="Comprobante de pago" 
                 style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #DDD' }}
               />

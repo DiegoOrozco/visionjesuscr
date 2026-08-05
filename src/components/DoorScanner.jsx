@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, CheckCircle2, QrCode, RefreshCw, ShieldAlert, Sparkles, UserCheck, XCircle } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export default function DoorScanner({ adminUser }) {
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null); // { success: boolean, code: string, message: string, reservation: object }
@@ -62,7 +64,7 @@ export default function DoorScanner({ adminUser }) {
   // Process QR Code scan API check
   const processQrCode = async (qrHash) => {
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch(`${API_URL}/api/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

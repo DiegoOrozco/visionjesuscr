@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { Calendar, CheckCircle, Clock, MapPin, MessageCircle, ShieldAlert, Sparkles, User, Users } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export default function TicketView({ qrHash, onGoHome }) {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ export default function TicketView({ qrHash, onGoHome }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    fetch(`/api/tickets/${qrHash}`)
+    fetch(`${API_URL}/api/tickets/${qrHash}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
