@@ -28,7 +28,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   });
 
   const [localSchedules, setLocalSchedules] = useState([]);
+  const [localButtons, setLocalButtons] = useState([]);
+  const [localNewsItems, setLocalNewsItems] = useState([]);
   const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingNewsImage, setUploadingNewsImage] = useState(null);
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
@@ -85,6 +88,24 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
       setLocalSchedules(parsedSchedules);
 
+      // Parse buttons
+      let parsedButtons = [];
+      try {
+        if (homepageConfig.hero_buttons) {
+          parsedButtons = typeof homepageConfig.hero_buttons === 'string' ? JSON.parse(homepageConfig.hero_buttons) : homepageConfig.hero_buttons;
+        }
+      } catch (e) { console.error('Error parsing hero_buttons:', e); }
+      setLocalButtons(parsedButtons || []);
+
+      // Parse news items
+      let parsedNews = [];
+      try {
+        if (homepageConfig.news_items) {
+          parsedNews = typeof homepageConfig.news_items === 'string' ? JSON.parse(homepageConfig.news_items) : homepageConfig.news_items;
+        }
+      } catch (e) { console.error('Error parsing news_items:', e); }
+      setLocalNewsItems(parsedNews || []);
+
       setConfigFields({
         hero_bg: homepageConfig.hero_bg || '',
         hero_title: homepageConfig.hero_title || '',
@@ -116,6 +137,51 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const handleScheduleVirtualToggle = (id) => {
     setLocalSchedules(localSchedules.map(s => s.id === id ? { ...s, isVirtual: !s.isVirtual } : s));
+  };
+
+  // --- BUTTON HANDLERS ---
+  const handleAddButton = () => {
+    setLocalButtons([...localButtons, { id: Date.now().toString(), label: 'Nuevo Botón', emoji: '🔗', url: '', style: 'secondary' }]);
+  };
+  const handleRemoveButton = (id) => {
+    setLocalButtons(localButtons.filter(b => b.id !== id));
+  };
+  const handleButtonChange = (id, field, value) => {
+    setLocalButtons(localButtons.map(b => b.id === id ? { ...b, [field]: value } : b));
+  };
+
+  // --- NEWS HANDLERS ---
+  const handleAddNews = () => {
+    setLocalNewsItems([...localNewsItems, { id: Date.now().toString(), title: '', description: '', image: '', link: '', badge: '' }]);
+  };
+  const handleRemoveNews = (id) => {
+    setLocalNewsItems(localNewsItems.filter(n => n.id !== id));
+  };
+  const handleNewsChange = (id, field, value) => {
+    setLocalNewsItems(localNewsItems.map(n => n.id === id ? { ...n, [field]: value } : n));
+  };
+  const handleNewsImageUpload = async (id, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingNewsImage(id);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        handleNewsChange(id, 'image', data.url);
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingNewsImage(null);
+    }
   };
 
   const handleHeroUpload = async (e) => {
@@ -282,7 +348,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         body: JSON.stringify({ 
           config: {
             ...configFields,
-            schedules: JSON.stringify(localSchedules)
+            schedules: JSON.stringify(localSchedules),
+            hero_buttons: JSON.stringify(localButtons),
+            news_items: JSON.stringify(localNewsItems)
           } 
         })
       });
@@ -292,7 +360,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         if (onSaveConfig) {
           onSaveConfig({
             ...configFields,
-            schedules: JSON.stringify(localSchedules)
+            schedules: JSON.stringify(localSchedules),
+            hero_buttons: JSON.stringify(localButtons),
+            news_items: JSON.stringify(localNewsItems)
           });
         }
         setTimeout(() => setSaveSuccessMsg(''), 4000);
@@ -824,6 +894,228 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                       >
                         Eliminar
                       </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* SECTION: DYNAMIC HERO BUTTONS */}
+              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Botones de Acción (Hero)</h4>
+                  <button 
+                    type="button" 
+                    onClick={handleAddButton}
+                    className="btn-secondary"
+                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                  >
+                    ➕ Agregar Botón
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {localButtons.length === 0 ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
+                    No hay botones creados. Presiona "Agregar Botón" para añadir uno.
+                  </div>
+                ) : (
+                  localButtons.map((btn, idx) => (
+                    <div key={btn.id || idx} style={{ backgroundColor: '#FAF8F5', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)' }}>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)', minWidth: '60px' }}>Botón #{idx + 1}</span>
+                        <select 
+                          value={btn.style || 'secondary'} 
+                          onChange={(e) => handleButtonChange(btn.id, 'style', e.target.value)}
+                          style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #CCC', fontSize: '0.85rem' }}
+                        >
+                          <option value="primary">🔴 Principal (Rojo)</option>
+                          <option value="secondary">⚫ Secundario (Oscuro)</option>
+                        </select>
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveButton(btn.id)}
+                          style={{
+                            backgroundColor: 'var(--color-red-light)',
+                            color: 'var(--color-red)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            cursor: 'pointer',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            marginLeft: 'auto'
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Emoji</label>
+                          <input 
+                            type="text" 
+                            value={btn.emoji || ''} 
+                            onChange={(e) => handleButtonChange(btn.id, 'emoji', e.target.value)} 
+                            placeholder="🎟️" 
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Texto del Botón</label>
+                          <input 
+                            type="text" 
+                            value={btn.label || ''} 
+                            onChange={(e) => handleButtonChange(btn.id, 'label', e.target.value)} 
+                            placeholder="Congreso de Mujeres" 
+                            required
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>URL / Enlace</label>
+                          <input 
+                            type="text" 
+                            value={btn.url || ''} 
+                            onChange={(e) => handleButtonChange(btn.id, 'url', e.target.value)} 
+                            placeholder="/autenticas o https://..." 
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* SECTION: NEWS / EVENTS GALLERY */}
+              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Galería de Noticias / Eventos</h4>
+                  <button 
+                    type="button" 
+                    onClick={handleAddNews}
+                    className="btn-secondary"
+                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                  >
+                    ➕ Agregar Noticia / Evento
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {localNewsItems.length === 0 ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
+                    No hay noticias/eventos creados. Presiona "Agregar Noticia" para crear uno nuevo.
+                  </div>
+                ) : (
+                  localNewsItems.map((item, idx) => (
+                    <div key={item.id || idx} style={{ backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '14px', border: '1px solid var(--accent-beige-border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>📰 Noticia #{idx + 1}</span>
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveNews(item.id)}
+                          style={{
+                            backgroundColor: 'var(--color-red-light)',
+                            color: 'var(--color-red)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            cursor: 'pointer',
+                            fontWeight: 700,
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Título</label>
+                          <input 
+                            type="text" 
+                            value={item.title || ''} 
+                            onChange={(e) => handleNewsChange(item.id, 'title', e.target.value)} 
+                            placeholder="Congreso Anual de Mujeres" 
+                            required
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Etiqueta / Badge (opcional)</label>
+                          <input 
+                            type="text" 
+                            value={item.badge || ''} 
+                            onChange={(e) => handleNewsChange(item.id, 'badge', e.target.value)} 
+                            placeholder="NUEVO, PRÓXIMO, EVENTO..." 
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: '10px' }}>
+                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Descripción Breve</label>
+                        <textarea 
+                          rows="2" 
+                          value={item.description || ''} 
+                          onChange={(e) => handleNewsChange(item.id, 'description', e.target.value)} 
+                          placeholder="Breve descripción de la noticia o evento..."
+                          style={{ width: '100%', borderRadius: '8px', border: '1px solid #CCC', padding: '8px' }}
+                        ></textarea>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Enlace (al hacer click)</label>
+                          <input 
+                            type="text" 
+                            value={item.link || ''} 
+                            onChange={(e) => handleNewsChange(item.id, 'link', e.target.value)} 
+                            placeholder="https://... o /ruta" 
+                            style={{ padding: '6px 10px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Imagen</label>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input 
+                              type="text" 
+                              value={item.image || ''} 
+                              onChange={(e) => handleNewsChange(item.id, 'image', e.target.value)} 
+                              placeholder="URL o subir abajo" 
+                              style={{ flex: 1, padding: '6px 10px' }}
+                            />
+                            <label style={{
+                              backgroundColor: 'var(--accent-coffee)',
+                              color: '#FFFFFF',
+                              padding: '8px 14px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {uploadingNewsImage === item.id ? '⏳' : '📁 Subir'}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => handleNewsImageUpload(item.id, e)} 
+                                style={{ display: 'none' }} 
+                                disabled={uploadingNewsImage === item.id}
+                              />
+                            </label>
+                          </div>
+                          {item.image && (
+                            <img 
+                              src={item.image.startsWith('http') ? item.image : `${API_URL}${item.image}`} 
+                              alt="Vista previa" 
+                              style={{ display: 'block', maxHeight: '80px', borderRadius: '8px', marginTop: '6px', border: '1px solid #DDD' }} 
+                            />
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))
                 )}

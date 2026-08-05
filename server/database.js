@@ -199,6 +199,20 @@ function initDb() {
     { id: '4', text: 'DOMINGOS 11:00AM', isVirtual: false },
     { id: '5', text: 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
   ]));
+
+  // Ensure hero_buttons key exists (dynamic buttons on landing hero)
+  db.prepare(`
+    INSERT OR IGNORE INTO homepage_config (key, value)
+    VALUES ('hero_buttons', ?)
+  `).run(JSON.stringify([
+    { id: '1', label: 'Congreso de Mujeres', emoji: '🎟️', url: '/autenticas', style: 'primary' }
+  ]));
+
+  // Ensure news_items key exists (gallery/carousel on landing)
+  db.prepare(`
+    INSERT OR IGNORE INTO homepage_config (key, value)
+    VALUES ('news_items', ?)
+  `).run(JSON.stringify([]));
 }
 
 initDb();
