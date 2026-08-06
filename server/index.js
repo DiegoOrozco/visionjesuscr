@@ -419,11 +419,20 @@ app.post('/api/scan', (req, res) => {
     }
 
     if (reservation.status === 'ingresado') {
-      return res.status(400).json({
-        success: false,
+      const attendees = db.prepare(`
+        SELECT *
+        FROM attendees
+        WHERE reservation_id = ?
+      `).all(reservation.id);
+
+      return res.json({
+        success: true,
         code: 'ALREADY_USED',
         message: `¡ATENCIÓN! ESTE BOLETO YA FUE ESCANEADO Y USADO.\nFecha de ingreso: ${new Date(reservation.scanned_at).toLocaleString()}`,
-        reservation
+        reservation: {
+          ...reservation,
+          attendees
+        }
       });
     }
 

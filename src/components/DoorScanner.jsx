@@ -124,8 +124,87 @@ export default function DoorScanner({ adminUser }) {
   return (
     <div style={{ maxWidth: '650px', margin: '20px auto', padding: '0 20px' }}>
       
+      {/* --- FULLSCREEN YELLOW SCREEN (ALREADY USED WARNING) --- */}
+      {scanResult && scanResult.success && scanResult.code === 'ALREADY_USED' && (
+        <div className="scan-screen-overlay" onClick={() => setScanResult(null)} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#D97706', // Yellow/Amber
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          color: '#FFFFFF',
+          textAlign: 'center',
+          cursor: 'pointer'
+        }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '20px'
+          }}>
+            <ShieldAlert size={70} color="#FFFFFF" />
+          </div>
+
+          <span className="badge" style={{ backgroundColor: '#FFFFFF', color: '#B45309', marginBottom: '12px', fontSize: '1rem', fontWeight: 900 }}>
+            ⚠️ BOLETO YA USADO
+          </span>
+
+          <h1 style={{ color: '#FFFFFF', fontSize: '2.4rem', margin: '0 0 10px', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+            ¡YA FUE INGRESADO!
+          </h1>
+          <p style={{ fontSize: '1.2rem', opacity: 0.95, marginBottom: '24px' }}>
+            {scanResult.message}
+          </p>
+
+          {scanResult.reservation && (
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '20px',
+              padding: '20px 24px',
+              width: '100%',
+              maxWidth: '450px',
+              textAlign: 'left',
+              marginBottom: '24px'
+            }}>
+              <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', opacity: 0.9 }}>
+                ZONA DE ASIENTOS: <strong>{scanResult.reservation.zone_name}</strong>
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: '4px' }}>
+                {scanResult.reservation.attendees ? scanResult.reservation.attendees.map(a => a.assigned_ticket_code).join(' • ') : 'BOLETO YA REGISTRADO'}
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px', marginTop: '12px' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                  👤 Responsable: {scanResult.reservation.purchaser_name}
+                </div>
+                <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>
+                  👥 Cantidad: {scanResult.reservation.quantity} {scanResult.reservation.quantity === 1 ? 'Persona' : 'Personas'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+            (Toca la pantalla en cualquier lugar para escanear el siguiente boleto)
+          </p>
+        </div>
+      )}
+
       {/* --- FULLSCREEN GREEN SCREEN (APPROVED / PASS) --- */}
-      {scanResult && scanResult.success && (
+      {scanResult && scanResult.success && scanResult.code !== 'ALREADY_USED' && (
         <div className="scan-screen-overlay scan-screen-green" onClick={() => setScanResult(null)}>
           <div style={{
             width: '100px',
