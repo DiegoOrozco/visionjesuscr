@@ -812,6 +812,31 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                 <Eye size={14} /> Ver Comprobante
                               </button>
                             )}
+
+                            {(resv.status === 'aprobado' || resv.status === 'usado') && resv.qr_code_hash && (
+                              <a
+                                href={`/ticket/${resv.qr_code_hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  backgroundColor: '#FEF3C7',
+                                  color: '#92400E',
+                                  border: '1px solid #FCD34D',
+                                  borderRadius: '6px',
+                                  padding: '4px 8px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  textDecoration: 'none',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Ticket size={14} /> Ver / Bajar Cupón
+                              </a>
+                            )}
                           </div>
                         </td>
 
