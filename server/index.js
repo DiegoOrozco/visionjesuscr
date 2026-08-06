@@ -425,10 +425,12 @@ app.post('/api/scan', (req, res) => {
         WHERE reservation_id = ?
       `).all(reservation.id);
 
+      const formattedDate = reservation.scanned_at ? new Date(reservation.scanned_at + 'Z').toLocaleString('es-CR', { timeZone: 'America/Costa_Rica' }) : 'Fecha desconocida';
+
       return res.json({
         success: true,
         code: 'ALREADY_USED',
-        message: `¡ATENCIÓN! ESTE BOLETO YA FUE ESCANEADO Y USADO.\nFecha de ingreso: ${new Date(reservation.scanned_at).toLocaleString()}`,
+        message: `¡ATENCIÓN! ESTE BOLETO YA FUE ESCANEADO Y USADO.\nFecha de ingreso: ${formattedDate}`,
         reservation: {
           ...reservation,
           attendees
