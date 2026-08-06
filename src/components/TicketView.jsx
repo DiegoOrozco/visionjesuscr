@@ -67,8 +67,8 @@ export default function TicketView({ qrHash, onGoHome }) {
     switch (ticket.status) {
       case 'aprobado':
         return <span className="badge badge-approved">✓ Boleto Verificado y Aprobado</span>;
-      case 'ingresado':
-        return <span className="badge badge-used">✓ Ingresado al Evento ({new Date(ticket.scanned_at).toLocaleTimeString()})</span>;
+      case 'usado':
+        return <span className="badge badge-used" style={{ backgroundColor: '#D97706', color: '#FFF' }}>✓ Ingresado al Evento ({new Date(ticket.scanned_at).toLocaleTimeString()})</span>;
       case 'rechazado':
         return <span className="badge badge-rejected">✕ Reserva Rechazada</span>;
       default:

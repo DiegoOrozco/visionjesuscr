@@ -475,7 +475,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   });
 
   // Calculate Metrics
-  const totalRevenue = reservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'ingresado' ? acc + r.total_amount : acc, 0);
+  const totalRevenue = reservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'usado' ? acc + r.total_amount : acc, 0);
   const totalAllTickets = reservations.reduce((acc, r) => acc + r.quantity, 0);
   const pendingCount = reservations.filter(r => r.status === 'pendiente').length;
 
@@ -675,7 +675,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             gap: '16px'
           }}>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {['all', 'pendiente', 'aprobado', 'ingresado', 'rechazado'].map(st => (
+              {['all', 'pendiente', 'aprobado', 'usado', 'rechazado'].map(st => (
                 <button
                   key={st}
                   onClick={() => setFilterStatus(st)}
@@ -690,7 +690,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     textTransform: 'capitalize'
                   }}
                 >
-                  {st === 'all' ? 'Todas' : st}
+                  {st === 'all' ? 'Todas' : st === 'usado' ? 'usado' : st}
                 </button>
               ))}
             </div>
@@ -819,7 +819,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                           {resv.status === 'aprobado' && <span className="badge badge-approved">Aprobado</span>}
                           {resv.status === 'pendiente' && <span className="badge badge-pending">Pendiente</span>}
                           {resv.status === 'rechazado' && <span className="badge badge-rejected">Rechazado</span>}
-                          {resv.status === 'ingresado' && <span className="badge badge-used">Ingresado</span>}
+                          {resv.status === 'usado' && <span className="badge badge-used" style={{ backgroundColor: '#D97706', color: '#FFF' }}>Usado</span>}
                         </td>
 
                         <td style={{ padding: '14px 16px', textAlign: 'center' }}>

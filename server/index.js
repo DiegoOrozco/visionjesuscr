@@ -418,7 +418,7 @@ app.post('/api/scan', (req, res) => {
       });
     }
 
-    if (reservation.status === 'ingresado') {
+    if (reservation.status === 'usado') {
       const attendees = db.prepare(`
         SELECT *
         FROM attendees
@@ -444,7 +444,7 @@ app.post('/api/scan', (req, res) => {
 
     db.prepare(`
       UPDATE reservations
-      SET status = 'ingresado', scanned_at = CURRENT_TIMESTAMP, scanned_by = ?
+      SET status = 'usado', scanned_at = CURRENT_TIMESTAMP, scanned_by = ?
       WHERE id = ?
     `).run(scanned_by || 'Personal de Puerta', reservation.id);
 
@@ -454,7 +454,7 @@ app.post('/api/scan', (req, res) => {
       message: '¡ENTRADA VÁLIDA! BIENVENIDA AL CONGRESO',
       reservation: {
         ...reservation,
-        status: 'ingresado',
+        status: 'usado',
         attendees
       }
     });
