@@ -93,7 +93,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
     {
       data: generalCentral,
       x: 270, y: 340, width: 360, height: 180, rx: 12,
-      label: "ZONA GENERAL",
+      label: "GENERAL CENTRAL",
       sublabel: "Área Central",
       hoverColor: "#10B981"
     },
