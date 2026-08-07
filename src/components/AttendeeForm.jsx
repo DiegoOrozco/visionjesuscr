@@ -73,7 +73,11 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
     for (let i = 0; i < attendees.length; i++) {
       const att = attendees[i];
       if (!att.full_name.trim() || !att.phone.trim() || !att.age || !att.residence.trim()) {
-        setErrorMsg(`Por favor completa todos los campos obligatorios del Asistente #${i + 1} (Nombre, Edad, Teléfono y ¿Dónde vive?).`);
+        setErrorMsg(`Por favor completa todos los campos obligatorios de la Persona #${i + 1} (Nombre, Edad, Teléfono y ¿Dónde vive?).`);
+        return;
+      }
+      if (parseInt(att.age, 10) <= 0) {
+        setErrorMsg(`Por favor ingresa una edad válida y positiva para la Persona #${i + 1}.`);
         return;
       }
     }
@@ -193,7 +197,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '10px' }}>
                     <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '1.1rem' }}>
-                      👤 Asistente #{index + 1}
+                      👤 Persona #{index + 1}
                     </div>
 
                     {seatBadge && (
@@ -227,9 +231,13 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
                       </label>
                       <input 
                         type="number" 
+                        min="1"
                         placeholder="Tu respuesta"
                         value={att.age}
-                        onChange={(e) => handleAttendeeChange(index, 'age', e.target.value)}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          handleAttendeeChange(index, 'age', isNaN(val) ? '' : Math.max(1, val));
+                        }}
                         required
                       />
                     </div>
