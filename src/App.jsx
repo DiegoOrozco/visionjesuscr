@@ -210,6 +210,11 @@ export default function App() {
               sessionId={seatSessionId}
               expiresAt={holdExpiresAt}
               onBack={() => {
+                setSelectedZone(null);
+                setAttendeeQuantity(1);
+                setChosenSeatCodes([]);
+                setSeatSessionId('');
+                setHoldExpiresAt(null);
                 fetchZones();
                 window.history.pushState({}, '', '/autenticas');
                 setCurrentView('home');
