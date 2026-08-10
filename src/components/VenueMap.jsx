@@ -19,9 +19,9 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     };
   };
 
-  const vipCentral = getZone('vip_central', 'VIP Central', 12000, '#DB2777');
-  const vipIzquierda = getZone('vip_izquierda', 'VIP Izquierda', 12000, '#9333EA');
-  const vipDerecha = getZone('vip_derecha', 'VIP Derecha', 12000, '#9333EA');
+  const vipCentral = getZone('vip_central', 'Gold Central', 12000, '#DB2777');
+  const vipIzquierda = getZone('vip_izquierda', 'Gold Izquierda', 12000, '#9333EA');
+  const vipDerecha = getZone('vip_derecha', 'Gold Derecha', 12000, '#9333EA');
   
   const generalCentral = getZone('central_atras', 'General Central', 7500, '#10B981');
   const lateralIzquierda = getZone('lateral_izquierda', 'General Izquierda', 7500, '#F59E0B');
@@ -72,21 +72,21 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     {
       data: vipCentral,
       x: 270, y: 140, width: 360, height: 180, rx: 12,
-      label: "VIP CENTRAL",
+      label: "GOLD CENTRAL",
       sublabel: "Frente al Altar",
       hoverColor: "#DB2777"
     },
     {
       data: vipIzquierda,
       x: 70, y: 140, width: 180, height: 180, rx: 12,
-      label: "VIP IZQUIERDA",
+      label: "GOLD IZQUIERDA",
       sublabel: "10 Filas x 8 Asientos",
       hoverColor: "#9333EA"
     },
     {
       data: vipDerecha,
       x: 650, y: 140, width: 180, height: 180, rx: 12,
-      label: "VIP DERECHA",
+      label: "GOLD DERECHA",
       sublabel: "10 Filas x 8 Asientos",
       hoverColor: "#9333EA"
     },

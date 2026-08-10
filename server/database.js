@@ -124,9 +124,9 @@ function initDb() {
   // VIP Central: 90 seats, VIP Izquierda: 80 seats, VIP Derecha: 80 seats. (Sum = 250)
   // General Central: 150 seats, General Izquierda: 100 seats, General Derecha: 100 seats. (Sum = 350)
   const zoneList = [
-    { id: 'vip_central', name: 'VIP Central', price: vipPrice, regular_price: 15000.00, capacity: 90, prefix: 'VIP-CTR', color: '#DB2777', desc: 'Ubicación preferencial en el centro del altar (90 asientos).' },
-    { id: 'vip_izquierda', name: 'VIP Izquierda', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'VIP-IZQ', color: '#9333EA', desc: 'Sector VIP lateral izquierdo (80 asientos).' },
-    { id: 'vip_derecha', name: 'VIP Derecha', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'VIP-DER', color: '#9333EA', desc: 'Sector VIP lateral derecho (80 asientos).' },
+    { id: 'vip_central', name: 'Gold Central', price: vipPrice, regular_price: 15000.00, capacity: 90, prefix: 'GLD-CTR', color: '#DB2777', desc: 'Ubicación preferencial en el centro del altar (90 asientos).' },
+    { id: 'vip_izquierda', name: 'Gold Izquierda', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'GLD-IZQ', color: '#9333EA', desc: 'Sector Gold lateral izquierdo (80 asientos).' },
+    { id: 'vip_derecha', name: 'Gold Derecha', price: vipPrice, regular_price: 15000.00, capacity: 80, prefix: 'GLD-DER', color: '#9333EA', desc: 'Sector Gold lateral derecho (80 asientos).' },
     { id: 'central_atras', name: 'General Central', price: generalPrice, regular_price: 10000.00, capacity: 150, prefix: 'GEN-CTR', color: '#10B981', desc: 'Área general central (150 asientos).' },
     { id: 'lateral_izquierda', name: 'General Izquierda', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-IZQ', color: '#F59E0B', desc: 'Área general lateral izquierda (100 asientos).' },
     { id: 'lateral_derecha', name: 'General Derecha', price: generalPrice, regular_price: 10000.00, capacity: 100, prefix: 'GEN-DER', color: '#F59E0B', desc: 'Área general lateral derecha (100 asientos).' }

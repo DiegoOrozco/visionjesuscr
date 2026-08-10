@@ -1468,9 +1468,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 />
               </div>
 
-              {/* TARIFAS VIP */}
+              {/* TARIFAS GOLD */}
               <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
-                <h4 style={{ color: '#DB2777', marginTop: 0, marginBottom: '14px' }}>Zonas VIP (Central, Izquierda, Derecha)</h4>
+                <h4 style={{ color: '#DB2777', marginTop: 0, marginBottom: '14px' }}>Zonas Gold (Central, Izquierda, Derecha)</h4>
                 
                 <div style={{ marginBottom: '14px' }}>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Precio Preventa (₡)</label>
