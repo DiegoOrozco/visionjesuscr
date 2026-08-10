@@ -53,10 +53,10 @@ export default function TicketSuccess({ reservation, onReset }) {
     ).join(', ');
 
     const message = `¡Hola! Confirmo mi reservación para el CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026.\n\n` +
-      `🎟️ Zona: ${reservation.zone_name}\n` +
-      `🔢 Boletos: ${formattedTickets}\n` +
-      `👤 Responsable: ${reservation.purchaser_name}\n\n` +
-      `🔗 Puedes abrir y visualizar mi boleto con código QR digital aquí:\n${ticketUrl}`;
+      `Zona: ${reservation.zone_name}\n` +
+      `Boletos: ${formattedTickets}\n` +
+      `Responsable: ${reservation.purchaser_name}\n\n` +
+      `Puedes abrir y visualizar mi boleto con código QR digital aquí:\n${ticketUrl}`;
 
     const encoded = encodeURIComponent(message);
     const targetUrl = phone
@@ -101,7 +101,7 @@ export default function TicketSuccess({ reservation, onReset }) {
         </div>
 
         <span className="badge badge-pending" style={{ marginBottom: '10px', display: 'inline-block' }}>
-          ⏳ Comprobante en Proceso de Verificación
+          Comprobante en Proceso de Verificación
         </span>
 
         <h2 style={{ fontSize: '2rem', color: 'var(--accent-coffee)', marginBottom: '8px' }}>
@@ -175,7 +175,7 @@ export default function TicketSuccess({ reservation, onReset }) {
           fontSize: '0.88rem'
         }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
-            🔗 Enlace persistente: {ticketUrl}
+            Enlace persistente: {ticketUrl}
           </span>
           <button
             onClick={handleCopyLink}

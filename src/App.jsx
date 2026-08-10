@@ -162,7 +162,7 @@ export default function App() {
             }}>
 
               <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-gold)', color: '#FFFFFF', marginBottom: '12px', fontSize: '0.9rem', padding: '6px 18px' }}>
-                ✦ PREVENTA ABIERTA • CONGRESO ANUAL 2026 ✦
+                PREVENTA ABIERTA • CONGRESO ANUAL 2026
               </span>
 
               <h1 style={{ fontSize: '2.5rem', marginTop: '8px', color: 'var(--accent-coffee)', fontFamily: 'var(--font-heading)' }}>
@@ -170,7 +170,7 @@ export default function App() {
               </h1>
 
               <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontStyle: 'italic', maxWidth: '780px', margin: '10px auto 0' }}>
-                "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas. ❤️🦋"
+                "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas."
               </p>
             </div>
 

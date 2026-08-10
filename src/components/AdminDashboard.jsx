@@ -148,7 +148,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   // --- BUTTON HANDLERS ---
   const handleAddButton = () => {
-    setLocalButtons([...localButtons, { id: Date.now().toString(), label: 'Nuevo Botón', emoji: '🔗', url: '', style: 'secondary' }]);
+    setLocalButtons([...localButtons, { id: Date.now().toString(), label: 'Nuevo Botón', emoji: '', url: '', style: 'secondary' }]);
   };
   const handleRemoveButton = (id) => {
     setLocalButtons(localButtons.filter(b => b.id !== id));
@@ -341,7 +341,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
           {loginError && (
             <div style={{ backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '0.88rem' }}>
-              ⚠️ {loginError}
+              {loginError}
             </div>
           )}
 
@@ -403,7 +403,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   };
 
   const handleDeleteReservation = async (reservationId, purchaserName) => {
-    if (!window.confirm(`⚠️ ¿ATENCIÓN! ¿Estás seguro de que deseas ELIMINAR PERMANENTEMENTE la reserva de "${purchaserName}"?\n\nEsta acción borrará la reserva por completo de la base de datos y liberará sus asientos.`)) {
+    if (!window.confirm(`¡ATENCIÓN! ¿Estás seguro de que deseas ELIMINAR PERMANENTEMENTE la reserva de "${purchaserName}"?\n\nEsta acción borrará la reserva por completo de la base de datos y liberará sus asientos.`)) {
       return;
     }
 
@@ -742,7 +742,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                             {resv.zone_name}
                           </span>
                           <div style={{ marginTop: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
-                            👥 {resv.quantity} {resv.quantity === 1 ? 'Persona' : 'Personas'}
+                            {resv.quantity} {resv.quantity === 1 ? 'Persona' : 'Personas'}
                           </div>
                           
                           {/* Visualización de los asientos específicos reservados */}
@@ -901,7 +901,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       {activeTab === 'church_web' && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
           <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
-            ✏️ Editar Portada e Información de la Iglesia
+            Editar Portada e Información de la Iglesia
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
             Modifica en tiempo real el fondo de la portada, títulos, horarios semanales y redes de contacto.
@@ -909,7 +909,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
           {saveSuccessMsg && (
             <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
-              ✓ {saveSuccessMsg}
+              {saveSuccessMsg}
             </div>
           )}
 
@@ -954,7 +954,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     display: 'inline-block',
                     textAlign: 'center'
                   }}>
-                    {uploadingHero ? 'Subiendo...' : '📁 Subir Imagen Iglesia'}
+                    {uploadingHero ? 'Subiendo...' : 'Subir Imagen Iglesia'}
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -1004,7 +1004,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     display: 'inline-block',
                     textAlign: 'center'
                   }}>
-                    {uploadingScheduleBg ? 'Subiendo...' : '📁 Subir Fondo Horarios'}
+                    {uploadingScheduleBg ? 'Subiendo...' : 'Subir Fondo Horarios'}
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -1036,7 +1036,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     className="btn-secondary"
                     style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                   >
-                    ➕ Agregar Culto / Servicio
+                    Agregar Culto / Servicio
                   </button>
                 </div>
               </div>
@@ -1097,7 +1097,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     className="btn-secondary"
                     style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                   >
-                    ➕ Agregar Botón
+                    Agregar Botón
                   </button>
                 </div>
               </div>
@@ -1117,8 +1117,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                           onChange={(e) => handleButtonChange(btn.id, 'style', e.target.value)}
                           style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #CCC', fontSize: '0.85rem' }}
                         >
-                          <option value="primary">🔴 Principal (Rojo)</option>
-                          <option value="secondary">⚫ Secundario (Oscuro)</option>
+                          <option value="primary">Principal (Rojo)</option>
+                          <option value="secondary">Secundario (Oscuro)</option>
                         </select>
                         <button 
                           type="button" 
@@ -1140,12 +1140,12 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Emoji</label>
+                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Icono (opcional)</label>
                           <input 
                             type="text" 
                             value={btn.emoji || ''} 
                             onChange={(e) => handleButtonChange(btn.id, 'emoji', e.target.value)} 
-                            placeholder="🎟️" 
+                            placeholder="Texto de icono" 
                             style={{ padding: '6px 10px' }}
                           />
                         </div>
@@ -1186,7 +1186,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     className="btn-secondary"
                     style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                   >
-                    ➕ Agregar Noticia / Evento
+                    Agregar Noticia / Evento
                   </button>
                 </div>
               </div>
@@ -1200,7 +1200,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   localNewsItems.map((item, idx) => (
                     <div key={item.id || idx} style={{ backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '14px', border: '1px solid var(--accent-beige-border)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>📰 Noticia #{idx + 1}</span>
+                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>Noticia #{idx + 1}</span>
                         <button 
                           type="button" 
                           onClick={() => handleRemoveNews(item.id)}
@@ -1285,7 +1285,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                               fontSize: '0.78rem',
                               whiteSpace: 'nowrap'
                             }}>
-                              {uploadingNewsImage === item.id ? '⏳' : '📁 Subir'}
+                              {uploadingNewsImage === item.id ? 'Subiendo...' : 'Subir'}
                               <input 
                                 type="file" 
                                 accept="image/*" 
@@ -1357,7 +1357,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             </div>
 
             <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
-              {saveLoading ? 'Guardando...' : '💾 Guardar Cambios Web Portada'}
+              {saveLoading ? 'Guardando...' : 'Guardar Cambios Web Portada'}
             </button>
           </form>
         </div>
@@ -1427,9 +1427,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                   style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CCC', width: '100%' }}
                 >
-                  <option value="tickets">🎟️ Solo Tickets (ver/aprobar/rechazar)</option>
-                  <option value="scanner">📱 Solo Escáner (puerta)</option>
-                  <option value="admin">👑 Administrador Total</option>
+                  <option value="tickets">Solo Tickets (ver/aprobar/rechazar)</option>
+                  <option value="scanner">Solo Escáner (puerta)</option>
+                  <option value="admin">Administrador Total</option>
                 </select>
               </div>
             </div>
@@ -1469,7 +1469,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                         borderRadius: '6px',
                         fontSize: '0.75rem',
                         fontWeight: 700
-                      }}>{u.role === 'admin' ? '👑 Admin' : u.role === 'tickets' ? '🎟️ Tickets' : '📱 Scanner'}</span>
+                      }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : 'Scanner'}</span>
                     </div>
                   </div>
                   <button 
@@ -1518,7 +1518,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   marginBottom: '14px'
                 }}>
                   <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '10px', fontSize: '1rem', borderBottom: '1px solid #EEE', paddingBottom: '6px' }}>
-                    👤 Asistente #{i + 1}: {att.full_name} ({att.assigned_ticket_code && att.assigned_ticket_code.includes(' - ') && !att.assigned_ticket_code.startsWith('Fila') && !att.assigned_ticket_code.startsWith('Asiento') ? att.assigned_ticket_code.split(' - ').slice(1).join(' - ') : att.assigned_ticket_code})
+                    Persona #{i + 1}: {att.full_name} ({att.assigned_ticket_code && att.assigned_ticket_code.includes(' - ') && !att.assigned_ticket_code.startsWith('Fila') && !att.assigned_ticket_code.startsWith('Asiento') ? att.assigned_ticket_code.split(' - ').slice(1).join(' - ') : att.assigned_ticket_code})
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '0.88rem' }}>

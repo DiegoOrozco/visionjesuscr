@@ -157,7 +157,7 @@ export default function DoorScanner({ adminUser }) {
           </div>
 
           <span className="badge" style={{ backgroundColor: '#FFFFFF', color: '#B45309', marginBottom: '12px', fontSize: '1rem', fontWeight: 900 }}>
-            ⚠️ BOLETO YA USADO
+            BOLETO YA USADO
           </span>
 
           <h1 style={{ color: '#FFFFFF', fontSize: '2.4rem', margin: '0 0 10px', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
@@ -188,10 +188,10 @@ export default function DoorScanner({ adminUser }) {
 
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px', marginTop: '12px' }}>
                 <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                  👤 Responsable: {scanResult.reservation.purchaser_name}
+                  Responsable: {scanResult.reservation.purchaser_name}
                 </div>
                 <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>
-                  👥 Cantidad: {scanResult.reservation.quantity} {scanResult.reservation.quantity === 1 ? 'Persona' : 'Personas'}
+                  Cantidad: {scanResult.reservation.quantity} {scanResult.reservation.quantity === 1 ? 'Persona' : 'Personas'}
                 </div>
               </div>
             </div>
@@ -252,10 +252,10 @@ export default function DoorScanner({ adminUser }) {
 
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px', marginTop: '12px' }}>
                 <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                  👤 Responsable: {scanResult.reservation.purchaser_name}
+                  Responsable: {scanResult.reservation.purchaser_name}
                 </div>
                 <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>
-                  👥 Cantidad: {scanResult.reservation.quantity} {scanResult.reservation.quantity === 1 ? 'Persona' : 'Personas'}
+                  Cantidad: {scanResult.reservation.quantity} {scanResult.reservation.quantity === 1 ? 'Persona' : 'Personas'}
                 </div>
               </div>
             </div>
@@ -284,7 +284,7 @@ export default function DoorScanner({ adminUser }) {
           </div>
 
           <span className="badge" style={{ backgroundColor: '#FFFFFF', color: '#8E0000', marginBottom: '12px', fontSize: '1rem' }}>
-            ⛔ ACCESO DENEGADO
+            ACCESO DENEGADO
           </span>
 
           <h1 style={{ color: '#FFFFFF', fontSize: '2.4rem', margin: '0 0 10px' }}>
@@ -339,7 +339,7 @@ export default function DoorScanner({ adminUser }) {
 
         {cameraError && (
           <div style={{ backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', padding: '12px', borderRadius: '10px', marginBottom: '16px', fontSize: '0.88rem' }}>
-            ⚠️ {cameraError}
+            {cameraError}
           </div>
         )}
 

@@ -66,14 +66,14 @@ export default function TicketView({ qrHash, onGoHome }) {
   const statusBadge = () => {
     switch (ticket.status) {
       case 'aprobado':
-        return <span className="badge badge-approved">✓ Boleto Verificado y Aprobado</span>;
+        return <span className="badge badge-approved">Boleto Verificado y Aprobado</span>;
       case 'usado':
         const usedTime = ticket.scanned_at ? new Date(ticket.scanned_at + 'Z').toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica', hour: '2-digit', minute: '2-digit' }) : '';
-        return <span className="badge badge-used" style={{ backgroundColor: '#D97706', color: '#FFF' }}>✓ Ingresado al Evento ({usedTime})</span>;
+        return <span className="badge badge-used" style={{ backgroundColor: '#D97706', color: '#FFF' }}>Ingresado al Evento ({usedTime})</span>;
       case 'rechazado':
-        return <span className="badge badge-rejected">✕ Reserva Rechazada</span>;
+        return <span className="badge badge-rejected">Reserva Rechazada</span>;
       default:
-        return <span className="badge badge-pending">⏳ Revisión de Pago Pendiente</span>;
+        return <span className="badge badge-pending">Revisión de Pago Pendiente</span>;
     }
   };
 

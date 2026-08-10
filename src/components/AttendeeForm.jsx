@@ -152,7 +152,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
             CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontStyle: 'italic', marginTop: '6px' }}>
-            "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas. ❤️🦋"
+            "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas."
           </p>
           <div style={{ marginTop: '12px', fontSize: '0.9rem', color: 'var(--accent-coffee)', fontWeight: 700 }}>
             Reservando {quantity} {quantity === 1 ? 'entrada' : 'entradas'} en {zone.name} — Total: {totalPrice}
@@ -169,7 +169,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
             fontWeight: 500,
             fontSize: '0.92rem'
           }}>
-            ⚠️ {errorMsg}
+            {errorMsg}
           </div>
         )}
 
@@ -196,8 +196,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
                   boxShadow: 'var(--shadow-sm)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '10px' }}>
-                    <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '1.1rem' }}>
-                      👤 Persona #{index + 1}
+                    <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <User size={18} /> Persona #{index + 1}
                     </div>
 
                     {seatBadge && (
@@ -526,14 +526,14 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
                     }}
                   />
                   <div style={{ fontWeight: 600, color: 'var(--color-green)' }}>
-                    ✓ Archivo seleccionado: {file.name}
+                    Archivo seleccionado: {file.name}
                   </div>
                 </div>
               ) : file ? (
                 <div>
                   <FileText size={40} color="var(--accent-coffee)" />
                   <div style={{ fontWeight: 600, color: 'var(--color-green)', marginTop: '8px' }}>
-                    ✓ Archivo PDF adjunto: {file.name}
+                    Archivo PDF adjunto: {file.name}
                   </div>
                 </div>
               ) : (

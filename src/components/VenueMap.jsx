@@ -229,7 +229,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
           const leftIsBoundOrTaken = (i === 0 || rowState[i - 1] === true);
           const rightIsBoundOrTaken = (i === maxSeats - 1 || rowState[i + 1] === true);
           if (leftIsBoundOrTaken && rightIsBoundOrTaken) {
-            alert(`⚠️ No se permite dejar asientos vacíos individuales (fila: ${rLabel}, asiento: ${i + 1}). Por favor selecciona este asiento o reorganiza tus selecciones para no dejar huecos aislados.`);
+            alert(`No se permite dejar asientos vacíos individuales (fila: ${rLabel}, asiento: ${i + 1}). Por favor selecciona este asiento o reorganiza tus selecciones para no dejar huecos aislados.`);
             return false;
           }
         }
@@ -341,7 +341,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       }}>
         <div>
           <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFF' }}>
-            ✦ CONGRESO AUTÉNTICAS 2026 ✦
+            CONGRESO AUTÉNTICAS 2026
           </span>
           <h2 style={{ fontSize: '1.75rem', marginTop: '6px', color: 'var(--accent-coffee)' }}>
             Auditorio Visión Jesús
@@ -355,7 +355,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
             style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-secondary)', fontWeight: 700 }}
           >
             <RotateCcw size={18} />
-            <span>🔍 REGRESAR AL MAPA PRINCIPAL</span>
+            <span>REGRESAR AL MAPA PRINCIPAL</span>
           </button>
         ) : (
           <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>
@@ -390,7 +390,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
               </span>
             </>
           ) : (
-            <span>👇 Pasa el cursor sobre las zonas del auditorio</span>
+            <span>Pasa el cursor sobre las zonas del auditorio</span>
           )}
         </div>
       )}
@@ -482,7 +482,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                         fill="#000000" stroke="#333333" strokeWidth="2"
                       />
                       <text x="450" y="172" fill="#4ADE80" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="2">
-                        ★ RESERVADO ★
+                        RESERVADO
                       </text>
                       <text x="450" y="195" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">
                         INVITADOS ESPECIALES / PASTORES
@@ -553,7 +553,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '16px', height: '16px', borderRadius: '4px', backgroundColor: '#4B5563', border: '1px solid #374151' }} />
-              <span>🔒 Ocupado / Reservado</span>
+              <span>Ocupado / Reservado</span>
             </div>
           </div>
 
@@ -603,7 +603,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                 const displayCode = s.includes(' - ') ? s.split(' - ').slice(1).join(' - ') : s;
                 return (
                   <span key={s} className="badge" style={{ backgroundColor: selectedZone.hoverColor, color: '#FFF' }}>
-                    ✓ {displayCode}
+                    {displayCode}
                   </span>
                 );
               })}
@@ -654,7 +654,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                               opacity: isOccupied ? 0.7 : 1
                             }}
                           >
-                            {isOccupied ? '🔒' : seatNum}
+                            {isOccupied ? 'X' : seatNum}
                           </button>
                         );
                       })}
@@ -702,7 +702,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                               opacity: isOccupied ? 0.7 : 1
                             }}
                           >
-                            {isOccupied ? '🔒' : seatNum}
+                            {isOccupied ? 'X' : seatNum}
                           </button>
                         );
                       })}
@@ -754,7 +754,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                               opacity: isOccupied ? 0.7 : 1
                             }}
                           >
-                            {isOccupied ? '🔒' : seatNum}
+                            {isOccupied ? 'X' : seatNum}
                           </button>
                         );
                       })}

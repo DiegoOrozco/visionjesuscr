@@ -653,14 +653,14 @@ export default function ChurchLanding({ config, onGoToTickets }) {
         <div className="modal-overlay" onClick={() => setModalType(null)}>
           <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', borderRadius: '24px', backgroundColor: '#11131E', border: '1px solid rgba(185, 28, 28, 0.3)', color: '#FFF' }}>
             <div style={{ padding: '28px' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.4rem', marginBottom: '8px' }}>💬 Enviar Pregunta</h3>
+              <h3 style={{ color: '#FFFFFF', fontSize: '1.4rem', marginBottom: '8px' }}>Enviar Pregunta</h3>
               <p style={{ color: '#9CA3AF', fontSize: '0.9rem', marginBottom: '20px' }}>
                 ¿Tienes alguna duda sobre nuestros horarios, ministerios o actividades? Escríbenos directamente aquí.
               </p>
 
               {formSubmitted ? (
                 <div style={{ textAlign: 'center', color: '#34D399', fontWeight: 700, padding: '20px' }}>
-                  📧 ¡Mensaje recibido! Te responderemos por correo o WhatsApp.
+                  ¡Mensaje recibido! Te responderemos por correo o WhatsApp.
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit}>

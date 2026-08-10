@@ -205,7 +205,7 @@ function initDb() {
     INSERT OR IGNORE INTO homepage_config (key, value)
     VALUES ('hero_buttons', ?)
   `).run(JSON.stringify([
-    { id: '1', label: 'Congreso de Mujeres', emoji: '🎟️', url: '/autenticas', style: 'primary' }
+    { id: '1', label: 'Congreso de Mujeres', emoji: '', url: '/autenticas', style: 'primary' }
   ]));
 
   // Ensure news_items key exists (gallery/carousel on landing)
