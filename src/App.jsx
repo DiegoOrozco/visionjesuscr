@@ -185,6 +185,7 @@ export default function App() {
               zones={zones} 
               occupiedSeats={occupiedSeats} 
               onSelectZone={handleSelectZone} 
+              onRefresh={fetchZones}
             />
 
             {/* Zone Modal Popup (if needed) */}

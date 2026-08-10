@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RotateCcw, Check, MousePointerClick, Star, Ticket } from 'lucide-react';
 
-export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
+export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRefresh }) {
   const [hoveredZoneId, setHoveredZoneId] = useState(null);
   const [selectedZone, setSelectedZone] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -280,7 +280,8 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
       } else if (data.code === 'SEATS_TAKEN') {
         alert(data.message);
         setSelectedSeats([]);
-        if (onResetZoom) onResetZoom();
+        handleResetZoom();
+        if (onRefresh) onRefresh();
       } else {
         alert(data.message || 'Error al apartar los asientos.');
       }
