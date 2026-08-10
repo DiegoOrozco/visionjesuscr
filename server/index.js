@@ -31,15 +31,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp|heic|pdf/;
+    const allowedTypes = /jpeg|jpg|png|webp|heic|pdf|mp4|webm|mov|ogg/;
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
     const mime = file.mimetype;
-    if (allowedTypes.test(ext) || allowedTypes.test(mime)) {
+    if (allowedTypes.test(ext) || allowedTypes.test(mime) || mime.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error('Formato de archivo no válido. Solo se permiten imágenes (JPG, PNG, WEBP) o PDF.'));
+      cb(new Error('Formato de archivo no válido. Se permiten imágenes, PDFs y videos (MP4, WEBM, MOV).'));
     }
   }
 });

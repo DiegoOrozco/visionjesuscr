@@ -24,8 +24,12 @@ export default function ChurchLanding({ config, onGoToTickets }) {
     }, 3000);
   };
 
-  const heroBg = config.hero_bg 
-    ? (config.hero_bg.startsWith('http') ? config.hero_bg : `${API_URL}${config.hero_bg}`)
+  const heroBgRaw = config.hero_bg || '';
+  const isVideoBg = !!heroBgRaw.match(/\.(mp4|webm|mov|ogg)($|\?)/i) || !!config.hero_video;
+  const heroVideoUrl = config.hero_video || (isVideoBg ? heroBgRaw : '');
+  
+  const heroBg = heroBgRaw 
+    ? (heroBgRaw.startsWith('http') ? heroBgRaw : `${API_URL}${heroBgRaw}`)
     : 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
 
   const scheduleBg = config.schedule_bg
@@ -117,6 +121,88 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       overflowX: 'hidden'
     }}>
       
+      {/* 0. HERO TOP HEADER / NAVBAR */}
+      <header style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        padding: '18px 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'linear-gradient(180deg, rgba(10, 11, 16, 0.9) 0%, rgba(10, 11, 16, 0) 100%)',
+        backdropFilter: 'blur(8px)',
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        {/* LOGO */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <img src="/logo-anual.png" alt="Visión Jesús Logo" style={{ height: '48px', objectFit: 'contain' }} />
+          <span style={{ fontWeight: 900, fontSize: '1.25rem', letterSpacing: '1px', color: '#FFFFFF', textTransform: 'uppercase' }}>
+            VISIÓN JESÚS
+          </span>
+        </div>
+
+        {/* MENU LINKS */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+          <a 
+            href="#inicio" 
+            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+            style={{ color: '#F3F4F6', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            INICIO
+          </a>
+          <a 
+            href="#vision-section" 
+            onClick={(e) => { e.preventDefault(); document.getElementById('vision-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+            style={{ color: '#FFD6D6', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            CONOCÉ LA VISIÓN
+          </a>
+          <a 
+            href="#horarios-section" 
+            onClick={(e) => { e.preventDefault(); document.getElementById('horarios-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+            style={{ color: '#F3F4F6', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            PRÉDICAS Y HORARIOS
+          </a>
+          <a 
+            href="#contacto-section" 
+            onClick={(e) => { e.preventDefault(); document.getElementById('contacto-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+            style={{ color: '#F3F4F6', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            CONTACTO
+          </a>
+          <button 
+            onClick={onGoToTickets}
+            style={{
+              backgroundColor: '#B91C1C',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '9px 20px',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(185,28,28,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Ticket size={16} />
+            <span>CONGRESO 2026</span>
+          </button>
+        </nav>
+      </header>
+
       {/* GLOW EFFECT OVERLAYS */}
       <div style={{
         position: 'absolute',
@@ -140,19 +226,52 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       }} />
 
       {/* 1. HERO SECTION */}
-      <div style={{
+      <div id="inicio" style={{
         position: 'relative',
-        backgroundImage: `linear-gradient(180deg, rgba(10, 11, 16, 0.3) 0%, rgba(10, 11, 16, 0.95) 100%), url(${heroBg})`,
+        backgroundImage: !isVideoBg ? `linear-gradient(180deg, rgba(10, 11, 16, 0.45) 0%, rgba(10, 11, 16, 0.95) 100%), url(${heroBg})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center 20%',
-        minHeight: '88vh',
+        minHeight: '92vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '80px 20px',
-        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)'
+        padding: '120px 20px 80px',
+        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)',
+        overflow: 'hidden'
       }}>
         
+        {/* BACKGROUND VIDEO (IF CONFIG HAS A VIDEO) */}
+        {isVideoBg && (
+          <>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                zIndex: 0
+              }}
+            >
+              <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
+            </video>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(180deg, rgba(10, 11, 16, 0.6) 0%, rgba(10, 11, 16, 0.95) 100%)',
+              zIndex: 1
+            }} />
+          </>
+        )}
+
         {/* Bottom gradient line */}
         <div style={{
           position: 'absolute',
@@ -160,7 +279,8 @@ export default function ChurchLanding({ config, onGoToTickets }) {
           left: 0,
           right: 0,
           height: '6px',
-          background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)'
+          background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
+          zIndex: 3
         }} />
 
         <div style={{ maxWidth: '1000px', margin: '0 auto', zIndex: 2, textAlign: 'center' }}>
@@ -197,7 +317,7 @@ export default function ChurchLanding({ config, onGoToTickets }) {
             WebkitTextFillColor: 'transparent',
             textShadow: '0 4px 12px rgba(0,0,0,0.5)'
           }}>
-            {config.hero_title || 'Bienvenido a TU CASA'}
+            {config.hero_title || 'CONOCÉ LA VISIÓN'}
           </h1>
 
           <p style={{
@@ -218,35 +338,41 @@ export default function ChurchLanding({ config, onGoToTickets }) {
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
-              justifyContent: 'center',
               gap: '16px',
-              maxWidth: '900px',
-              margin: '0 auto'
+              justifyContent: 'center',
+              marginBottom: '20px'
             }}>
-              {heroButtons.map((btn) => (
-                <button 
-                  key={btn.id}
+              {heroButtons.map((btn, idx) => (
+                <button
+                  key={btn.id || idx}
                   onClick={() => handleButtonClick(btn)}
                   style={{
-                    backgroundColor: btn.style === 'primary' ? '#B91C1C' : '#11131E',
+                    backgroundColor: btn.style === 'primary' ? '#B91C1C' : 'rgba(255,255,255,0.1)',
                     color: '#FFFFFF',
-                    border: btn.style === 'primary' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.15)',
-                    padding: '18px 32px',
-                    fontSize: '1.1rem',
-                    fontWeight: 900,
-                    borderRadius: '16px',
+                    border: btn.style === 'primary' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: '50px',
+                    padding: '16px 36px',
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
                     cursor: 'pointer',
-                    boxShadow: btn.style === 'primary' ? '0 10px 30px rgba(185,28,28,0.45)' : '0 4px 12px rgba(0,0,0,0.3)',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
                     gap: '10px',
-                    minWidth: '200px'
+                    boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(185,28,28,0.4)' : 'none',
+                    backdropFilter: btn.style !== 'primary' ? 'blur(10px)' : 'none',
+                    transition: 'all 0.2s ease'
                   }}
-                  className={btn.style === 'primary' ? 'btn-glow' : ''}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#DC2626';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#B91C1C';
+                  }}
                 >
-                  {btn.emoji && <span style={{ fontSize: '1.2rem' }}>{btn.emoji}</span>}
                   <span>{btn.label}</span>
                 </button>
               ))}
@@ -435,43 +561,153 @@ export default function ChurchLanding({ config, onGoToTickets }) {
         </div>
       )}
 
-      {/* 3. ABOUT US SECTION */}
-      <div className="container" style={{ padding: '80px 20px', position: 'relative', zIndex: 1 }}>
-        <div style={{
-          backgroundColor: '#11131E',
-          border: '1px solid rgba(185, 28, 28, 0.25)',
-          borderRadius: '32px',
-          padding: '48px 32px',
-          maxWidth: '900px',
-          margin: '0 auto',
-          textAlign: 'center',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-          background: 'linear-gradient(135deg, #11131E 0%, #1A0D12 100%)'
-        }}>
-          <h2 style={{ 
-            fontSize: '2.5rem', 
-            color: '#FFFFFF', 
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            marginBottom: '20px',
-            letterSpacing: '-0.5px'
+      {/* 3. CONOCÉ LA VISIÓN SECTION */}
+      <div id="vision-section" style={{ padding: '90px 20px', position: 'relative', zIndex: 1 }}>
+        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          
+          <div style={{ textAlign: 'center', marginBottom: '54px' }}>
+            <span style={{
+              backgroundColor: 'rgba(185, 28, 28, 0.2)',
+              border: '1px solid rgba(185, 28, 28, 0.5)',
+              color: '#FF8A8A',
+              padding: '6px 18px',
+              borderRadius: '50px',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              letterSpacing: '2px',
+              textTransform: 'uppercase'
+            }}>
+              ACERCA DE NOSOTROS
+            </span>
+
+            <h2 style={{
+              fontSize: '3.2rem',
+              fontWeight: 900,
+              color: '#FFFFFF',
+              textTransform: 'uppercase',
+              letterSpacing: '-0.5px',
+              marginTop: '16px',
+              marginBottom: '14px'
+            }}>
+              CONOCÉ LA VISIÓN
+            </h2>
+
+            <p style={{
+              color: '#9CA3AF',
+              fontSize: '1.2rem',
+              maxWidth: '780px',
+              margin: '0 auto',
+              lineHeight: 1.6
+            }}>
+              {config.about_text || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo en cada corazón, hogar y comunidad.'}
+            </p>
+          </div>
+
+          {/* 3 PILLARS CARDS: VISIÓN, MISIÓN, VALORES */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '28px'
           }}>
-            NUESTRA PASIÓN ES JESÚS
-          </h2>
-          <p style={{ 
-            fontSize: '1.25rem', 
-            lineHeight: '1.7', 
-            color: '#D1D5DB',
-            maxWidth: '780px',
-            margin: '0 auto'
-          }}>
-            {config.about_text || 'Somos una comunidad apasionada por compartir el mensaje de esperanza, amor y gracia de Jesucristo en Costa Rica y el mundo entero. ¡Nuestras puertas están abiertas para ti!'}
-          </p>
+            {/* CARD 1: VISIÓN */}
+            <div style={{
+              backgroundColor: '#11131E',
+              border: '1px solid rgba(185, 28, 28, 0.3)',
+              borderRadius: '24px',
+              padding: '36px 28px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(185, 28, 28, 0.2)',
+                color: '#EF4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px'
+              }}>
+                <Compass size={28} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
+                NUESTRA VISIÓN
+              </h3>
+              <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.
+              </p>
+            </div>
+
+            {/* CARD 2: MISIÓN */}
+            <div style={{
+              backgroundColor: '#11131E',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '24px',
+              padding: '36px 28px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                color: '#F59E0B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px'
+              }}>
+                <Flame size={28} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
+                NUESTRA MISIÓN
+              </h3>
+              <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.
+              </p>
+            </div>
+
+            {/* CARD 3: VALORES */}
+            <div style={{
+              backgroundColor: '#11131E',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '24px',
+              padding: '36px 28px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                color: '#10B981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px'
+              }}>
+                <Users size={28} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
+                NUESTROS VALORES
+              </h3>
+              <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
 
       {/* 4. SCHEDULES SECTION */}
-      <div style={{
+      <div id="horarios-section" style={{
         backgroundImage: `linear-gradient(180deg, rgba(10, 11, 16, 0.85) 0%, rgba(10, 11, 16, 0.95) 100%), url(${scheduleBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -553,7 +789,7 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       </div>
 
       {/* 5. FOOTER & CONTACT */}
-      <footer style={{
+      <footer id="contacto-section" style={{
         backgroundColor: '#090A0F',
         color: '#9CA3AF',
         padding: '80px 20px',

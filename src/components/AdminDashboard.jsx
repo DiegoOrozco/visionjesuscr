@@ -1003,15 +1003,16 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo (Hero Banner)</label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>
+                  Fondo de Portada (Imagen o Video MP4/WebM)
+                </label>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <input 
                     type="text" 
                     name="hero_bg" 
                     value={configFields.hero_bg} 
                     onChange={handleConfigChange} 
-                    placeholder="URL de la imagen o ruta del archivo" 
-                    required 
+                    placeholder="URL de imagen/video (o subir archivo mp4/jpg)" 
                     style={{ flex: 1 }}
                   />
                   <label style={{
@@ -1025,10 +1026,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     display: 'inline-block',
                     textAlign: 'center'
                   }}>
-                    {uploadingHero ? 'Subiendo...' : 'Subir Imagen Iglesia'}
+                    {uploadingHero ? 'Subiendo...' : 'Subir Fondo (Foto / Video)'}
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept="image/*,video/*" 
                       onChange={handleHeroUpload} 
                       style={{ display: 'none' }} 
                       disabled={uploadingHero}
@@ -1038,11 +1039,20 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 {configFields.hero_bg && (
                   <div style={{ marginTop: '10px' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vista previa:</span>
-                    <img 
-                      src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
-                      alt="Vista previa fondo" 
-                      style={{ display: 'block', maxHeight: '120px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
-                    />
+                    {configFields.hero_bg.match(/\.(mp4|webm|mov|ogg)($|\?)/i) ? (
+                      <video 
+                        src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
+                        controls
+                        muted
+                        style={{ display: 'block', maxHeight: '140px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
+                      />
+                    ) : (
+                      <img 
+                        src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
+                        alt="Vista previa fondo" 
+                        style={{ display: 'block', maxHeight: '120px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
+                      />
+                    )}
                   </div>
                 )}
               </div>
