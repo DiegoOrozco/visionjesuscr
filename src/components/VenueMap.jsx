@@ -118,11 +118,13 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
   const handleZoneClick = (zoneConfig) => {
     setSelectedZone(zoneConfig);
     setSelectedSeats([]);
+    setHoveredZoneId(null);
   };
 
   const handleResetZoom = () => {
     setSelectedZone(null);
     setSelectedSeats([]);
+    setHoveredZoneId(null);
   };
 
   const toggleSeatSelection = (seatCode, isOccupied) => {
@@ -250,8 +252,8 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
 
   // Render SVG Labels with strictly unified typography and font size (12.5px)
   const renderSvgLabels = (cfg) => {
-    const isHovered = hoveredZoneId === cfg.data.id;
     const isSelected = selectedZone && selectedZone.data.id === cfg.data.id;
+    const isHovered = !selectedZone && hoveredZoneId === cfg.data.id;
     const textColor = isHovered || isSelected ? '#FFFFFF' : '#1F2937';
     const priceColor = isHovered || isSelected ? '#FAF8F5' : '#4B5563';
 
@@ -451,8 +453,9 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
 
             {/* RECTANGULAR ZONES */}
             {zoneList.map((cfg) => {
-              const isHovered = hoveredZoneId === cfg.data.id;
               const isSelected = selectedZone && selectedZone.data.id === cfg.data.id;
+              const isHovered = !selectedZone && hoveredZoneId === cfg.data.id;
+              const isDimmed = selectedZone && !isSelected;
 
               return (
                 <g
@@ -460,7 +463,11 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                   onMouseEnter={() => !selectedZone && setHoveredZoneId(cfg.data.id)}
                   onMouseLeave={() => !selectedZone && setHoveredZoneId(null)}
                   onClick={() => handleZoneClick(cfg)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ 
+                    cursor: selectedZone && !isSelected ? 'default' : 'pointer',
+                    opacity: isDimmed ? 0.35 : 1,
+                    transition: 'all 0.3s ease'
+                  }}
                 >
                   <rect
                     x={cfg.x}
@@ -468,7 +475,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
                     width={cfg.width}
                     height={cfg.height}
                     rx={cfg.rx}
-                    fill={isSelected ? cfg.hoverColor : isHovered ? cfg.hoverColor : '#D1D5DB'}
+                    fill={isSelected || isHovered ? cfg.hoverColor : '#D1D5DB'}
                     stroke={isSelected || isHovered ? '#2C1A0E' : '#FFFFFF'}
                     strokeWidth={isSelected || isHovered ? "4" : "3"}
                     style={{ transition: 'all 0.25s ease' }}
