@@ -92,11 +92,17 @@ export default function App() {
     setCurrentView('landing');
   };
 
-  const handleSelectZone = (zone, qty = 1, seatCodes = []) => {
+  // Seat hold state
+  const [seatSessionId, setSeatSessionId] = useState('');
+  const [holdExpiresAt, setHoldExpiresAt] = useState(null);
+
+  const handleSelectZone = (zone, qty = 1, seatCodes = [], sessionId = '', expiresAt = null) => {
     setSelectedZone(zone);
     const validQty = qty && qty > 0 ? qty : 1;
     setAttendeeQuantity(validQty);
     setChosenSeatCodes(seatCodes || []);
+    if (sessionId) setSeatSessionId(sessionId);
+    if (expiresAt) setHoldExpiresAt(expiresAt);
 
     if (validQty > 0) {
       setCurrentView('attendees');
@@ -200,7 +206,10 @@ export default function App() {
               zone={selectedZone}
               quantity={attendeeQuantity}
               chosenSeatCodes={chosenSeatCodes}
+              sessionId={seatSessionId}
+              expiresAt={holdExpiresAt}
               onBack={() => {
+                fetchZones();
                 window.history.pushState({}, '', '/autenticas');
                 setCurrentView('home');
               }}

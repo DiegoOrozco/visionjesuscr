@@ -46,13 +46,53 @@ const upload = multer({
 
 // --- API ROUTES ---
 
-// 1. Get Zones, Pricing Tiers & List of Occupied Seats
+// Helper: Clean up expired seat holds
+function cleanupExpiredHolds() {
+  try {
+    db.prepare(`DELETE FROM seat_holds WHERE expires_at < CURRENT_TIMESTAMP`).run();
+  } catch (e) {
+    console.error('Error cleaning up seat holds:', e);
+  }
+}
+
+// 1. Get Zones, Pricing Tiers & List of Occupied/Held Seats
 app.get('/api/zones', (req, res) => {
   try {
-    const zones = db.prepare(`
+    cleanupExpiredHolds();
+
+    // Read presale config from homepage_config
+    const configRows = db.prepare('SELECT key, value FROM homepage_config').all();
+    const config = {};
+    configRows.forEach(r => config[r.key] = r.value);
+
+    const cutoffDateStr = config.presale_cutoff_date || '2026-08-15';
+    const cutoffDate = new Date(`${cutoffDateStr}T23:59:59`);
+    const now = new Date();
+    const isPresale = now <= cutoffDate;
+
+    const vipPresale = parseFloat(config.vip_presale_price || '12000');
+    const vipRegular = parseFloat(config.vip_regular_price || '15000');
+    const genPresale = parseFloat(config.general_presale_price || '7500');
+    const genRegular = parseFloat(config.general_regular_price || '10000');
+
+    const activeVipPrice = isPresale ? vipPresale : vipRegular;
+    const activeGenPrice = isPresale ? genPresale : genRegular;
+
+    const rawZones = db.prepare(`
       SELECT id, name, price, regular_price, total_capacity, available_capacity, description, color_code
       FROM zones
     `).all();
+
+    const zones = rawZones.map(z => {
+      const isVip = z.id.startsWith('vip');
+      const currentPrice = isVip ? activeVipPrice : activeGenPrice;
+      const regularPrice = isVip ? vipRegular : genRegular;
+      return {
+        ...z,
+        price: currentPrice,
+        regular_price: regularPrice
+      };
+    });
 
     // Fetch all assigned/occupied seat codes from attendees table AND seat_queues table
     const occupiedAttendees = db.prepare(`
@@ -63,22 +103,115 @@ app.get('/api/zones', (req, res) => {
       SELECT ticket_code FROM seat_queues WHERE is_assigned = 1
     `).all().map(r => r.ticket_code);
 
-    const occupiedSeats = Array.from(new Set([...occupiedAttendees, ...occupiedQueues]));
+    // Fetch active held seat codes from seat_holds table
+    const activeHeldSeats = db.prepare(`
+      SELECT seat_code FROM seat_holds WHERE expires_at >= CURRENT_TIMESTAMP
+    `).all().map(r => r.seat_code);
 
-    const now = new Date();
-    const cutoffDate = new Date('2026-08-15T23:59:59');
-    const isPresale = now <= cutoffDate;
+    const occupiedSeats = Array.from(new Set([...occupiedAttendees, ...occupiedQueues, ...activeHeldSeats]));
 
     res.json({
       success: true,
       isPresale,
-      cutoffDate: '2026-08-15',
+      cutoffDate: cutoffDateStr,
+      presaleConfig: {
+        cutoffDate: cutoffDateStr,
+        vipPresale,
+        vipRegular,
+        genPresale,
+        genRegular
+      },
       zones,
       occupiedSeats
     });
   } catch (error) {
     console.error('Error fetching zones:', error);
     res.status(500).json({ success: false, message: 'Error al consultar las zonas.' });
+  }
+});
+
+// 1b. Hold Seats (5-minute temporary reservation lock for concurrency control)
+app.post('/api/seats/hold', (req, res) => {
+  try {
+    cleanupExpiredHolds();
+
+    const { seat_codes, session_id, zone_id } = req.body;
+
+    if (!seat_codes || !Array.isArray(seat_codes) || seat_codes.length === 0 || !session_id || !zone_id) {
+      return res.status(400).json({ success: false, message: 'Se requieren asientos, ID de sesión y zona.' });
+    }
+
+    // 1. Check permanently assigned seats
+    const occupiedAttendees = db.prepare(`
+      SELECT assigned_ticket_code FROM attendees WHERE assigned_ticket_code IS NOT NULL AND assigned_ticket_code != ''
+    `).all().map(r => r.assigned_ticket_code);
+
+    const occupiedQueues = db.prepare(`
+      SELECT ticket_code FROM seat_queues WHERE is_assigned = 1
+    `).all().map(r => r.ticket_code);
+
+    const permanentlyAssigned = new Set([...occupiedAttendees, ...occupiedQueues]);
+
+    // 2. Check active holds by other sessions
+    const activeHoldsOtherSessions = db.prepare(`
+      SELECT seat_code FROM seat_holds WHERE session_id != ? AND expires_at >= CURRENT_TIMESTAMP
+    `).all(session_id).map(r => r.seat_code);
+
+    const otherSessionHolds = new Set(activeHoldsOtherSessions);
+
+    // Identify conflicts
+    const conflictSeats = seat_codes.filter(code => permanentlyAssigned.has(code) || otherSessionHolds.has(code));
+
+    if (conflictSeats.length > 0) {
+      return res.json({
+        success: false,
+        code: 'SEATS_TAKEN',
+        conflictSeats,
+        message: '¡Atención! Uno o más de los asientos seleccionados fueron reservados o apartados por otra persona. Por favor refresca la página y selecciona otros asientos disponibles.'
+      });
+    }
+
+    // Insert or renew hold for 5 minutes (300 seconds)
+    const holdTx = db.transaction(() => {
+      db.prepare('DELETE FROM seat_holds WHERE session_id = ?').run(session_id);
+
+      const insertHold = db.prepare(`
+        INSERT INTO seat_holds (id, session_id, seat_code, zone_id, expires_at)
+        VALUES (?, ?, ?, ?, datetime('now', '+5 minutes'))
+      `);
+
+      for (const seatCode of seat_codes) {
+        insertHold.run(uuidv4(), session_id, seatCode, zone_id);
+      }
+    });
+
+    holdTx();
+
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    res.json({
+      success: true,
+      message: 'Asientos apartados temporalmente por 5 minutos.',
+      session_id,
+      expires_at: expiresAt,
+      hold_duration_seconds: 300
+    });
+  } catch (error) {
+    console.error('Error holding seats:', error);
+    res.status(500).json({ success: false, message: 'Error interno al apartar los asientos.' });
+  }
+});
+
+// 1c. Release Seats Hold
+app.post('/api/seats/release', (req, res) => {
+  try {
+    const { session_id } = req.body;
+    if (session_id) {
+      db.prepare('DELETE FROM seat_holds WHERE session_id = ?').run(session_id);
+    }
+    res.json({ success: true, message: 'Asientos liberados.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -180,6 +313,11 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
         SET available_capacity = available_capacity - ?
         WHERE id = ?
       `).run(quantity, zone_id);
+
+      // Clean up seat_holds for this session if provided
+      if (req.body.session_id) {
+        db.prepare('DELETE FROM seat_holds WHERE session_id = ?').run(req.body.session_id);
+      }
 
       return { reservationId, qrCodeHash, assignedTickets, totalAmount };
     });
@@ -511,6 +649,49 @@ app.post('/api/admin/homepage/config', (req, res) => {
     tx();
     res.json({ success: true, message: 'Configuración de portada guardada con éxito.' });
   } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Admin Pricing and Presale Config
+app.post('/api/admin/pricing', (req, res) => {
+  try {
+    const {
+      presale_cutoff_date,
+      vip_presale_price,
+      vip_regular_price,
+      general_presale_price,
+      general_regular_price
+    } = req.body;
+
+    if (!presale_cutoff_date || !vip_presale_price || !vip_regular_price || !general_presale_price || !general_regular_price) {
+      return res.status(400).json({ success: false, message: 'Todos los campos de precios y fecha límite son requeridos.' });
+    }
+
+    const updateConfig = db.prepare('INSERT OR REPLACE INTO homepage_config (key, value) VALUES (?, ?)');
+    
+    const tx = db.transaction(() => {
+      updateConfig.run('presale_cutoff_date', String(presale_cutoff_date));
+      updateConfig.run('vip_presale_price', String(vip_presale_price));
+      updateConfig.run('vip_regular_price', String(vip_regular_price));
+      updateConfig.run('general_presale_price', String(general_presale_price));
+      updateConfig.run('general_regular_price', String(general_regular_price));
+
+      const cutoffDate = new Date(`${presale_cutoff_date}T23:59:59`);
+      const isPresale = new Date() <= cutoffDate;
+
+      const activeVip = isPresale ? parseFloat(vip_presale_price) : parseFloat(vip_regular_price);
+      const activeGen = isPresale ? parseFloat(general_presale_price) : parseFloat(general_regular_price);
+
+      db.prepare(`UPDATE zones SET price = ?, regular_price = ? WHERE id LIKE 'vip%'`).run(activeVip, parseFloat(vip_regular_price));
+      db.prepare(`UPDATE zones SET price = ?, regular_price = ? WHERE id NOT LIKE 'vip%'`).run(activeGen, parseFloat(general_regular_price));
+    });
+
+    tx();
+
+    res.json({ success: true, message: 'Precios y fecha de preventa guardados con éxito.' });
+  } catch (e) {
+    console.error('Error saving pricing:', e);
     res.status(500).json({ success: false, message: e.message });
   }
 });

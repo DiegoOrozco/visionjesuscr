@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -9,7 +9,18 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  const [activeTab, setActiveTab] = useState('reservations'); // 'reservations' | 'church_web'
+  const [activeTab, setActiveTab] = useState('reservations'); // 'reservations' | 'church_web' | 'pricing' | 'users'
+
+  // Pricing & Presale Editing State
+  const [pricingFields, setPricingFields] = useState({
+    presale_cutoff_date: '2026-08-15',
+    vip_presale_price: '12000',
+    vip_regular_price: '15000',
+    general_presale_price: '7500',
+    general_regular_price: '10000'
+  });
+  const [savingPricing, setSavingPricing] = useState(false);
+  const [pricingSuccessMsg, setPricingSuccessMsg] = useState('');
 
   // Config editing state
   const [configFields, setConfigFields] = useState({
@@ -127,8 +138,45 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         contact_phone_1: homepageConfig.contact_phone_1 || '',
         contact_phone_2: homepageConfig.contact_phone_2 || ''
       });
+
+      setPricingFields({
+        presale_cutoff_date: homepageConfig.presale_cutoff_date || '2026-08-15',
+        vip_presale_price: homepageConfig.vip_presale_price || '12000',
+        vip_regular_price: homepageConfig.vip_regular_price || '15000',
+        general_presale_price: homepageConfig.general_presale_price || '7500',
+        general_regular_price: homepageConfig.general_regular_price || '10000'
+      });
     }
   }, [homepageConfig]);
+
+  const handlePricingChange = (e) => {
+    const { name, value } = e.target;
+    setPricingFields(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSavePricingSubmit = async (e) => {
+    e.preventDefault();
+    setSavingPricing(true);
+    setPricingSuccessMsg('');
+    try {
+      const res = await fetch(`${API_URL}/api/admin/pricing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pricingFields)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPricingSuccessMsg('¡Precios y fecha de preventa guardados con éxito!');
+        if (onSaveConfig) onSaveConfig();
+      } else {
+        alert(data.message || 'Error al guardar configuración de precios.');
+      }
+    } catch (err) {
+      alert('Error de red al guardar precios.');
+    } finally {
+      setSavingPricing(false);
+    }
+  };
 
   const handleAddSchedule = () => {
     setLocalSchedules([...localSchedules, { id: Date.now().toString(), text: 'NUEVO HORARIO 7:00 PM', isVirtual: false }]);
@@ -563,6 +611,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Globe size={18} />
             Diseño Web Iglesia
+          </button>
+        )}
+
+        {/* Only admin role can edit pricing & presale */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('pricing')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'pricing' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'pricing' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Tag size={18} />
+            Precios y Preventa
           </button>
         )}
 
@@ -1358,6 +1429,107 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
             <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
               {saveLoading ? 'Guardando...' : 'Guardar Cambios Web Portada'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB: PRICING & PRESALE CONFIGURATION (admin only) */}
+      {activeTab === 'pricing' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de Precios y Fecha Límite de Preventa
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Define la fecha límite de preventa y los precios por zona (Preventa y Regular). El sistema cambiará automáticamente los precios en el mapa una vez alcanzada la fecha límite.
+          </p>
+
+          {pricingSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {pricingSuccessMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSavePricingSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              
+              {/* FECHA LIMITE PREVENTA */}
+              <div style={{ gridColumn: '1 / -1', backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+                <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '8px' }}>
+                  Fecha Límite de Preventa (Hasta las 23:59:59 de este día)
+                </label>
+                <input 
+                  type="date" 
+                  name="presale_cutoff_date" 
+                  value={pricingFields.presale_cutoff_date} 
+                  onChange={handlePricingChange} 
+                  required 
+                  style={{ width: '100%', maxWidth: '300px', padding: '10px 14px', borderRadius: '10px', border: '1px solid #CCC', fontWeight: 700 }}
+                />
+              </div>
+
+              {/* TARIFAS VIP */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+                <h4 style={{ color: '#DB2777', marginTop: 0, marginBottom: '14px' }}>Zonas VIP (Central, Izquierda, Derecha)</h4>
+                
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Precio Preventa (₡)</label>
+                  <input 
+                    type="number" 
+                    name="vip_presale_price" 
+                    value={pricingFields.vip_presale_price} 
+                    onChange={handlePricingChange} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Precio Regular / Normal (₡)</label>
+                  <input 
+                    type="number" 
+                    name="vip_regular_price" 
+                    value={pricingFields.vip_regular_price} 
+                    onChange={handlePricingChange} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+              </div>
+
+              {/* TARIFAS GENERAL */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+                <h4 style={{ color: '#10B981', marginTop: 0, marginBottom: '14px' }}>Zonas General (Central, Izquierda, Derecha)</h4>
+                
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Precio Preventa (₡)</label>
+                  <input 
+                    type="number" 
+                    name="general_presale_price" 
+                    value={pricingFields.general_presale_price} 
+                    onChange={handlePricingChange} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Precio Regular / Normal (₡)</label>
+                  <input 
+                    type="number" 
+                    name="general_regular_price" 
+                    value={pricingFields.general_regular_price} 
+                    onChange={handlePricingChange} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+              </div>
+
+            </div>
+
+            <button type="submit" disabled={savingPricing} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {savingPricing ? 'Guardando...' : 'Guardar Configuración de Precios'}
             </button>
           </form>
         </div>

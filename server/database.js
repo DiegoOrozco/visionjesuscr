@@ -87,6 +87,19 @@ function initDb() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS seat_holds (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      seat_code TEXT NOT NULL,
+      zone_id TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
+    CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
+    CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);
   `);
 
   // Migrations for columns
@@ -187,6 +200,14 @@ function initDb() {
       }
     })();
   }
+
+  // Ensure presale and pricing keys exist in homepage_config
+  const insertConfig = db.prepare('INSERT OR IGNORE INTO homepage_config (key, value) VALUES (?, ?)');
+  insertConfig.run('presale_cutoff_date', '2026-08-15');
+  insertConfig.run('vip_presale_price', '12000');
+  insertConfig.run('vip_regular_price', '15000');
+  insertConfig.run('general_presale_price', '7500');
+  insertConfig.run('general_regular_price', '10000');
 
   // Ensure schedules key exists
   db.prepare(`

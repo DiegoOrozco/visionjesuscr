@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle2, FileText, Image as ImageIcon, Heart, Send, User, UserCheck, UploadCloud, Ticket } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, CheckCircle2, FileText, Image as ImageIcon, Heart, Send, User, UserCheck, UploadCloud, Ticket, Clock } from 'lucide-react';
 
-export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onBack, onSuccess }) {
+export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], sessionId = '', expiresAt = null, onBack, onSuccess }) {
   // Purchaser info
   const [purchaserName, setPurchaserName] = useState('');
   const [purchaserEmail, setPurchaserEmail] = useState('');
@@ -10,6 +10,57 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
   // Track if user manually modified purchaser fields
   const [purchaserNameEdited, setPurchaserNameEdited] = useState(false);
   const [purchaserPhoneEdited, setPurchaserPhoneEdited] = useState(false);
+
+  // 5-Minute Reservation Countdown Timer state
+  const [remainingSeconds, setRemainingSeconds] = useState(() => {
+    if (!expiresAt) return 300;
+    const diff = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
+    return diff > 0 ? diff : 300;
+  });
+  const [timerExpired, setTimerExpired] = useState(false);
+
+  useEffect(() => {
+    if (!expiresAt) return;
+
+    const interval = setInterval(() => {
+      const diff = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
+      if (diff <= 0) {
+        setRemainingSeconds(0);
+        setTimerExpired(true);
+        clearInterval(interval);
+      } else {
+        setRemainingSeconds(diff);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  const handleReleaseSeats = async () => {
+    if (sessionId) {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || '';
+        await fetch(`${API_URL}/api/seats/release`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId })
+        });
+      } catch (e) {
+        console.error('Error releasing seats:', e);
+      }
+    }
+  };
+
+  const handleBackWithRelease = async () => {
+    await handleReleaseSeats();
+    onBack();
+  };
 
   // Attendees array initialized with complete fields from Google Form
   const [attendees, setAttendees] = useState(() => {
@@ -97,6 +148,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
       formData.append('purchaser_phone', purchaserPhone);
       formData.append('attendees', JSON.stringify(attendees));
       formData.append('comprobante', file);
+      if (sessionId) {
+        formData.append('session_id', sessionId);
+      }
 
       const baseUrl = import.meta.env.VITE_API_URL || '';
       const res = await fetch(`${baseUrl}/api/reservations`, {
@@ -121,8 +175,46 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px 0' }}>
+      
+      {/* TIMER EXPIRED OVERLAY MODAL */}
+      {timerExpired && (
+        <div className="modal-overlay" style={{ backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999 }}>
+          <div className="modal-card" style={{ maxWidth: '480px', textAlign: 'center', padding: '32px', borderRadius: '24px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              backgroundColor: '#FEE2E2',
+              color: '#DC2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px'
+            }}>
+              <Clock size={36} />
+            </div>
+
+            <h3 style={{ fontSize: '1.5rem', color: 'var(--accent-coffee)', marginBottom: '12px' }}>
+              ¡Tiempo de Reserva Expirado!
+            </h3>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.5 }}>
+              El tiempo límite de 5 minutos para completar la reserva ha finalizado. Los asientos seleccionados han sido liberados automáticamente para que otros usuarios puedan disponer de ellos.
+            </p>
+
+            <button
+              onClick={handleBackWithRelease}
+              className="btn-primary"
+              style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 800 }}
+            >
+              Volver a Seleccionar Asientos
+            </button>
+          </div>
+        </div>
+      )}
+
       <button 
-        onClick={onBack}
+        onClick={handleBackWithRelease}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -130,11 +222,54 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], onB
           backgroundColor: 'transparent',
           color: 'var(--accent-coffee)',
           fontWeight: 600,
-          marginBottom: '16px'
+          marginBottom: '16px',
+          cursor: 'pointer'
         }}
       >
         <ArrowLeft size={18} /> Volver a la selección de zona
       </button>
+
+      {/* 5-MINUTE COUNTDOWN BANNER */}
+      <div style={{
+        backgroundColor: remainingSeconds <= 60 ? '#FEE2E2' : '#FEF3C7',
+        color: remainingSeconds <= 60 ? '#991B1B' : '#92400E',
+        border: `2px solid ${remainingSeconds <= 60 ? '#F87171' : '#F59E0B'}`,
+        borderRadius: '16px',
+        padding: '14px 20px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontWeight: 700,
+        fontSize: '0.92rem',
+        boxShadow: 'var(--shadow-sm)',
+        transition: 'all 0.3s ease',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Clock size={22} />
+          <div>
+            {remainingSeconds <= 60 ? (
+              <span>¡Queda menos de 1 minuto! Completa los datos antes de que se liberen los asientos.</span>
+            ) : (
+              <span>Tus asientos están apartados a tu nombre. Completa los datos para finalizar.</span>
+            )}
+          </div>
+        </div>
+        <div style={{
+          backgroundColor: remainingSeconds <= 60 ? '#DC2626' : 'var(--accent-coffee)',
+          color: '#FFFFFF',
+          padding: '6px 14px',
+          borderRadius: '20px',
+          fontFamily: 'monospace',
+          fontSize: '1.25rem',
+          fontWeight: 900,
+          letterSpacing: '1px'
+        }}>
+          {formatTime(remainingSeconds)}
+        </div>
+      </div>
 
       <div className="card-glass" style={{ borderRadius: '24px' }}>
         

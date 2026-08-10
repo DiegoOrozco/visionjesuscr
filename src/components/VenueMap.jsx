@@ -240,14 +240,56 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
     return true;
   };
 
-  const handleConfirmSelectedSeats = () => {
+  const [holdingSeats, setHoldingSeats] = useState(false);
+
+  const getOrCreateSessionId = () => {
+    let sid = sessionStorage.getItem('seat_session_id');
+    if (!sid) {
+      sid = 'sess_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      sessionStorage.setItem('seat_session_id', sid);
+    }
+    return sid;
+  };
+
+  const handleConfirmSelectedSeats = async () => {
     if (!selectedZone) return;
     if (selectedSeats.length === 0) {
       alert("Por favor selecciona al menos un asiento.");
       return;
     }
     if (!validateRowGaps()) return;
-    onSelectZone(selectedZone.data, selectedSeats.length, selectedSeats);
+
+    setHoldingSeats(true);
+    const sessionId = getOrCreateSessionId();
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API_URL}/api/seats/hold`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          seat_codes: selectedSeats,
+          session_id: sessionId,
+          zone_id: selectedZone.data.id
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        onSelectZone(selectedZone.data, selectedSeats.length, selectedSeats, sessionId, data.expires_at);
+      } else if (data.code === 'SEATS_TAKEN') {
+        alert(data.message);
+        setSelectedSeats([]);
+        if (onResetZoom) onResetZoom();
+      } else {
+        alert(data.message || 'Error al apartar los asientos.');
+      }
+    } catch (err) {
+      console.error('Error holding seats:', err);
+      alert('Error de conexión al verificar los asientos. Por favor intenta nuevamente.');
+    } finally {
+      setHoldingSeats(false);
+    }
   };
 
   // Render SVG Labels with strictly unified typography and font size (12.5px)
@@ -775,18 +817,20 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone }) {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
               onClick={handleConfirmSelectedSeats}
+              disabled={holdingSeats}
               className="btn-primary"
               style={{
                 flex: 1,
                 padding: '16px',
                 fontSize: '1.1rem',
                 backgroundColor: selectedZone.hoverColor,
-                borderRadius: '12px'
+                borderRadius: '12px',
+                opacity: holdingSeats ? 0.7 : 1
               }}
             >
               <Check size={20} />
               <span>
-                Reservar ({selectedSeats.length > 0 ? selectedSeats.length : 1} {selectedSeats.length === 1 ? 'Boleto' : 'Boletos'}) — Total: {formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}
+                {holdingSeats ? 'Verificando disponibilidad...' : `Reservar (${selectedSeats.length > 0 ? selectedSeats.length : 1} ${selectedSeats.length === 1 ? 'Boleto' : 'Boletos'}) — Total: ${formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}`}
               </span>
             </button>
           </div>
