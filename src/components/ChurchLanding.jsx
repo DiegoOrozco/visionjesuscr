@@ -633,10 +633,10 @@ export default function ChurchLanding({ config, onGoToTickets }) {
                 <Compass size={28} />
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                NUESTRA VISIÓN
+                {config.vision_title || 'NUESTRA VISIÓN'}
               </h3>
               <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.
+                {config.vision_text || 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.'}
               </p>
             </div>
 
@@ -664,10 +664,10 @@ export default function ChurchLanding({ config, onGoToTickets }) {
                 <Flame size={28} />
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                NUESTRA MISIÓN
+                {config.mision_title || 'NUESTRA MISIÓN'}
               </h3>
               <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.
+                {config.mision_text || 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.'}
               </p>
             </div>
 
@@ -695,10 +695,10 @@ export default function ChurchLanding({ config, onGoToTickets }) {
                 <Users size={28} />
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                NUESTROS VALORES
+                {config.valores_title || 'NUESTROS VALORES'}
               </h3>
               <p style={{ color: '#D1D5DB', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.
+                {config.valores_text || 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.'}
               </p>
             </div>
           </div>

@@ -209,6 +209,14 @@ function initDb() {
   insertConfig.run('general_presale_price', '7500');
   insertConfig.run('general_regular_price', '10000');
 
+  // Ensure default Vision, Misión, Valores exist
+  insertConfig.run('vision_title', 'NUESTRA VISIÓN');
+  insertConfig.run('vision_text', 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.');
+  insertConfig.run('mision_title', 'NUESTRA MISIÓN');
+  insertConfig.run('mision_text', 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.');
+  insertConfig.run('valores_title', 'NUESTROS VALORES');
+  insertConfig.run('valores_text', 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.');
+
   // Ensure default Autenticas config values exist
   insertConfig.run('autenticas_hero_bg', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1600');
   insertConfig.run('autenticas_title', 'AUTÉNTICAS');

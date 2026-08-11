@@ -44,7 +44,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     autenticas_date_info: '',
     autenticas_place_info: '',
     autenticas_price_info: '',
-    autenticas_gallery: '[]'
+    autenticas_gallery: '[]',
+    vision_title: '',
+    vision_text: '',
+    mision_title: '',
+    mision_text: '',
+    valores_title: '',
+    valores_text: ''
   });
 
   // User management state
@@ -167,7 +173,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         autenticas_date_info: homepageConfig.autenticas_date_info || '',
         autenticas_place_info: homepageConfig.autenticas_place_info || '',
         autenticas_price_info: homepageConfig.autenticas_price_info || '',
-        autenticas_gallery: homepageConfig.autenticas_gallery || '[]'
+        autenticas_gallery: homepageConfig.autenticas_gallery || '[]',
+        vision_title: homepageConfig.vision_title || '',
+        vision_text: homepageConfig.vision_text || '',
+        mision_title: homepageConfig.mision_title || '',
+        mision_text: homepageConfig.mision_text || '',
+        valores_title: homepageConfig.valores_title || '',
+        valores_text: homepageConfig.valores_text || ''
       });
 
       setPricingFields({
@@ -198,7 +210,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       const data = await res.json();
       if (data.success) {
         setPricingSuccessMsg('¡Precios y fecha de preventa guardados con éxito!');
-        if (onSaveConfig) onSaveConfig();
+        if (onSaveConfig) onSaveConfig(pricingFields);
       } else {
         alert(data.message || 'Error al guardar configuración de precios.');
       }
@@ -1525,6 +1537,38 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     </div>
                   ))
                 )}
+              </div>
+
+              {/* SECTION: MISIÓN, VISIÓN Y VALORES */}
+              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
+                <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Misión, Visión y Valores</h4>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Visión</label>
+                <input type="text" name="vision_title" value={configFields.vision_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Visión</label>
+                <textarea name="vision_text" rows="2" value={configFields.vision_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Misión</label>
+                <input type="text" name="mision_title" value={configFields.mision_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Misión</label>
+                <textarea name="mision_text" rows="2" value={configFields.mision_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Valores</label>
+                <input type="text" name="valores_title" value={configFields.valores_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Valores</label>
+                <textarea name="valores_text" rows="2" value={configFields.valores_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
               </div>
 
               {/* SECTION: CONTACT & SOCIAL MEDIA */}

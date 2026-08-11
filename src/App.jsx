@@ -271,7 +271,11 @@ export default function App() {
             onLogout={handleAdminLogout}
             homepageConfig={homepageConfig}
             onSaveConfig={(updated) => {
-              setHomepageConfig(updated);
+              if (updated) {
+                setHomepageConfig(prev => ({ ...prev, ...updated }));
+              } else {
+                fetchConfig();
+              }
             }}
           />
         )}
