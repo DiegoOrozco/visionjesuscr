@@ -11,15 +11,15 @@ const BACKGROUNDS = {
 const TITLES = {
   sanados: 'SANADOS PARA SANAR',
   modelo: 'MODELO DE JESÚS',
-  move: 'MOVE YOUTH',
+  move: 'MOVE',
   tienda: 'TIENDA VISIÓN'
 };
 
 const SUBTITLES = {
   sanados: 'Un espacio de restauración, sanidad interior y libertad en Cristo.',
   modelo: 'Capacitación, discipulado y formación de líderes comprometidos.',
-  move: 'El movimiento juvenil de Iglesia Visión Jesús. Pasión, adoración y propósito.',
-  tienda: 'Libros, recursos y literatura para alimentar tu crecimiento espiritual.'
+  move: 'El movimiento de jóvenes de Iglesia Visión Jesús. Pasión, adoración y propósito.',
+  tienda: 'Ropa oficial, bebidas, literatura y recursos variados de la iglesia.'
 };
 
 export default function UnderConstruction({ pageName, onGoHome }) {
