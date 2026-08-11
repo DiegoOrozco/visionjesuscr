@@ -78,6 +78,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   // User management state
   const [adminUsers, setAdminUsers] = useState([]);
   const [newUser, setNewUser] = useState({ username: '', password: '', full_name: '', role: 'tickets' });
+  const [editingUser, setEditingUser] = useState(null);
   const [uploadingScheduleBg, setUploadingScheduleBg] = useState(false);
 
   const [localSchedules, setLocalSchedules] = useState([]);
@@ -504,6 +505,27 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
     } catch (err) {
       alert('Error de red al crear usuario.');
+    }
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingUser)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        setEditingUser(null);
+        fetchAdminUsers();
+      } else {
+        alert(data.message || 'Error al actualizar usuario.');
+      }
+    } catch (err) {
+      alert('Error de red al actualizar usuario.');
     }
   };
 
@@ -2357,6 +2379,76 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             </button>
           </form>
 
+          {/* EDIT EXISTING USER FORM */}
+          {editingUser && (
+            <form onSubmit={handleUpdateUser} style={{
+              backgroundColor: '#FFFBEB',
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1px solid #FCD34D',
+              marginBottom: '28px'
+            }}>
+              <h4 style={{ color: 'var(--accent-coffee)', margin: '0 0 16px 0' }}>Editar Usuario: {editingUser.username}</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    value={editingUser.full_name} 
+                    onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Usuario</label>
+                  <input 
+                    type="text" 
+                    value={editingUser.username} 
+                    onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })} 
+                    required 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Nueva Contraseña (dejar en blanco para mantener)</label>
+                  <input 
+                    type="text" 
+                    value={editingUser.password || ''} 
+                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })} 
+                    placeholder="Contraseña nueva" 
+                    style={{ padding: '8px 12px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Rol / Permisos</label>
+                  <select 
+                    value={editingUser.role} 
+                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CCC', width: '100%' }}
+                  >
+                    <option value="tickets">Solo Tickets (ver/aprobar/rechazar)</option>
+                    <option value="scanner">Solo Escáner (puerta)</option>
+                    <option value="editor_autenticas">Editor Auténticas</option>
+                    <option value="editor_sanados">Editor Sanados</option>
+                    <option value="editor_modelo">Editor Modelo</option>
+                    <option value="editor_move">Editor Move</option>
+                    <option value="editor_tienda">Editor Tienda</option>
+                    <option value="admin">Administrador Total</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                <button type="submit" className="btn-primary" style={{ padding: '10px 24px' }}>
+                  Guardar Cambios
+                </button>
+                <button type="button" onClick={() => setEditingUser(null)} className="btn-secondary" style={{ padding: '10px 24px' }}>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
+
           {/* EXISTING USERS LIST */}
           <h4 style={{ color: 'var(--accent-coffee)', marginBottom: '12px' }}>Usuarios Registrados</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -2390,22 +2482,39 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                       }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : u.role === 'scanner' ? 'Escáner' : u.role.replace('editor_', 'Editor ')}</span>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleDeleteUser(u.id, u.username)}
-                    style={{
-                      backgroundColor: 'var(--color-red-light)',
-                      color: 'var(--color-red)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 14px',
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                      fontSize: '0.85rem'
-                    }}
-                  >
-                    <Trash2 size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-                    Eliminar
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => setEditingUser({ id: u.id, username: u.username, full_name: u.full_name, role: u.role })}
+                      style={{
+                        backgroundColor: '#FEF3C7',
+                        color: '#D97706',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 14px',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteUser(u.id, u.username)}
+                      style={{
+                        backgroundColor: 'var(--color-red-light)',
+                        color: 'var(--color-red)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 14px',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      <Trash2 size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ))
             )}

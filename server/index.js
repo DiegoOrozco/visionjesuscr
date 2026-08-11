@@ -728,9 +728,9 @@ app.post('/api/admin/users', (req, res) => {
       return res.status(400).json({ success: false, message: 'Todos los campos son requeridos.' });
     }
 
-    const validRoles = ['admin', 'tickets', 'scanner'];
+    const validRoles = ['admin', 'tickets', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
     if (!validRoles.includes(role)) {
-      return res.status(400).json({ success: false, message: 'Rol no válido. Use: admin, tickets, scanner.' });
+      return res.status(400).json({ success: false, message: 'Rol no válido.' });
     }
 
     const existing = db.prepare('SELECT id FROM admin_users WHERE username = ?').get(username);
@@ -740,6 +740,38 @@ app.post('/api/admin/users', (req, res) => {
 
     db.prepare('INSERT INTO admin_users (username, password_hash, full_name, role) VALUES (?, ?, ?, ?)').run(username, password, full_name, role);
     res.json({ success: true, message: `Usuario "${username}" creado con rol "${role}".` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Update admin user
+app.put('/api/admin/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, password, full_name, role } = req.body;
+    if (!username || !full_name || !role) {
+      return res.status(400).json({ success: false, message: 'Usuario, Nombre Completo y Rol son requeridos.' });
+    }
+
+    const validRoles = ['admin', 'tickets', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: 'Rol no válido.' });
+    }
+
+    const existing = db.prepare('SELECT id FROM admin_users WHERE username = ? AND id != ?').get(username, id);
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'El nombre de usuario ya está tomado.' });
+    }
+
+    if (password && password.trim() !== '') {
+      db.prepare('UPDATE admin_users SET username = ?, password_hash = ?, full_name = ?, role = ? WHERE id = ?')
+        .run(username, password, full_name, role, id);
+    } else {
+      db.prepare('UPDATE admin_users SET username = ?, full_name = ?, role = ? WHERE id = ?')
+        .run(username, full_name, role, id);
+    }
+    res.json({ success: true, message: 'Usuario actualizado con éxito.' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
