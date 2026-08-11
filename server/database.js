@@ -159,16 +159,15 @@ function initDb() {
     }
   })();
 
-  // Seed default admin users
-  const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get();
-  if (adminCount.count === 0) {
-    db.prepare(`
-      INSERT INTO admin_users (username, password_hash, role, full_name)
-      VALUES 
-      ('admin', 'admin123', 'admin', 'Administrador Principal'),
-      ('scanner', 'puerta123', 'scanner', 'Personal de Puerta / Escáner')
-    `).run();
-  }
+  // Seed default admin and editor users
+  const insertUser = db.prepare('INSERT OR IGNORE INTO admin_users (username, password_hash, role, full_name) VALUES (?, ?, ?, ?)');
+  insertUser.run('admin', 'admin123', 'admin', 'Administrador Principal');
+  insertUser.run('scanner', 'puerta123', 'scanner', 'Personal de Puerta / Escáner');
+  insertUser.run('editor_move', 'move123', 'editor_move', 'Editor de Move');
+  insertUser.run('editor_sanados', 'sanados123', 'editor_sanados', 'Editor de Sanados');
+  insertUser.run('editor_modelo', 'modelo123', 'editor_modelo', 'Editor de Modelo');
+  insertUser.run('editor_tienda', 'tienda123', 'editor_tienda', 'Editor de Tienda');
+  insertUser.run('editor_autenticas', 'autenticas123', 'editor_autenticas', 'Editor de Auténticas');
 
   // Seed default homepage config values
   const configCount = db.prepare('SELECT COUNT(*) as count FROM homepage_config').get();
