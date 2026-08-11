@@ -10,10 +10,24 @@ export default function DoorScanner({ adminUser }) {
   const [manualHash, setManualHash] = useState('');
   const [cameraError, setCameraError] = useState('');
   const scannerRef = useRef(null);
+  const inactivityTimerRef = useRef(null);
+  const lastScannedRef = useRef('');
+  const lastScannedTimeRef = useRef(0);
+
+  const resetInactivityTimer = () => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    inactivityTimerRef.current = setTimeout(() => {
+      stopCameraScanner();
+      alert('Cámara apagada automáticamente por inactividad de 5 minutos.');
+    }, 5 * 60 * 1000);
+  };
 
   const startCameraScanner = async () => {
     setCameraError('');
     setScanResult(null);
+    resetInactivityTimer();
 
     try {
       if (!scannerRef.current) {
@@ -27,11 +41,14 @@ export default function DoorScanner({ adminUser }) {
           qrbox: { width: 250, height: 250 }
         },
         async (decodedText) => {
-          // Stop camera scanning temporarily upon detection
-          if (scannerRef.current && scannerRef.current.isScanning) {
-            await scannerRef.current.stop();
+          const now = Date.now();
+          if (lastScannedRef.current === decodedText && now - lastScannedTimeRef.current < 3000) {
+            return;
           }
-          setScanning(false);
+          lastScannedRef.current = decodedText;
+          lastScannedTimeRef.current = now;
+
+          resetInactivityTimer();
           processQrCode(decodedText);
         },
         (errorMessage) => {
@@ -47,6 +64,9 @@ export default function DoorScanner({ adminUser }) {
   };
 
   const stopCameraScanner = async () => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
     if (scannerRef.current && scannerRef.current.isScanning) {
       await scannerRef.current.stop();
     }
@@ -58,6 +78,9 @@ export default function DoorScanner({ adminUser }) {
     startCameraScanner();
 
     return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
       if (scannerRef.current && scannerRef.current.isScanning) {
         scannerRef.current.stop().catch(console.error);
       }
