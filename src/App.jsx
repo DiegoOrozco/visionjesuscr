@@ -9,6 +9,7 @@ import AdminDashboard from './components/AdminDashboard';
 import DoorScanner from './components/DoorScanner';
 import ChurchLanding from './components/ChurchLanding';
 import AutenticasPromo from './components/AutenticasPromo';
+import UnderConstruction from './components/UnderConstruction';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -17,6 +18,7 @@ export default function App() {
   const [zones, setZones] = useState([]);
   const [occupiedSeats, setOccupiedSeats] = useState([]);
   const [homepageConfig, setHomepageConfig] = useState({});
+  const [constructionPage, setConstructionPage] = useState('');
   
   // Modal & Reservation state
   const [selectedZone, setSelectedZone] = useState(null);
@@ -76,6 +78,9 @@ export default function App() {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
       setCurrentView('autenticas-promo');
+    } else if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) {
+      setConstructionPage(path.replace('/', ''));
+      setCurrentView('under-construction');
     } else {
       setCurrentView('landing');
     }
@@ -128,7 +133,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {currentView !== 'landing' && (
+      {!['landing', 'under-construction'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
           setCurrentView={setCurrentView} 
@@ -285,10 +290,21 @@ export default function App() {
           <DoorScanner adminUser={adminUser} />
         )}
 
+        {/* VIEW 7: UNDER CONSTRUCTION */}
+        {currentView === 'under-construction' && (
+          <UnderConstruction 
+            pageName={constructionPage} 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+            }} 
+          />
+        )}
+
       </main>
 
       {/* Footer */}
-      {currentView !== 'landing' && (
+      {!['landing', 'under-construction'].includes(currentView) && (
         <footer style={{
           backgroundColor: 'var(--bg-dark)',
           color: '#FAF8F5',
