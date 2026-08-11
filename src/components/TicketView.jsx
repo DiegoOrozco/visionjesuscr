@@ -141,6 +141,9 @@ export default function TicketView({ qrHash, onGoHome }) {
                     : t;
                 }).join(' • ')}
               </div>
+              <div style={{ fontSize: '0.78rem', color: '#6B7280', marginTop: '14px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
+                CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{ticket.qr_code_hash}</strong>
+              </div>
             </div>
           </div>
 
