@@ -315,7 +315,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      {!['landing', 'under-construction'].includes(currentView) && (
+      {!['landing', 'under-construction', 'scanner'].includes(currentView) && (
         <footer style={{
           backgroundColor: 'var(--bg-dark)',
           color: '#FAF8F5',

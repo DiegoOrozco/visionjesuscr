@@ -4,6 +4,7 @@ import { QrCode, ShieldCheck, Ticket, Home } from 'lucide-react';
 export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome }) {
   
   const handleNavLanding = () => {
+    if (adminUser && adminUser.role === 'scanner') return;
     window.history.pushState({}, '', '/');
     if (onGoHome) {
       onGoHome();
@@ -35,7 +36,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
         {/* Brand Logo Only (Removed text title & subtitle) */}
         <div 
           onClick={handleNavLanding} 
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', cursor: (adminUser && adminUser.role === 'scanner') ? 'default' : 'pointer' }}
         >
           <img 
             src="/logo.png" 
@@ -50,44 +51,52 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
         {/* Navigation Buttons */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           
-          <button 
-            className={`btn-secondary ${currentView === 'landing' ? 'active' : ''}`}
-            onClick={handleNavLanding}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
-          >
-            <Home size={18} />
-            <span>Inicio</span>
-          </button>
+          {(!adminUser || adminUser.role !== 'scanner') && (
+            <>
+              <button 
+                className={`btn-secondary ${currentView === 'landing' ? 'active' : ''}`}
+                onClick={handleNavLanding}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
+              >
+                <Home size={18} />
+                <span>Inicio</span>
+              </button>
 
-          <button 
-            className={`btn-secondary ${currentView === 'home' || currentView === 'attendees' || currentView === 'success' ? 'active' : ''}`}
-            onClick={handleNavTickets}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
-          >
-            <Ticket size={18} />
-            <span>Congreso Mujeres</span>
-          </button>
+              <button 
+                className={`btn-secondary ${currentView === 'home' || currentView === 'attendees' || currentView === 'success' ? 'active' : ''}`}
+                onClick={handleNavTickets}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
+              >
+                <Ticket size={18} />
+                <span>Congreso Mujeres</span>
+              </button>
+            </>
+          )}
 
           {/* Render admin links ONLY if logged in */}
           {adminUser && (
             <>
-              <button 
-                className={`btn-secondary ${currentView === 'scanner' ? 'active' : ''}`}
-                onClick={() => setCurrentView('scanner')}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px', borderColor: 'var(--accent-gold)' }}
-              >
-                <QrCode size={18} color="var(--accent-coffee)" />
-                <span>Escáner Puerta</span>
-              </button>
+              {(adminUser.role === 'admin' || adminUser.role === 'scanner') && (
+                <button 
+                  className={`btn-secondary ${currentView === 'scanner' ? 'active' : ''}`}
+                  onClick={() => setCurrentView('scanner')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px', borderColor: 'var(--accent-gold)' }}
+                >
+                  <QrCode size={18} color="var(--accent-coffee)" />
+                  <span>Escáner Puerta</span>
+                </button>
+              )}
 
-              <button 
-                className="btn-primary"
-                onClick={() => setCurrentView('admin')}
-                style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-              >
-                <ShieldCheck size={18} />
-                <span>Panel Admin ({adminUser.username})</span>
-              </button>
+              {adminUser.role !== 'scanner' && (
+                <button 
+                  className="btn-primary"
+                  onClick={() => setCurrentView('admin')}
+                  style={{ fontSize: '0.9rem', padding: '8px 16px' }}
+                >
+                  <ShieldCheck size={18} />
+                  <span>Panel Admin ({adminUser.username})</span>
+                </button>
+              )}
 
               <button 
                 onClick={onLogout}
