@@ -1,0 +1,8 @@
+Sección	Usuario	Contraseña	Rol / Permiso
+Administrador Total	admin	admin123	Control total del sitio
+Escáner de Puerta	scanner	puerta123	Solo escaneo de códigos QR
+Sección Move	editor_move	move123	Solo edición de /move
+Sección Sanados	editor_sanados	sanados123	Solo edición de /sanados
+Sección Modelo	editor_modelo	modelo123	Solo edición de /modelo
+Sección Tienda	editor_tienda	tienda123	Solo edición de /tienda
+Congreso Auténticas	editor_autenticas	autenticas123	Solo edición de /autenticas

@@ -72,7 +72,10 @@ export default function App() {
         setTicketQrHash(hash);
         setCurrentView('ticket-view');
       }
-    } else if (path === '/admin' || path === '/portal-admin') {
+    } else if (path === '/admin' || path === '/login' || path === '/portal-admin') {
+      if (path === '/admin') {
+        window.history.replaceState({}, '', '/login');
+      }
       const savedUser = localStorage.getItem('admin_user');
       const userObj = savedUser ? JSON.parse(savedUser) : null;
       if (userObj && userObj.role === 'scanner') {
@@ -95,6 +98,7 @@ export default function App() {
   const handleAdminLogin = (user) => {
     setAdminUser(user);
     localStorage.setItem('admin_user', JSON.stringify(user));
+    window.history.pushState({}, '', '/login');
     if (user.role === 'scanner') {
       setCurrentView('scanner');
     } else {

@@ -90,7 +90,10 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
               {adminUser.role !== 'scanner' && (
                 <button 
                   className="btn-primary"
-                  onClick={() => setCurrentView('admin')}
+                  onClick={() => {
+                    window.history.pushState({}, '', '/login');
+                    setCurrentView('admin');
+                  }}
                   style={{ fontSize: '0.9rem', padding: '8px 16px' }}
                 >
                   <ShieldCheck size={18} />

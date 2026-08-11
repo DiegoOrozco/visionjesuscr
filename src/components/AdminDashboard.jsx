@@ -2381,13 +2381,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     <div style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>{u.full_name}</div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                       @{u.username} · Rol: <span style={{ 
-                        backgroundColor: u.role === 'admin' ? '#F59E0B' : u.role === 'tickets' ? '#3B82F6' : '#10B981',
+                        backgroundColor: u.role === 'admin' ? '#F59E0B' : u.role === 'tickets' ? '#3B82F6' : u.role.startsWith('editor_') ? '#8B5CF6' : '#10B981',
                         color: '#FFF',
                         padding: '2px 8px',
                         borderRadius: '6px',
                         fontSize: '0.75rem',
                         fontWeight: 700
-                      }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : 'Scanner'}</span>
+                      }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : u.role === 'scanner' ? 'Escáner' : u.role.replace('editor_', 'Editor ')}</span>
                     </div>
                   </div>
                   <button 
