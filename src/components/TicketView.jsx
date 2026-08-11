@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { Calendar, CheckCircle, Clock, MapPin, MessageCircle, ShieldAlert, Sparkles, User, Users } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, MapPin, MessageCircle, ShieldAlert, Sparkles, User, Users, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -9,6 +10,28 @@ export default function TicketView({ qrHash, onGoHome }) {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const canvasRef = useRef(null);
+  const ticketCardRef = useRef(null);
+
+  const handleDownloadTicketImage = () => {
+    if (ticketCardRef.current) {
+      html2canvas(ticketCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#FFFFFF',
+        scale: 3 // Higher resolution
+      }).then(canvas => {
+        const imageUri = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const firstTicket = ticket.attendees[0]?.assigned_ticket_code || 'Boleto';
+        link.download = `Boleto-${firstTicket.replace(/\s+/g, '-')}.png`;
+        link.href = imageUri;
+        link.click();
+      }).catch(err => {
+        console.error('Error generating ticket image:', err);
+        alert('Hubo un error al generar la imagen del boleto.');
+      });
+    }
+  };
 
   useEffect(() => {
     fetch(`${API_URL}/api/tickets/${qrHash}`)
@@ -90,30 +113,57 @@ export default function TicketView({ qrHash, onGoHome }) {
 
         {/* QR Box */}
         <div style={{ textAlign: 'center', margin: '20px 0' }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            border: '2px solid var(--accent-gold)',
-            borderRadius: '20px',
-            padding: '20px',
-            display: 'inline-block',
-            boxShadow: 'var(--shadow-md)'
-          }}>
-            <canvas ref={canvasRef} />
-             <div style style={{ marginTop: '12px' }}>
-               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                 {ticket.zone_name}
-               </div>
-               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
-                 {ticket.attendees.map(a => {
-                   const t = a.assigned_ticket_code || '';
-                   return t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
-                     ? t.split(' - ').slice(1).join(' - ') 
-                     : t;
-                 }).join(' • ')}
-               </div>
-             </div>
-           </div>
-         </div>
+          <div 
+            ref={ticketCardRef}
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '4px solid #C5A880',
+              borderRadius: '24px',
+              padding: '30px 24px',
+              display: 'inline-block',
+              boxShadow: 'var(--shadow-md)',
+              width: '100%',
+              maxWidth: '360px',
+              textAlign: 'center',
+              boxSizing: 'border-box'
+            }}
+          >
+            <canvas ref={canvasRef} style={{ display: 'block', margin: '0 auto' }} />
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ fontSize: '0.9rem', color: '#8C7456', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>
+                {ticket.zone_name}
+              </div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2C1A0E', lineHeight: 1.2 }}>
+                {ticket.attendees.map(a => {
+                  const t = a.assigned_ticket_code || '';
+                  return t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+                    ? t.split(' - ').slice(1).join(' - ') 
+                    : t;
+                }).join(' • ')}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+            <button
+              onClick={handleDownloadTicketImage}
+              className="btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                fontSize: '0.9rem',
+                backgroundColor: 'var(--accent-coffee)',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <Download size={18} />
+              <span>Guardar Boleto en Galería (Imagen)</span>
+            </button>
+          </div>
+        </div>
  
          {/* Details Grid */}
          <div style={{

@@ -54,6 +54,9 @@ export default function DoorScanner({ adminUser }) {
   };
 
   useEffect(() => {
+    // Start camera scanning automatically on load
+    startCameraScanner();
+
     return () => {
       if (scannerRef.current && scannerRef.current.isScanning) {
         scannerRef.current.stop().catch(console.error);

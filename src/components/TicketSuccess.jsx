@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { CheckCircle, Copy, Download, ExternalLink, MessageCircle, Share2, Sparkles, Ticket } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import html2canvas from 'html2canvas';
 
 export default function TicketSuccess({ reservation, onReset }) {
   const canvasRef = useRef(null);
+  const ticketCardRef = useRef(null);
   const [copied, setCopied] = useState(false);
 
   const ticketUrl = `${window.location.origin}/ticket/${reservation.qr_code_hash}`;
@@ -73,12 +75,23 @@ export default function TicketSuccess({ reservation, onReset }) {
   };
 
   const handleDownloadQR = () => {
-    if (canvasRef.current) {
-      const imageUri = canvasRef.current.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `QR-Boleto-${reservation.assigned_tickets.join('-')}.png`;
-      link.href = imageUri;
-      link.click();
+    if (ticketCardRef.current) {
+      html2canvas(ticketCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#FFFFFF',
+        scale: 3 // Higher resolution
+      }).then(canvas => {
+        const imageUri = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const firstTicket = reservation.assigned_tickets[0] || 'Boleto';
+        link.download = `Boleto-${firstTicket.replace(/\s+/g, '-')}.png`;
+        link.href = imageUri;
+        link.click();
+      }).catch(err => {
+        console.error('Error generating ticket image:', err);
+        alert('Hubo un error al generar la imagen del boleto.');
+      });
     }
   };
 
@@ -113,26 +126,33 @@ export default function TicketSuccess({ reservation, onReset }) {
         </p>
 
         {/* QR Box */}
-        <div style={{
-          backgroundColor: '#FFFFFF',
-          border: '2px dashed var(--accent-gold)',
-          borderRadius: '20px',
-          padding: '24px',
-          display: 'inline-block',
-          boxShadow: 'var(--shadow-md)',
-          marginBottom: '24px'
-        }}>
-          <canvas ref={canvasRef} style={{ borderRadius: '12px' }} />
-          
-          <div style={{ marginTop: '14px', borderTop: '1px solid #EEE', paddingTop: '12px' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              BOLETOS ASIGNADOS
-            </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
-              {reservation.assigned_tickets.map(t => 
-                t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
-                  ? t.split(' - ').slice(1).join(' - ') 
-                  : t
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div 
+            ref={ticketCardRef}
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '4px solid #C5A880',
+              borderRadius: '24px',
+              padding: '30px 24px',
+              display: 'inline-block',
+              boxShadow: 'var(--shadow-md)',
+              width: '100%',
+              maxWidth: '360px',
+              textAlign: 'center',
+              boxSizing: 'border-box'
+            }}
+          >
+            <canvas ref={canvasRef} style={{ display: 'block', margin: '0 auto', borderRadius: '12px' }} />
+            
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ fontSize: '0.9rem', color: '#8C7456', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>
+                {reservation.zone_name}
+              </div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2C1A0E', lineHeight: 1.2 }}>
+                {reservation.assigned_tickets.map(t => 
+                  t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+                    ? t.split(' - ').slice(1).join(' - ') 
+                    : t
               ).join(' • ')}
             </div>
             <div style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 600, marginTop: '2px' }}>
@@ -140,6 +160,7 @@ export default function TicketSuccess({ reservation, onReset }) {
             </div>
           </div>
         </div>
+      </div>
 
         {/* Action Buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>

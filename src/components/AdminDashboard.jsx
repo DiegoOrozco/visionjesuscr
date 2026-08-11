@@ -2588,6 +2588,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               />
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <a
+                  href={`${API_URL}${selectedReceipt.comprobante_url}`}
+                  download={`Comprobante-${selectedReceipt.purchaser_name.replace(/\s+/g, '-')}.jpg`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary"
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px', flex: 1, textDecoration: 'none', textAlign: 'center', cursor: 'pointer' }}
+                >
+                  <Download size={18} /> Descargar Comprobante Original
+                </a>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
                 <button
                   onClick={() => handleUpdateStatus(selectedReceipt.id, 'aprobado')}
                   className="btn-success"
