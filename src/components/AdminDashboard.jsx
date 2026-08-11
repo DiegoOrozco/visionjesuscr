@@ -38,6 +38,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     contact_phone_1: '',
     contact_phone_2: '',
     autenticas_hero_bg: '',
+    autenticas_title: '',
+    autenticas_subtitle: '',
     autenticas_description: '',
     autenticas_date_info: '',
     autenticas_place_info: '',
@@ -159,6 +161,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         contact_phone_1: homepageConfig.contact_phone_1 || '',
         contact_phone_2: homepageConfig.contact_phone_2 || '',
         autenticas_hero_bg: homepageConfig.autenticas_hero_bg || '',
+        autenticas_title: homepageConfig.autenticas_title || '',
+        autenticas_subtitle: homepageConfig.autenticas_subtitle || '',
         autenticas_description: homepageConfig.autenticas_description || '',
         autenticas_date_info: homepageConfig.autenticas_date_info || '',
         autenticas_place_info: homepageConfig.autenticas_place_info || '',
@@ -1596,6 +1600,32 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           <form onSubmit={handleSaveAutenticasSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
               
+              {/* TITLE */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título del Banner (Ej: AUTÉNTICAS)</label>
+                <input 
+                  type="text" 
+                  name="autenticas_title" 
+                  value={configFields.autenticas_title} 
+                  onChange={handleConfigChange} 
+                  required 
+                  placeholder="Ej: AUTÉNTICAS"
+                />
+              </div>
+
+              {/* SUBTITLE */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo del Banner (Ej: CONGRESO DE MUJERES)</label>
+                <input 
+                  type="text" 
+                  name="autenticas_subtitle" 
+                  value={configFields.autenticas_subtitle} 
+                  onChange={handleConfigChange} 
+                  required 
+                  placeholder="Ej: CONGRESO DE MUJERES"
+                />
+              </div>
+
               {/* DESCRIPTION */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Descripción del Congreso</label>

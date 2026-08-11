@@ -74,21 +74,28 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
         }} />
 
         <div style={{ zIndex: 2, position: 'relative' }}>
-          <img 
-            src="/logo_oficial_transparente.png" 
-            alt="Logo Oficial Transparente" 
-            style={{ maxHeight: '110px', objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }} 
-          />
-          <h2 style={{
+          <h1 style={{
             color: '#FFFFFF',
-            fontSize: '1.4rem',
+            fontSize: '4.5rem',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '2px',
+            fontFamily: "'Outfit', 'Inter', sans-serif",
+            textShadow: '0 4px 12px rgba(0,0,0,0.6)',
+            margin: 0
+          }}>
+            {config.autenticas_title || 'AUTÉNTICAS'}
+          </h1>
+          <h2 style={{
+            color: '#FAF5EF',
+            fontSize: '1.6rem',
             fontWeight: 800,
             textTransform: 'uppercase',
-            letterSpacing: '3px',
-            marginTop: '8px',
+            letterSpacing: '4px',
+            marginTop: '10px',
             textShadow: '0 2px 8px rgba(0,0,0,0.6)'
           }}>
-            Congreso de Mujeres
+            {config.autenticas_subtitle || 'CONGRESO DE MUJERES'}
           </h2>
         </div>
       </div>

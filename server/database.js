@@ -211,6 +211,8 @@ function initDb() {
 
   // Ensure default Autenticas config values exist
   insertConfig.run('autenticas_hero_bg', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1600');
+  insertConfig.run('autenticas_title', 'AUTÉNTICAS');
+  insertConfig.run('autenticas_subtitle', 'CONGRESO DE MUJERES');
   insertConfig.run('autenticas_description', 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada una de sus cicatrices. Un encuentro para ser transformadas por el amor y la presencia de Dios.');
   insertConfig.run('autenticas_date_info', 'Sábado 15 de Noviembre - 5:00 PM');
   insertConfig.run('autenticas_place_info', 'Auditorio Principal - Desamparados');
