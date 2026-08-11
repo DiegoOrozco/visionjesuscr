@@ -9,6 +9,15 @@ const db = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+function generateShortCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid ambiguous chars like O, 0, I, 1
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 app.use(cors());
 app.use(express.json());
 
@@ -247,7 +256,17 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
 
     const comprobanteUrl = req.file ? `/uploads/comprobantes/${req.file.filename}` : null;
     const reservationId = uuidv4();
-    const qrCodeHash = uuidv4();
+    
+    let qrCodeHash;
+    let isUnique = false;
+    while (!isUnique) {
+      qrCodeHash = generateShortCode();
+      const existing = db.prepare('SELECT id FROM reservations WHERE qr_code_hash = ?').get(qrCodeHash);
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+
     const totalAmount = quantity * zone.price;
 
     const reservationTx = db.transaction(() => {
