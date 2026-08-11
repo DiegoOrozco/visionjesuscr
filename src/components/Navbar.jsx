@@ -38,8 +38,8 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
           style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
           <img 
-            src="/logo-anual.png" 
-            alt="Logo Iglesia Visión Jesús" 
+            src="/logo.png" 
+            alt="Logo Mujeres Auténticas" 
             style={{
               height: '62px',
               objectFit: 'contain'

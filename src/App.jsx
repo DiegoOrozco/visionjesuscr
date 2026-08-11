@@ -127,19 +127,21 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar 
-        currentView={currentView} 
-        setCurrentView={setCurrentView} 
-        adminUser={adminUser}
-        onLogout={handleAdminLogout}
-        onGoHome={() => {
-          setSelectedZone(null);
-          setAttendeeQuantity(1);
-          setChosenSeatCodes([]);
-          window.history.pushState({}, '', '/');
-          setCurrentView('landing');
-        }}
-      />
+      {currentView !== 'landing' && (
+        <Navbar 
+          currentView={currentView} 
+          setCurrentView={setCurrentView} 
+          adminUser={adminUser}
+          onLogout={handleAdminLogout}
+          onGoHome={() => {
+            setSelectedZone(null);
+            setAttendeeQuantity(1);
+            setChosenSeatCodes([]);
+            window.history.pushState({}, '', '/');
+            setCurrentView('landing');
+          }}
+        />
+      )}
 
       <main style={{ flex: 1, paddingBottom: currentView === 'landing' ? '0px' : '60px' }}>
         
