@@ -14,7 +14,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
 
   const handleNavTickets = () => {
     window.history.pushState({}, '', '/autenticas');
-    setCurrentView('home');
+    setCurrentView('autenticas-promo');
   };
 
   return (

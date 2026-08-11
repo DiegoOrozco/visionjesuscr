@@ -75,7 +75,7 @@ export default function App() {
     } else if (path === '/escanear') {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
-      setCurrentView('home');
+      setCurrentView('autenticas-promo');
     } else {
       setCurrentView('landing');
     }
@@ -123,7 +123,7 @@ export default function App() {
 
   const handleGoToTickets = () => {
     window.history.pushState({}, '', '/autenticas');
-    setCurrentView('home');
+    setCurrentView('autenticas-promo');
   };
 
   return (
@@ -154,18 +154,22 @@ export default function App() {
           />
         )}
 
+        {/* VIEW 1A: AUTÉNTICAS PROMO PAGE */}
+        {currentView === 'autenticas-promo' && (
+          <div className="container" style={{ paddingTop: '20px' }}>
+            <AutenticasPromo 
+              config={homepageConfig} 
+              onScrollToMap={() => {
+                setCurrentView('home');
+              }}
+            />
+          </div>
+        )}
+
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
         {currentView === 'home' && (
           <div className="container" style={{ paddingTop: '20px' }}>
             
-            {/* Promo Intro Section */}
-            <AutenticasPromo 
-              config={homepageConfig} 
-              onScrollToMap={() => {
-                document.getElementById('map-selection-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            />
-
             {/* Event Hero Banner with Official Large Annual Logo */}
             <div id="map-selection-section" style={{
               backgroundColor: '#FFFFFF',
