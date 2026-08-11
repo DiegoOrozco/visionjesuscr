@@ -542,12 +542,21 @@ app.post('/api/scan', (req, res) => {
       });
     }
 
-    const reservation = db.prepare(`
+    let reservation = db.prepare(`
       SELECT r.*, z.name as zone_name
       FROM reservations r
       JOIN zones z ON r.zone_id = z.id
       WHERE r.qr_code_hash = ?
     `).get(qr_hash);
+
+    if (!reservation) {
+      reservation = db.prepare(`
+        SELECT r.*, z.name as zone_name
+        FROM reservations r
+        JOIN zones z ON r.zone_id = z.id
+        WHERE r.qr_code_hash LIKE ?
+      `).get(`${qr_hash}%`);
+    }
 
     if (!reservation) {
       return res.status(404).json({

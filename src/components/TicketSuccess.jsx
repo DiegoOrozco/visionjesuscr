@@ -159,7 +159,7 @@ export default function TicketSuccess({ reservation, onReset }) {
               {reservation.zone_name} ({reservation.quantity} {reservation.quantity === 1 ? 'Persona' : 'Personas'})
             </div>
             <div style={{ fontSize: '0.78rem', color: '#6B7280', marginTop: '14px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
-              CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{reservation.qr_code_hash}</strong>
+              CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{reservation.qr_code_hash.substring(0, 6).toUpperCase()}</strong>
             </div>
           </div>
         </div>
