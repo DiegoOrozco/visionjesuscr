@@ -217,6 +217,23 @@ function initDb() {
   insertConfig.run('valores_title', 'NUESTROS VALORES');
   insertConfig.run('valores_text', 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.');
 
+  // Ensure default Sanados, Modelo, Move, and Tienda exist
+  insertConfig.run('sanados_hero_bg', 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1600');
+  insertConfig.run('sanados_title', 'SANADOS PARA SANAR');
+  insertConfig.run('sanados_subtitle', 'Un espacio de restauración, sanidad interior y libertad en Cristo.');
+
+  insertConfig.run('modelo_hero_bg', 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1600');
+  insertConfig.run('modelo_title', 'MODELO DE JESÚS');
+  insertConfig.run('modelo_subtitle', 'Capacitación, discipulado y formación de líderes comprometidos.');
+
+  insertConfig.run('move_hero_bg', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1600');
+  insertConfig.run('move_title', 'MOVE');
+  insertConfig.run('move_subtitle', 'El movimiento de jóvenes de Iglesia Visión Jesús. Pasión, adoración y propósito.');
+
+  insertConfig.run('tienda_hero_bg', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1600');
+  insertConfig.run('tienda_title', 'TIENDA VISIÓN');
+  insertConfig.run('tienda_subtitle', 'Ropa oficial, bebidas, literatura y recursos variados de la iglesia.');
+
   // Ensure default Autenticas config values exist
   insertConfig.run('autenticas_hero_bg', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1600');
   insertConfig.run('autenticas_title', 'AUTÉNTICAS');

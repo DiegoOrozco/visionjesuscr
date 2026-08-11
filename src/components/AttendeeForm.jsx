@@ -69,7 +69,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
       age: '',
       phone: '',
       residence: '',
-      civil_status: 'Soltera',
+      civil_status: '',
       is_vision_jesus: 'Sí',
       church_network: 'Red FuXión',
       invited_by: '',
@@ -405,40 +405,6 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                       />
                     </div>
 
-                    {/* 5. Estado Civil */}
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '8px' }}>
-                        Estado Civil *
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                        {['Soltera', 'Casada', 'Divorciada', 'Viuda', 'Unión Libre', 'Separada'].map(st => (
-                          <label key={st} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: att.civil_status === st ? 'var(--accent-coffee)' : '#FFFFFF',
-                            color: att.civil_status === st ? '#FFFFFF' : 'var(--accent-coffee)',
-                            border: '1px solid var(--accent-beige-border)',
-                            padding: '10px 14px',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontSize: '0.88rem',
-                            fontWeight: 600
-                          }}>
-                            <input 
-                              type="radio"
-                              name={`civil_status_${index}`}
-                              value={st}
-                              checked={att.civil_status === st}
-                              onChange={(e) => handleAttendeeChange(index, 'civil_status', e.target.value)}
-                              style={{ display: 'none' }}
-                            />
-                            <span>{att.civil_status === st ? '●' : '○'} {st}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
                     {/* 6. ¿Te congregas en Visión Jesús? */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '8px' }}>
@@ -477,7 +443,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                         ¿A cuál Red asistes? *
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                        {['Red FuXión', 'Red Move', 'Obra Social', 'Modelo', 'Ninguna'].map(net => (
+                        {['Red FuXión', 'Red Move', 'Red Diamante', 'Red de emprendedores', 'Ninguna'].map(net => (
                           <label key={net} style={{
                             display: 'flex',
                             alignItems: 'center',

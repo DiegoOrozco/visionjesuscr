@@ -22,10 +22,20 @@ const SUBTITLES = {
   tienda: 'Ropa oficial, bebidas, literatura y recursos variados de la iglesia.'
 };
 
-export default function UnderConstruction({ pageName, onGoHome }) {
-  const bg = BACKGROUNDS[pageName] || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
-  const title = TITLES[pageName] || pageName.toUpperCase();
-  const subtitle = SUBTITLES[pageName] || 'Estamos construyendo algo grandioso para ti. Vuelve pronto.';
+export default function UnderConstruction({ pageName, config = {}, onGoHome }) {
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
+  const heroBgKey = `${pageName}_hero_bg`;
+  const titleKey = `${pageName}_title`;
+  const subtitleKey = `${pageName}_subtitle`;
+
+  const rawBg = config[heroBgKey] || BACKGROUNDS[pageName];
+  const bg = rawBg 
+    ? (rawBg.startsWith('http') ? rawBg : `${API_URL}${rawBg}`)
+    : 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+
+  const title = config[titleKey] || TITLES[pageName] || pageName.toUpperCase();
+  const subtitle = config[subtitleKey] || SUBTITLES[pageName] || 'Estamos construyendo algo grandioso para ti. Vuelve pronto.';
 
   return (
     <div style={{

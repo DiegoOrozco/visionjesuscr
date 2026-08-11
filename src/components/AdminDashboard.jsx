@@ -9,7 +9,17 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  const [activeTab, setActiveTab] = useState('reservations'); // 'reservations' | 'church_web' | 'pricing' | 'users'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (adminUser) {
+      if (adminUser.role === 'editor_autenticas') return 'autenticas';
+      if (adminUser.role === 'editor_sanados') return 'sanados';
+      if (adminUser.role === 'editor_modelo') return 'modelo';
+      if (adminUser.role === 'editor_move') return 'move';
+      if (adminUser.role === 'editor_tienda') return 'tienda';
+      if (adminUser.role === 'scanner') return 'escanear';
+    }
+    return 'reservations';
+  });
 
   // Pricing & Presale Editing State
   const [pricingFields, setPricingFields] = useState({
@@ -50,7 +60,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     mision_title: '',
     mision_text: '',
     valores_title: '',
-    valores_text: ''
+    valores_text: '',
+    sanados_hero_bg: '',
+    sanados_title: '',
+    sanados_subtitle: '',
+    modelo_hero_bg: '',
+    modelo_title: '',
+    modelo_subtitle: '',
+    move_hero_bg: '',
+    move_title: '',
+    move_subtitle: '',
+    tienda_hero_bg: '',
+    tienda_title: '',
+    tienda_subtitle: ''
   });
 
   // User management state
@@ -66,10 +88,12 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [uploadingAutenticasHero, setUploadingAutenticasHero] = useState(false);
   const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
   const [uploadingNewsImage, setUploadingNewsImage] = useState(null);
+  const [uploadingBgName, setUploadingBgName] = useState('');
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [autenticasSuccessMsg, setAutenticasSuccessMsg] = useState('');
+  const [constructionSuccessMsg, setConstructionSuccessMsg] = useState('');
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -179,7 +203,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         mision_title: homepageConfig.mision_title || '',
         mision_text: homepageConfig.mision_text || '',
         valores_title: homepageConfig.valores_title || '',
-        valores_text: homepageConfig.valores_text || ''
+        valores_text: homepageConfig.valores_text || '',
+        sanados_hero_bg: homepageConfig.sanados_hero_bg || '',
+        sanados_title: homepageConfig.sanados_title || '',
+        sanados_subtitle: homepageConfig.sanados_subtitle || '',
+        modelo_hero_bg: homepageConfig.modelo_hero_bg || '',
+        modelo_title: homepageConfig.modelo_title || '',
+        modelo_subtitle: homepageConfig.modelo_subtitle || '',
+        move_hero_bg: homepageConfig.move_hero_bg || '',
+        move_title: homepageConfig.move_title || '',
+        move_subtitle: homepageConfig.move_subtitle || '',
+        tienda_hero_bg: homepageConfig.tienda_hero_bg || '',
+        tienda_title: homepageConfig.tienda_title || '',
+        tienda_subtitle: homepageConfig.tienda_subtitle || ''
       });
 
       setPricingFields({
@@ -362,6 +398,31 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setLocalAutenticasGallery(prev => prev.filter(img => img !== imageUrl));
   };
 
+  const handleSectionBgUpload = async (sectionName, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingBgName(sectionName);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfigFields(prev => ({ ...prev, [`${sectionName}_hero_bg`]: data.url }));
+        alert(`¡Imagen de fondo de ${sectionName} cargada con éxito!`);
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingBgName('');
+    }
+  };
+
   const handleSaveAutenticasSubmit = async (e) => {
     e.preventDefault();
     setSaveLoading(true);
@@ -381,6 +442,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       if (data.success) {
         setAutenticasSuccessMsg('¡Configuración del Congreso Auténticas guardada con éxito!');
         if (onSaveConfig) onSaveConfig();
+      } else {
+        alert(data.message || 'Error al guardar la configuración.');
+      }
+    } catch (err) {
+      alert('Error de red al guardar la configuración.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+  const handleSaveConstructionSubmit = async (e) => {
+    e.preventDefault();
+    setSaveLoading(true);
+    setConstructionSuccessMsg('');
+    try {
+      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: configFields })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConstructionSuccessMsg('¡Cambios guardados con éxito!');
+        if (onSaveConfig) onSaveConfig(configFields);
       } else {
         alert(data.message || 'Error al guardar la configuración.');
       }
@@ -697,25 +781,27 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         gap: '20px',
         flexWrap: 'wrap'
       }}>
-        <button
-          onClick={() => setActiveTab('reservations')}
-          style={{
-            background: 'none',
-            border: 'none',
-            borderBottom: activeTab === 'reservations' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-            color: activeTab === 'reservations' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-            fontWeight: 800,
-            fontSize: '1rem',
-            padding: '10px 16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <LayoutGrid size={18} />
-          Reservaciones Congreso
-        </button>
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('reservations')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'reservations' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'reservations' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <LayoutGrid size={18} />
+            Reservaciones Congreso
+          </button>
+        )}
 
         {/* Only admin role can edit website */}
         {adminUser.role === 'admin' && (
@@ -763,8 +849,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           </button>
         )}
 
-        {/* Only admin role can edit Autenticas config */}
-        {adminUser.role === 'admin' && (
+        {/* Admin or Editor Autenticas */}
+        {(adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
           <button
             onClick={() => setActiveTab('autenticas')}
             style={{
@@ -783,6 +869,98 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Heart size={18} />
             Congreso Auténticas
+          </button>
+        )}
+
+        {/* Admin or Editor Sanados */}
+        {(adminUser.role === 'admin' || adminUser.role === 'editor_sanados') && (
+          <button
+            onClick={() => setActiveTab('sanados')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'sanados' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'sanados' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Sección Sanados
+          </button>
+        )}
+
+        {/* Admin or Editor Modelo */}
+        {(adminUser.role === 'admin' || adminUser.role === 'editor_modelo') && (
+          <button
+            onClick={() => setActiveTab('modelo')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'modelo' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'modelo' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Sección Modelo
+          </button>
+        )}
+
+        {/* Admin or Editor Move */}
+        {(adminUser.role === 'admin' || adminUser.role === 'editor_move') && (
+          <button
+            onClick={() => setActiveTab('move')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'move' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'move' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Sección Move
+          </button>
+        )}
+
+        {/* Admin or Editor Tienda */}
+        {(adminUser.role === 'admin' || adminUser.role === 'editor_tienda') && (
+          <button
+            onClick={() => setActiveTab('tienda')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'tienda' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'tienda' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Sección Tienda
           </button>
         )}
 
@@ -1625,8 +1803,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         </div>
       )}
 
-      {/* TAB: AUTÉNTICAS CONGRESO CONFIGURATION (admin only) */}
-      {activeTab === 'autenticas' && adminUser.role === 'admin' && (
+      {/* TAB: AUTÉNTICAS CONGRESO CONFIGURATION */}
+      {activeTab === 'autenticas' && (adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
           <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
             Configuración de la Sección Auténticas
@@ -1830,7 +2008,173 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           </form>
         </div>
       )}
+      {/* TAB: SANADOS CONFIGURATION */}
+      {activeTab === 'sanados' && (adminUser.role === 'admin' || adminUser.role === 'editor_sanados') && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de la Sección Sanados
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Personaliza el título principal, el subtítulo descriptivo y la imagen de fondo para la sección de Sanados.
+          </p>
+          {constructionSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {constructionSuccessMsg}
+            </div>
+          )}
+          <form onSubmit={handleSaveConstructionSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal</label>
+                <input type="text" name="sanados_title" value={configFields.sanados_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Descripción</label>
+                <input type="text" name="sanados_subtitle" value={configFields.sanados_subtitle} onChange={handleConfigChange} required />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" name="sanados_hero_bg" value={configFields.sanados_hero_bg} onChange={handleConfigChange} required style={{ flex: 1 }} />
+                  <label style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', padding: '12px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem' }}>
+                    {uploadingBgName === 'sanados' ? 'Subiendo...' : 'Subir Fondo'}
+                    <input type="file" accept="image/*" onChange={(e) => handleSectionBgUpload('sanados', e)} style={{ display: 'none' }} disabled={uploadingBgName === 'sanados'} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {saveLoading ? 'Guardando...' : 'Guardar Configuración Sanados'}
+            </button>
+          </form>
+        </div>
+      )}
 
+      {/* TAB: MODELO CONFIGURATION */}
+      {activeTab === 'modelo' && (adminUser.role === 'admin' || adminUser.role === 'editor_modelo') && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de la Sección Modelo
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Personaliza el título principal, el subtítulo descriptivo y la imagen de fondo para la sección de Modelo.
+          </p>
+          {constructionSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {constructionSuccessMsg}
+            </div>
+          )}
+          <form onSubmit={handleSaveConstructionSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal</label>
+                <input type="text" name="modelo_title" value={configFields.modelo_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Descripción</label>
+                <input type="text" name="modelo_subtitle" value={configFields.modelo_subtitle} onChange={handleConfigChange} required />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" name="modelo_hero_bg" value={configFields.modelo_hero_bg} onChange={handleConfigChange} required style={{ flex: 1 }} />
+                  <label style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', padding: '12px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem' }}>
+                    {uploadingBgName === 'modelo' ? 'Subiendo...' : 'Subir Fondo'}
+                    <input type="file" accept="image/*" onChange={(e) => handleSectionBgUpload('modelo', e)} style={{ display: 'none' }} disabled={uploadingBgName === 'modelo'} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {saveLoading ? 'Guardando...' : 'Guardar Configuración Modelo'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB: MOVE CONFIGURATION */}
+      {activeTab === 'move' && (adminUser.role === 'admin' || adminUser.role === 'editor_move') && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de la Sección Move
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Personaliza el título principal, el subtítulo descriptivo y la imagen de fondo para la sección de Move.
+          </p>
+          {constructionSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {constructionSuccessMsg}
+            </div>
+          )}
+          <form onSubmit={handleSaveConstructionSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal</label>
+                <input type="text" name="move_title" value={configFields.move_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Descripción</label>
+                <input type="text" name="move_subtitle" value={configFields.move_subtitle} onChange={handleConfigChange} required />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" name="move_hero_bg" value={configFields.move_hero_bg} onChange={handleConfigChange} required style={{ flex: 1 }} />
+                  <label style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', padding: '12px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem' }}>
+                    {uploadingBgName === 'move' ? 'Subiendo...' : 'Subir Fondo'}
+                    <input type="file" accept="image/*" onChange={(e) => handleSectionBgUpload('move', e)} style={{ display: 'none' }} disabled={uploadingBgName === 'move'} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {saveLoading ? 'Guardando...' : 'Guardar Configuración Move'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB: TIENDA CONFIGURATION */}
+      {activeTab === 'tienda' && (adminUser.role === 'admin' || adminUser.role === 'editor_tienda') && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de la Sección Tienda
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Personaliza el título principal, el subtítulo descriptivo y la imagen de fondo para la sección de Tienda.
+          </p>
+          {constructionSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {constructionSuccessMsg}
+            </div>
+          )}
+          <form onSubmit={handleSaveConstructionSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal</label>
+                <input type="text" name="tienda_title" value={configFields.tienda_title} onChange={handleConfigChange} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Descripción</label>
+                <input type="text" name="tienda_subtitle" value={configFields.tienda_subtitle} onChange={handleConfigChange} required />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" name="tienda_hero_bg" value={configFields.tienda_hero_bg} onChange={handleConfigChange} required style={{ flex: 1 }} />
+                  <label style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', padding: '12px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem' }}>
+                    {uploadingBgName === 'tienda' ? 'Subiendo...' : 'Subir Fondo'}
+                    <input type="file" accept="image/*" onChange={(e) => handleSectionBgUpload('tienda', e)} style={{ display: 'none' }} disabled={uploadingBgName === 'tienda'} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {saveLoading ? 'Guardando...' : 'Guardar Configuración Tienda'}
+            </button>
+          </form>
+        </div>
+      )}
       {/* TAB: PRICING & PRESALE CONFIGURATION (admin only) */}
       {activeTab === 'pricing' && adminUser.role === 'admin' && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
@@ -1998,6 +2342,11 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 >
                   <option value="tickets">Solo Tickets (ver/aprobar/rechazar)</option>
                   <option value="scanner">Solo Escáner (puerta)</option>
+                  <option value="editor_autenticas">Editor Auténticas</option>
+                  <option value="editor_sanados">Editor Sanados</option>
+                  <option value="editor_modelo">Editor Modelo</option>
+                  <option value="editor_move">Editor Move</option>
+                  <option value="editor_tienda">Editor Tienda</option>
                   <option value="admin">Administrador Total</option>
                 </select>
               </div>

@@ -73,7 +73,13 @@ export default function App() {
         setCurrentView('ticket-view');
       }
     } else if (path === '/admin' || path === '/portal-admin') {
-      setCurrentView('admin');
+      const savedUser = localStorage.getItem('admin_user');
+      const userObj = savedUser ? JSON.parse(savedUser) : null;
+      if (userObj && userObj.role === 'scanner') {
+        setCurrentView('scanner');
+      } else {
+        setCurrentView('admin');
+      }
     } else if (path === '/escanear') {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
@@ -89,7 +95,11 @@ export default function App() {
   const handleAdminLogin = (user) => {
     setAdminUser(user);
     localStorage.setItem('admin_user', JSON.stringify(user));
-    setCurrentView('admin');
+    if (user.role === 'scanner') {
+      setCurrentView('scanner');
+    } else {
+      setCurrentView('admin');
+    }
   };
 
   const handleAdminLogout = () => {
@@ -294,6 +304,7 @@ export default function App() {
         {currentView === 'under-construction' && (
           <UnderConstruction 
             pageName={constructionPage} 
+            config={homepageConfig}
             onGoHome={() => {
               window.history.pushState({}, '', '/');
               setCurrentView('landing');
