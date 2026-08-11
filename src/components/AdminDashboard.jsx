@@ -781,7 +781,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         gap: '20px',
         flexWrap: 'wrap'
       }}>
-        {adminUser.role === 'admin' && (
+        {(adminUser.role === 'admin' || adminUser.role === 'tickets') && (
           <button
             onClick={() => setActiveTab('reservations')}
             style={{
