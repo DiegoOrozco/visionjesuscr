@@ -469,11 +469,30 @@ app.post('/api/admin/reservations/:id/status', (req, res) => {
       return res.status(404).json({ success: false, message: 'Reserva no encontrada.' });
     }
 
-    db.prepare(`
-      UPDATE reservations
-      SET status = ?, approved_at = CASE WHEN ? = 'aprobado' THEN CURRENT_TIMESTAMP ELSE approved_at END, notes = ?
-      WHERE id = ?
-    `).run(status, status, notes || '', id);
+    const updateTx = db.transaction(() => {
+      db.prepare(`
+        UPDATE reservations
+        SET status = ?, approved_at = CASE WHEN ? = 'aprobado' THEN CURRENT_TIMESTAMP ELSE approved_at END, notes = ?
+        WHERE id = ?
+      `).run(status, status, notes || '', id);
+
+      // When rejecting, release the seats so they become available again
+      if (status === 'rechazado') {
+        db.prepare(`
+          UPDATE seat_queues
+          SET is_assigned = 0, reservation_id = NULL
+          WHERE reservation_id = ?
+        `).run(id);
+
+        db.prepare(`
+          UPDATE zones
+          SET available_capacity = available_capacity + ?
+          WHERE id = ?
+        `).run(reservation.quantity, reservation.zone_id);
+      }
+    });
+
+    updateTx();
 
     res.json({ success: true, message: `Reserva ${status === 'aprobado' ? 'APROBADA' : 'RECHAZADA'} con éxito.` });
   } catch (error) {
@@ -493,19 +512,23 @@ app.delete('/api/admin/reservations/:id', (req, res) => {
     }
 
     const deleteTx = db.transaction(() => {
-      // 1. Release assigned seats in seat_queues
-      db.prepare(`
-        UPDATE seat_queues
-        SET is_assigned = 0, reservation_id = NULL
-        WHERE reservation_id = ?
-      `).run(id);
+      // Only release seats & restore capacity if NOT already rejected
+      // (rejected reservations already had their seats freed)
+      if (reservation.status !== 'rechazado') {
+        // 1. Release assigned seats in seat_queues
+        db.prepare(`
+          UPDATE seat_queues
+          SET is_assigned = 0, reservation_id = NULL
+          WHERE reservation_id = ?
+        `).run(id);
 
-      // 2. Increment available capacity in zones
-      db.prepare(`
-        UPDATE zones
-        SET available_capacity = available_capacity + ?
-        WHERE id = ?
-      `).run(reservation.quantity, reservation.zone_id);
+        // 2. Increment available capacity in zones
+        db.prepare(`
+          UPDATE zones
+          SET available_capacity = available_capacity + ?
+          WHERE id = ?
+        `).run(reservation.quantity, reservation.zone_id);
+      }
 
       // 3. Delete attendees
       db.prepare(`
