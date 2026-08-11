@@ -8,6 +8,7 @@ import TicketView from './components/TicketView';
 import AdminDashboard from './components/AdminDashboard';
 import DoorScanner from './components/DoorScanner';
 import ChurchLanding from './components/ChurchLanding';
+import AutenticasPromo from './components/AutenticasPromo';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -157,8 +158,16 @@ export default function App() {
         {currentView === 'home' && (
           <div className="container" style={{ paddingTop: '20px' }}>
             
+            {/* Promo Intro Section */}
+            <AutenticasPromo 
+              config={homepageConfig} 
+              onScrollToMap={() => {
+                document.getElementById('map-selection-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
+
             {/* Event Hero Banner with Official Large Annual Logo */}
-            <div style={{
+            <div id="map-selection-section" style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid var(--accent-beige-border)',
               borderRadius: '24px',

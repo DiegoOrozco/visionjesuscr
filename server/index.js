@@ -634,6 +634,18 @@ app.post('/api/admin/homepage/upload', upload.single('image'), (req, res) => {
   }
 });
 
+app.post('/api/admin/autenticas/gallery-upload', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Archivo no subido.' });
+    }
+    const fileUrl = `/uploads/comprobantes/${req.file.filename}`;
+    res.json({ success: true, url: fileUrl });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.post('/api/admin/homepage/config', (req, res) => {
   try {
     const { config } = req.body;

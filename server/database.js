@@ -209,6 +209,18 @@ function initDb() {
   insertConfig.run('general_presale_price', '7500');
   insertConfig.run('general_regular_price', '10000');
 
+  // Ensure default Autenticas config values exist
+  insertConfig.run('autenticas_hero_bg', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1600');
+  insertConfig.run('autenticas_description', 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada una de sus cicatrices. Un encuentro para ser transformadas por el amor y la presencia de Dios.');
+  insertConfig.run('autenticas_date_info', 'Sábado 15 de Noviembre - 5:00 PM');
+  insertConfig.run('autenticas_place_info', 'Auditorio Principal - Desamparados');
+  insertConfig.run('autenticas_price_info', 'General ₡7.500 / Gold ₡12.000');
+  insertConfig.run('autenticas_gallery', JSON.stringify([
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=1000',
+    'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000'
+  ]));
+
   // Ensure schedules key exists
   db.prepare(`
     INSERT OR IGNORE INTO homepage_config (key, value)

@@ -36,7 +36,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     contact_address: '',
     contact_email: '',
     contact_phone_1: '',
-    contact_phone_2: ''
+    contact_phone_2: '',
+    autenticas_hero_bg: '',
+    autenticas_description: '',
+    autenticas_date_info: '',
+    autenticas_place_info: '',
+    autenticas_price_info: '',
+    autenticas_gallery: '[]'
   });
 
   // User management state
@@ -47,11 +53,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [localSchedules, setLocalSchedules] = useState([]);
   const [localButtons, setLocalButtons] = useState([]);
   const [localNewsItems, setLocalNewsItems] = useState([]);
+  const [localAutenticasGallery, setLocalAutenticasGallery] = useState([]);
   const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingAutenticasHero, setUploadingAutenticasHero] = useState(false);
+  const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
   const [uploadingNewsImage, setUploadingNewsImage] = useState(null);
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+  const [autenticasSuccessMsg, setAutenticasSuccessMsg] = useState('');
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -123,6 +133,17 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       } catch (e) { console.error('Error parsing news_items:', e); }
       setLocalNewsItems(parsedNews || []);
 
+      // Parse Autenticas Gallery
+      let parsedAutenticasGallery = [];
+      try {
+        if (homepageConfig.autenticas_gallery) {
+          parsedAutenticasGallery = typeof homepageConfig.autenticas_gallery === 'string' ? JSON.parse(homepageConfig.autenticas_gallery) : homepageConfig.autenticas_gallery;
+        }
+      } catch (e) {
+        console.error('Error parsing Autenticas gallery:', e);
+      }
+      setLocalAutenticasGallery(parsedAutenticasGallery || []);
+
       setConfigFields({
         hero_bg: homepageConfig.hero_bg || '',
         hero_title: homepageConfig.hero_title || '',
@@ -136,7 +157,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         contact_address: homepageConfig.contact_address || '',
         contact_email: homepageConfig.contact_email || '',
         contact_phone_1: homepageConfig.contact_phone_1 || '',
-        contact_phone_2: homepageConfig.contact_phone_2 || ''
+        contact_phone_2: homepageConfig.contact_phone_2 || '',
+        autenticas_hero_bg: homepageConfig.autenticas_hero_bg || '',
+        autenticas_description: homepageConfig.autenticas_description || '',
+        autenticas_date_info: homepageConfig.autenticas_date_info || '',
+        autenticas_place_info: homepageConfig.autenticas_place_info || '',
+        autenticas_price_info: homepageConfig.autenticas_price_info || '',
+        autenticas_gallery: homepageConfig.autenticas_gallery || '[]'
       });
 
       setPricingFields({
@@ -262,6 +289,89 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       alert('Error de red al subir la imagen.');
     } finally {
       setUploadingScheduleBg(false);
+    }
+  };
+
+  const handleAutenticasHeroUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingAutenticasHero(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfigFields(prev => ({ ...prev, autenticas_hero_bg: data.url }));
+        alert('¡Imagen de fondo de Auténticas subida con éxito!');
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingAutenticasHero(false);
+    }
+  };
+
+  const handleAutenticasGalleryUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingGalleryImage(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLocalAutenticasGallery(prev => [...prev, data.url]);
+        alert('¡Foto agregada a la galería!');
+      } else {
+        alert(data.message || 'Error al subir foto.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la foto.');
+    } finally {
+      setUploadingGalleryImage(false);
+    }
+  };
+
+  const handleRemoveGalleryImage = (imageUrl) => {
+    setLocalAutenticasGallery(prev => prev.filter(img => img !== imageUrl));
+  };
+
+  const handleSaveAutenticasSubmit = async (e) => {
+    e.preventDefault();
+    setSaveLoading(true);
+    setAutenticasSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        autenticas_gallery: JSON.stringify(localAutenticasGallery)
+      };
+      
+      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: updatedConfig })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAutenticasSuccessMsg('¡Configuración del Congreso Auténticas guardada con éxito!');
+        if (onSaveConfig) onSaveConfig();
+      } else {
+        alert(data.message || 'Error al guardar la configuración.');
+      }
+    } catch (err) {
+      alert('Error de red al guardar la configuración.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -634,6 +744,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Tag size={18} />
             Precios y Preventa
+          </button>
+        )}
+
+        {/* Only admin role can edit Autenticas config */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('autenticas')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'autenticas' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'autenticas' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Congreso Auténticas
           </button>
         )}
 
@@ -1439,6 +1572,186 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
             <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
               {saveLoading ? 'Guardando...' : 'Guardar Cambios Web Portada'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB: AUTÉNTICAS CONGRESO CONFIGURATION (admin only) */}
+      {activeTab === 'autenticas' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
+            Configuración de la Sección Auténticas
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
+            Personaliza el banner de cabecera, la descripción promocional, la tarjeta de información y la galería de fotos (carrusel) del Congreso Auténticas.
+          </p>
+
+          {autenticasSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {autenticasSuccessMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSaveAutenticasSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              
+              {/* DESCRIPTION */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Descripción del Congreso</label>
+                <textarea 
+                  name="autenticas_description" 
+                  rows="3" 
+                  value={configFields.autenticas_description} 
+                  onChange={handleConfigChange} 
+                  required 
+                  style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}
+                />
+              </div>
+
+              {/* HERO BACKGROUND IMAGE */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo (Cabecera Auténticas)</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input 
+                    type="text" 
+                    name="autenticas_hero_bg" 
+                    value={configFields.autenticas_hero_bg} 
+                    onChange={handleConfigChange} 
+                    placeholder="URL de la imagen o sube un archivo" 
+                    required 
+                    style={{ flex: 1 }}
+                  />
+                  <label style={{
+                    backgroundColor: 'var(--accent-coffee)',
+                    color: '#FFFFFF',
+                    padding: '12px 20px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: '0.88rem'
+                  }}>
+                    {uploadingAutenticasHero ? 'Subiendo...' : 'Subir Fondo'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleAutenticasHeroUpload} 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingAutenticasHero}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* DATE INFO */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha del Evento (Texto libre)</label>
+                <input 
+                  type="text" 
+                  name="autenticas_date_info" 
+                  value={configFields.autenticas_date_info} 
+                  onChange={handleConfigChange} 
+                  required 
+                  placeholder="Ej: Sábado 15 de Noviembre - 5:00 PM"
+                />
+              </div>
+
+              {/* PLACE INFO */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Lugar del Evento (Texto libre)</label>
+                <input 
+                  type="text" 
+                  name="autenticas_place_info" 
+                  value={configFields.autenticas_place_info} 
+                  onChange={handleConfigChange} 
+                  required 
+                  placeholder="Ej: Auditorio Principal - Desamparados"
+                />
+              </div>
+
+              {/* PRICE INFO */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Inversión / Precios (Texto libre)</label>
+                <input 
+                  type="text" 
+                  name="autenticas_price_info" 
+                  value={configFields.autenticas_price_info} 
+                  onChange={handleConfigChange} 
+                  required 
+                  placeholder="Ej: General ₡7.500 / Gold ₡12.000"
+                />
+              </div>
+
+              {/* GALLERY MANAGEMENT */}
+              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Galería de Fotos (Carrusel / Carrete)</h4>
+                  <label style={{
+                    backgroundColor: 'var(--accent-coffee)',
+                    color: '#FFFFFF',
+                    padding: '8px 16px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: '0.82rem'
+                  }}>
+                    {uploadingGalleryImage ? 'Agregando...' : 'Agregar Foto'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleAutenticasGalleryUpload} 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingGalleryImage}
+                    />
+                  </label>
+                </div>
+
+                {localAutenticasGallery.length === 0 ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
+                    No hay imágenes en la galería de Auténticas. Agrega fotos para activar el carrusel.
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '14px' }}>
+                    {localAutenticasGallery.map((imgUrl, idx) => (
+                      <div key={idx} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #DDD', height: '100px' }}>
+                        <img 
+                          src={imgUrl.startsWith('http') ? imgUrl : `${API_URL}${imgUrl}`} 
+                          alt={`Foto galeria ${idx}`} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(imgUrl)}
+                          style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '4px',
+                            backgroundColor: 'rgba(220, 38, 38, 0.9)',
+                            color: '#FFF',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '24px',
+                            height: '24px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800
+                          }}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
+              {saveLoading ? 'Guardando...' : 'Guardar Configuración Congreso Auténticas'}
             </button>
           </form>
         </div>
