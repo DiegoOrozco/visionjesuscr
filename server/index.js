@@ -220,6 +220,18 @@ function cleanupExpiredHolds() {
   }
 }
 
+// Helper: Log activity
+function logActivity(username, action, details) {
+  try {
+    db.prepare(`
+      INSERT INTO activity_logs (username, action, details)
+      VALUES (?, ?, ?)
+    `).run(username, action, details);
+  } catch (error) {
+    console.error('Error writing activity log:', error);
+  }
+}
+
 // 1. Get Zones, Pricing Tiers & List of Occupied/Held Seats
 app.get('/api/zones', (req, res) => {
   try {
@@ -499,6 +511,12 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
 
     const result = reservationTx();
 
+    logActivity(
+      'sistema',
+      'crear_reserva',
+      `Reserva creada por ${purchaser_name} (${purchaser_email}) de ${quantity} boletos en la zona ${zone.name}. Total: ₡${totalAmount.toLocaleString('es-CR')}. ID: ${result.reservationId}`
+    );
+
     // Send email asynchronously in the background
     const origin = req.headers.origin || 'https://www.visionjesuscr.com';
     sendReservationEmail({
@@ -663,6 +681,13 @@ app.post('/api/admin/reservations/:id/status', (req, res) => {
 
     updateTx();
 
+    const adminUser = req.headers['x-admin-user'] || req.body.admin_username || 'desconocido';
+    logActivity(
+      adminUser,
+      status === 'aprobado' ? 'aprobar_reserva' : 'rechazar_reserva',
+      `Reserva de ${reservation.purchaser_name} (${reservation.id}) cambiada a ${status}. Notas: ${notes || 'Ninguna'}`
+    );
+
     res.json({ success: true, message: `Reserva ${status === 'aprobado' ? 'APROBADA' : 'RECHAZADA'} con éxito.` });
   } catch (error) {
     console.error('Error updating status:', error);
@@ -713,6 +738,13 @@ app.delete('/api/admin/reservations/:id', (req, res) => {
     });
 
     deleteTx();
+
+    const adminUser = req.headers['x-admin-user'] || req.body.admin_username || 'desconocido';
+    logActivity(
+      adminUser,
+      'eliminar_reserva',
+      `Reserva de ${reservation.purchaser_name} (${reservation.id}) de ${reservation.quantity} boletos eliminada permanentemente.`
+    );
 
     res.json({ success: true, message: 'Reserva eliminada permanentemente y sus asientos han sido liberados.' });
   } catch (error) {
@@ -785,6 +817,12 @@ app.post('/api/scan', (req, res) => {
 
       const formattedDate = reservation.scanned_at ? new Date(reservation.scanned_at + 'Z').toLocaleString('es-CR', { timeZone: 'America/Costa_Rica' }) : 'Fecha desconocida';
 
+      logActivity(
+        scanned_by || 'Personal de Puerta',
+        'intento_reingreso',
+        `Intento de reingreso para boleto de ${reservation.purchaser_name} (${reservation.qr_code_hash})`
+      );
+
       return res.json({
         success: true,
         code: 'ALREADY_USED',
@@ -807,6 +845,12 @@ app.post('/api/scan', (req, res) => {
       SET status = 'usado', scanned_at = CURRENT_TIMESTAMP, scanned_by = ?
       WHERE id = ?
     `).run(scanned_by || 'Personal de Puerta', reservation.id);
+
+    logActivity(
+      scanned_by || 'Personal de Puerta',
+      'escanear_boleto',
+      `Boleto de ${reservation.purchaser_name} (${reservation.qr_code_hash}) de ${reservation.quantity} personas escaneado con éxito para ingreso.`
+    );
 
     res.json({
       success: true,
@@ -1007,6 +1051,16 @@ app.delete('/api/admin/users/:id', (req, res) => {
     }
     db.prepare('DELETE FROM admin_users WHERE id = ?').run(id);
     res.json({ success: true, message: `Usuario "${user.username}" eliminado.` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Get Activity Logs (Admin)
+app.get('/api/admin/logs', (req, res) => {
+  try {
+    const logs = db.prepare('SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 500').all();
+    res.json({ success: true, logs });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }

@@ -667,7 +667,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     try {
       const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}/status`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Admin-User': adminUser ? adminUser.username : 'desconocido'
+        },
         body: JSON.stringify({ status: newStatus })
       });
       const data = await res.json();
@@ -689,7 +692,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
     try {
       const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'X-Admin-User': adminUser ? adminUser.username : 'desconocido'
+        }
       });
       const data = await res.json();
       if (data.success) {

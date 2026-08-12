@@ -97,6 +97,14 @@ function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      username TEXT NOT NULL,
+      action TEXT NOT NULL,
+      details TEXT
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);
