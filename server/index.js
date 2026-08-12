@@ -5,6 +5,8 @@ const fs = require('fs');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
+const nodemailer = require('nodemailer');
+const QRCode = require('qrcode');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +18,277 @@ function generateShortCode() {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
+}
+
+// Nodemailer SMTP Transporter setup for Zoho
+const transporter = nodemailer.createTransport({
+  host: 'smtp.zoho.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'autenticas@visionjesuscr.com',
+    pass: 'Visjes@2025'
+  }
+});
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('SMTP Connection Error:', error);
+  } else {
+    console.log('SMTP server ready for sending emails');
+  }
+});
+
+async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity, assignedTickets, qrCodeHash, totalAmount, origin }) {
+  try {
+    const ticketUrl = `${origin || 'https://www.visionjesuscr.com'}/ticket/${qrCodeHash}`;
+    const controlCode = qrCodeHash.substring(0, 6).toUpperCase();
+    const formattedAmount = `₡${Number(totalAmount).toLocaleString('es-CR')}`;
+    const seatsList = assignedTickets.map(t => 
+      t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+        ? t.split(' - ').slice(1).join(' - ') 
+        : t
+    ).join(' • ');
+
+    // Generate QR Code image as a buffer
+    const qrBuffer = await QRCode.toBuffer(qrCodeHash, {
+      margin: 2,
+      width: 250,
+      color: {
+        dark: '#2C1A0E',
+        light: '#FFFFFF'
+      }
+    });
+
+    const logoPath = path.join(__dirname, '..', 'logo-anual.png');
+    const attachments = [
+      {
+        filename: 'qrcode.png',
+        content: qrBuffer,
+        cid: 'qrcode'
+      }
+    ];
+
+    if (fs.existsSync(logoPath)) {
+      attachments.push({
+        filename: 'logo-anual.png',
+        path: logoPath,
+        cid: 'logo'
+      });
+    }
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu Reservación - Mujeres Auténticas 2026</title>
+  <style>
+    body {
+      background-color: #FAF6F0;
+      font-family: 'Outfit', 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      color: #2C1A0E;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #FAF6F0;
+      padding: 30px 0;
+    }
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border: 1px solid #E6D5C3;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(92, 61, 46, 0.08);
+    }
+    .header {
+      background: linear-gradient(135deg, #5C3D2E 0%, #4A2E1B 100%);
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header img {
+      max-width: 180px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .header h1 {
+      color: #FFFFFF;
+      margin: 15px 0 0 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .content {
+      padding: 35px 25px;
+    }
+    .welcome-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #4A3B32;
+      margin-bottom: 25px;
+    }
+    .welcome-text strong {
+      color: #5C3D2E;
+    }
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+      background-color: #FAF6F0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .details-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #E6D5C3;
+      font-size: 14px;
+    }
+    .details-table tr:last-child td {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: 700;
+      color: #5C3D2E;
+      width: 35%;
+    }
+    .value {
+      color: #2C1A0E;
+      font-weight: 500;
+    }
+    .qr-section {
+      text-align: center;
+      padding: 25px;
+      background-color: #FAF6F0;
+      border: 2px dashed #C69B6D;
+      border-radius: 16px;
+      margin-bottom: 25px;
+    }
+    .qr-image {
+      border: 3px solid #C69B6D;
+      border-radius: 12px;
+      padding: 8px;
+      background-color: #FFFFFF;
+      display: inline-block;
+      width: 180px;
+      height: 180px;
+    }
+    .control-code {
+      font-size: 13px;
+      color: #8C7456;
+      margin-top: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 30px 0 10px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #C69B6D 0%, #B58A5C 100%);
+      color: #FFFFFF !important;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(198, 155, 109, 0.3);
+    }
+    .footer {
+      background-color: #FAF6F0;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #8C7456;
+      border-top: 1px solid #E6D5C3;
+    }
+    .footer p {
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        ${fs.existsSync(logoPath) ? '<img src="cid:logo" alt="Logo Auténticas">' : ''}
+        <h1>Registro Recibido</h1>
+      </div>
+      <div class="content">
+        <p class="welcome-text">
+          Hola <strong>${purchaserName}</strong>,<br><br>
+          Tu solicitud de reservación para el <strong>Congreso Anual de Mujeres Auténticas 2026</strong> ha sido registrada con éxito.
+        </p>
+
+        <table class="details-table">
+          <tr>
+            <td class="label">Comprador:</td>
+            <td class="value">${purchaserName}</td>
+          </tr>
+          <tr>
+            <td class="label">Zona:</td>
+            <td class="value">${zoneName}</td>
+          </tr>
+          <tr>
+            <td class="label">Cantidad:</td>
+            <td class="value">${quantity} ${quantity === 1 ? 'Persona' : 'Personas'}</td>
+          </tr>
+          <tr>
+            <td class="label">Asientos:</td>
+            <td class="value">${seatsList}</td>
+          </tr>
+          <tr>
+            <td class="label">Monto Total:</td>
+            <td class="value" style="color: #5C3D2E; font-weight: 700;">${formattedAmount}</td>
+          </tr>
+        </table>
+
+        <div class="qr-section">
+          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #5C3D2E;">Código QR Digital de Entrada</p>
+          <img class="qr-image" src="cid:qrcode" alt="Código QR">
+          <div class="control-code">CÓDIGO DE CONTROL: ${controlCode}</div>
+        </div>
+
+        <p style="font-size: 13px; line-height: 1.5; color: #6B7280; text-align: center; margin-top: 20px;">
+          <em>Nota: Una vez que nuestro equipo valide tu comprobante de pago, el código QR quedará habilitado para ser escaneado en la entrada del evento.</em>
+        </p>
+
+        <div class="btn-container">
+          <a class="btn" href="${ticketUrl}" target="_blank">Ver Boleto en la Web</a>
+        </div>
+      </div>
+      <div class="footer">
+        <p><strong>Iglesia Visión Jesús</strong></p>
+        <p>© 2026 Conferencia de Mujeres Auténticas</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: '"Mujeres Auténticas" <autenticas@visionjesuscr.com>',
+      to: toEmail,
+      subject: '🎟️ Registro Recibido - Mujeres Auténticas 2026',
+      html: htmlContent,
+      attachments
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Reservation email sent successfully to', toEmail, 'Info:', info.messageId);
+  } catch (error) {
+    console.error('Error sending reservation email:', error);
+  }
 }
 
 app.use(cors());
@@ -342,6 +615,19 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
     });
 
     const result = reservationTx();
+
+    // Send email asynchronously in the background
+    const origin = req.headers.origin || 'https://www.visionjesuscr.com';
+    sendReservationEmail({
+      toEmail: purchaser_email,
+      purchaserName: purchaser_name,
+      zoneName: zone.name,
+      quantity: quantity,
+      assignedTickets: result.assignedTickets,
+      qrCodeHash: result.qrCodeHash,
+      totalAmount: result.totalAmount,
+      origin
+    }).catch(err => console.error('Background email error:', err));
 
     res.json({
       success: true,
