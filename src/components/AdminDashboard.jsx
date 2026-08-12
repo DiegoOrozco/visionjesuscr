@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -79,6 +79,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [adminUsers, setAdminUsers] = useState([]);
   const [newUser, setNewUser] = useState({ username: '', password: '', full_name: '', role: 'tickets' });
   const [editingUser, setEditingUser] = useState(null);
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [logsLoading, setLogsLoading] = useState(false);
   const [uploadingScheduleBg, setUploadingScheduleBg] = useState(false);
 
   const [localSchedules, setLocalSchedules] = useState([]);
@@ -120,11 +122,32 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const fetchActivityLogs = async () => {
+    setLogsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/logs`);
+      const data = await res.json();
+      if (data.success) {
+        setActivityLogs(data.logs);
+      }
+    } catch (err) {
+      console.error('Error fetching activity logs:', err);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (adminUser) {
       fetchReservations();
     }
   }, [adminUser]);
+
+  useEffect(() => {
+    if (adminUser && activeTab === 'activity_log') {
+      fetchActivityLogs();
+    }
+  }, [adminUser, activeTab]);
 
   // Sync configFields with incoming homepageConfig prop
   useEffect(() => {
@@ -1012,6 +1035,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Users size={18} />
             Gestión de Usuarios
+          </button>
+        )}
+
+        {/* Only admin role can view logs */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('activity_log')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'activity_log' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'activity_log' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <History size={18} />
+            Bitácora de Actividad
           </button>
         )}
       </div>
@@ -2529,6 +2575,95 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: ACTIVITY LOG (admin only) */}
+      {activeTab === 'activity_log' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ padding: '32px', borderRadius: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h3 style={{ color: 'var(--accent-coffee)', margin: 0, fontSize: '1.4rem' }}>
+                <History size={22} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+                Bitácora de Actividad / Auditoría
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '4px 0 0 0' }}>
+                Historial de acciones, transacciones, aprobaciones y escaneos de la tiquetera.
+              </p>
+            </div>
+            <button 
+              onClick={fetchActivityLogs} 
+              className="btn-secondary" 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '10px 16px' }}
+            >
+              <RefreshCw size={16} />
+              Actualizar Bitácora
+            </button>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            {logsLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                <RefreshCw size={32} style={{ margin: '0 auto 10px', display: 'block' }} className="spin" />
+                Cargando historial...
+              </div>
+            ) : activityLogs.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                No hay registros de actividad en el sistema todavía.
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--accent-beige-border)', textAlign: 'left', color: 'var(--accent-coffee)' }}>
+                    <th style={{ padding: '12px 8px', fontWeight: 800 }}>Fecha / Hora</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 800 }}>Usuario</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 800 }}>Acción</th>
+                    <th style={{ padding: '12px 8px', fontWeight: 800 }}>Detalles</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activityLogs.map((log) => {
+                    let localDate = log.timestamp;
+                    try {
+                      const d = new Date(log.timestamp + 'Z');
+                      localDate = d.toLocaleString('es-CR', { timeZone: 'America/Costa_Rica' });
+                    } catch (e) {}
+
+                    let badgeColor = '#3B82F6';
+                    let badgeLabel = log.action;
+                    if (log.action === 'aprobar_reserva') { badgeColor = '#10B981'; badgeLabel = 'Aprobó'; }
+                    else if (log.action === 'rechazar_reserva') { badgeColor = '#EF4444'; badgeLabel = 'Rechazó'; }
+                    else if (log.action === 'eliminar_reserva') { badgeColor = '#7F1D1D'; badgeLabel = 'Eliminó'; }
+                    else if (log.action === 'crear_reserva') { badgeColor = '#2563EB'; badgeLabel = 'Reservó'; }
+                    else if (log.action === 'escanear_boleto') { badgeColor = '#059669'; badgeLabel = 'Escaneó'; }
+                    else if (log.action === 'intento_reingreso') { badgeColor = '#D97706'; badgeLabel = 'Reingreso'; }
+
+                    return (
+                      <tr key={log.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '12px 8px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{localDate}</td>
+                        <td style={{ padding: '12px 8px', fontWeight: 700 }}>{log.username}</td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <span style={{
+                            backgroundColor: badgeColor,
+                            color: '#FFF',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            display: 'inline-block'
+                          }}>
+                            {badgeLabel}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#4A3B32' }}>{log.details}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
