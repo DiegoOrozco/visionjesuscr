@@ -20,25 +20,6 @@ function generateShortCode() {
   return code;
 }
 
-// Nodemailer SMTP Transporter setup for Zoho
-const transporter = nodemailer.createTransport({
-  host: 'smtp.zoho.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'autenticas@visionjesuscr.com',
-    pass: 'Visjes@2025'
-  }
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('SMTP Connection Error:', error);
-  } else {
-    console.log('SMTP server ready for sending emails');
-  }
-});
-
 async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity, assignedTickets, qrCodeHash, totalAmount, origin }) {
   try {
     const ticketUrl = `${origin || 'https://www.visionjesuscr.com'}/ticket/${qrCodeHash}`;
@@ -60,20 +41,26 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
       }
     });
 
+    const qrBase64 = qrBuffer.toString('base64');
     const logoPath = path.join(__dirname, '..', 'logo-anual.png');
+    let logoBase64 = null;
+    if (fs.existsSync(logoPath)) {
+      logoBase64 = fs.readFileSync(logoPath).toString('base64');
+    }
+
     const attachments = [
       {
         filename: 'qrcode.png',
-        content: qrBuffer,
-        cid: 'qrcode'
+        content: qrBase64,
+        contentId: 'qrcode'
       }
     ];
 
-    if (fs.existsSync(logoPath)) {
+    if (logoBase64) {
       attachments.push({
         filename: 'logo-anual.png',
-        path: logoPath,
-        cid: 'logo'
+        content: logoBase64,
+        contentId: 'logo'
       });
     }
 
@@ -220,7 +207,7 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
   <div class="wrapper">
     <div class="container">
       <div class="header">
-        ${fs.existsSync(logoPath) ? '<img src="cid:logo" alt="Logo Auténticas">' : ''}
+        ${logoBase64 ? '<img src="cid:logo" alt="Logo Auténticas">' : ''}
         <h1>Registro Recibido</h1>
       </div>
       <div class="content">
@@ -276,16 +263,39 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
 </html>
     `;
 
-    const mailOptions = {
-      from: '"Mujeres Auténticas" <autenticas@visionjesuscr.com>',
-      to: toEmail,
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error('ERROR: RESEND_API_KEY environment variable is not defined.');
+      return;
+    }
+
+    // Default to custom domain if API key is set (assumes domain is verified)
+    // You can override the sender with RESEND_FROM_EMAIL env variable if needed
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Mujeres Auténticas <autenticas@visionjesuscr.com>';
+
+    const payload = {
+      from: fromAddress,
+      to: [toEmail],
       subject: '🎟️ Registro Recibido - Mujeres Auténticas 2026',
       html: htmlContent,
       attachments
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Reservation email sent successfully to', toEmail, 'Info:', info.messageId);
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${resendApiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      console.log('Reservation email sent successfully via Resend. ID:', data.id);
+    } else {
+      console.error('Error response from Resend API:', data);
+    }
   } catch (error) {
     console.error('Error sending reservation email:', error);
   }
