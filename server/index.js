@@ -685,7 +685,7 @@ app.post('/api/admin/reservations/:id/status', (req, res) => {
     logActivity(
       adminUser,
       status === 'aprobado' ? 'aprobar_reserva' : 'rechazar_reserva',
-      `Reserva de ${reservation.purchaser_name} (${reservation.id}) cambiada a ${status}. Notas: ${notes || 'Ninguna'}`
+      `Reserva de ${reservation.purchaser_name} (${reservation.id}) cambiada a ${status}.`
     );
 
     res.json({ success: true, message: `Reserva ${status === 'aprobado' ? 'APROBADA' : 'RECHAZADA'} con éxito.` });
