@@ -168,6 +168,11 @@ function initDb() {
   insertUser.run('editor_modelo', 'modelo123', 'editor_modelo', 'Editor de Modelo');
   insertUser.run('editor_tienda', 'tienda123', 'editor_tienda', 'Editor de Tienda');
   insertUser.run('editor_autenticas', 'autenticas123', 'editor_autenticas', 'Editor de Auténticas');
+  insertUser.run('Evelyn_reservas', 'Ev8mR9t4', 'tickets_readonly', 'Evelyn Reservas (Lectura)');
+  insertUser.run('Dayanna_reservas', 'Dy6qA3w1', 'tickets', 'Dayanna Reservas');
+  insertUser.run('Stephanie_scanner', 'Sp7nS2x8', 'scanner', 'Stephanie Scanner');
+  insertUser.run('Evelyn_scanner', 'Ev2kS5z9', 'scanner', 'Evelyn Scanner');
+  insertUser.run('Andrea_scanner', 'An4pS7w2', 'scanner', 'Andrea Scanner');
 
   // Seed default homepage config values
   const configCount = db.prepare('SELECT COUNT(*) as count FROM homepage_config').get();

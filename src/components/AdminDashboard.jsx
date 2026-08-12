@@ -803,7 +803,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         gap: '20px',
         flexWrap: 'wrap'
       }}>
-        {(adminUser.role === 'admin' || adminUser.role === 'tickets') && (
+        {(adminUser.role === 'admin' || adminUser.role === 'tickets' || adminUser.role === 'tickets_readonly') && (
           <button
             onClick={() => setActiveTab('reservations')}
             style={{
@@ -1268,43 +1268,47 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                         </td>
 
                         <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <button
-                              onClick={() => handleUpdateStatus(resv.id, 'aprobado')}
-                              className="btn-success"
-                              style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem' }}
-                            >
-                              <CheckCircle2 size={14} /> Aprobar
-                            </button>
+                          {adminUser.role !== 'tickets_readonly' ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <button
+                                onClick={() => handleUpdateStatus(resv.id, 'aprobado')}
+                                className="btn-success"
+                                style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem' }}
+                              >
+                                <CheckCircle2 size={14} /> Aprobar
+                              </button>
 
-                            <button
-                              onClick={() => handleUpdateStatus(resv.id, 'rechazado')}
-                              className="btn-danger"
-                              style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem' }}
-                            >
-                              <XCircle size={14} /> Rechazar
-                            </button>
+                              <button
+                                onClick={() => handleUpdateStatus(resv.id, 'rechazado')}
+                                className="btn-danger"
+                                style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem' }}
+                              >
+                                <XCircle size={14} /> Rechazar
+                              </button>
 
-                            <button
-                              onClick={() => handleDeleteReservation(resv.id, resv.purchaser_name)}
-                              style={{
-                                backgroundColor: '#7F1D1D',
-                                color: '#FFFFFF',
-                                border: 'none',
-                                borderRadius: '6px',
-                                padding: '6px 10px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                fontSize: '0.78rem',
-                                cursor: 'pointer',
-                                fontWeight: 700
-                              }}
-                              title="Eliminar permanentemente esta reserva"
-                            >
-                              <Trash2 size={14} /> Eliminar
-                            </button>
-                          </div>
+                              <button
+                                onClick={() => handleDeleteReservation(resv.id, resv.purchaser_name)}
+                                style={{
+                                  backgroundColor: '#7F1D1D',
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '6px 10px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '0.78rem',
+                                  cursor: 'pointer',
+                                  fontWeight: 700
+                                }}
+                                title="Eliminar permanentemente esta reserva"
+                              >
+                                <Trash2 size={14} /> Eliminar
+                              </button>
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Sólo lectura</span>
+                          )}
                         </td>
 
                       </tr>
@@ -2362,7 +2366,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                   style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CCC', width: '100%' }}
                 >
-                  <option value="tickets">Solo Tickets (ver/aprobar/rechazar)</option>
+                  <option value="tickets">Solo Tickets (Gestión Completa)</option>
+                  <option value="tickets_readonly">Solo Tickets (Modo Lectura)</option>
                   <option value="scanner">Solo Escáner (puerta)</option>
                   <option value="editor_autenticas">Editor Auténticas</option>
                   <option value="editor_sanados">Editor Sanados</option>
@@ -2427,7 +2432,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CCC', width: '100%' }}
                   >
-                    <option value="tickets">Solo Tickets (ver/aprobar/rechazar)</option>
+                    <option value="tickets">Solo Tickets (Gestión Completa)</option>
+                    <option value="tickets_readonly">Solo Tickets (Modo Lectura)</option>
                     <option value="scanner">Solo Escáner (puerta)</option>
                     <option value="editor_autenticas">Editor Auténticas</option>
                     <option value="editor_sanados">Editor Sanados</option>
@@ -2473,13 +2479,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     <div style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>{u.full_name}</div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                       @{u.username} · Rol: <span style={{ 
-                        backgroundColor: u.role === 'admin' ? '#F59E0B' : u.role === 'tickets' ? '#3B82F6' : u.role.startsWith('editor_') ? '#8B5CF6' : '#10B981',
+                        backgroundColor: u.role === 'admin' ? '#F59E0B' : u.role === 'tickets' ? '#3B82F6' : u.role === 'tickets_readonly' ? '#6B7280' : u.role.startsWith('editor_') ? '#8B5CF6' : '#10B981',
                         color: '#FFF',
                         padding: '2px 8px',
                         borderRadius: '6px',
                         fontSize: '0.75rem',
                         fontWeight: 700
-                      }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : u.role === 'scanner' ? 'Escáner' : u.role.replace('editor_', 'Editor ')}</span>
+                      }}>{u.role === 'admin' ? 'Admin' : u.role === 'tickets' ? 'Tickets' : u.role === 'tickets_readonly' ? 'Tickets (Lectura)' : u.role === 'scanner' ? 'Escáner' : u.role.replace('editor_', 'Editor ')}</span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -2600,23 +2606,25 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 </a>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                <button
-                  onClick={() => handleUpdateStatus(selectedReceipt.id, 'aprobado')}
-                  className="btn-success"
-                  style={{ flex: 1, padding: '12px' }}
-                >
-                  <CheckCircle2 size={18} /> Confirmar & Aprobar Pago
-                </button>
+              {adminUser.role !== 'tickets_readonly' && (
+                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedReceipt.id, 'aprobado')}
+                    className="btn-success"
+                    style={{ flex: 1, padding: '12px' }}
+                  >
+                    <CheckCircle2 size={18} /> Confirmar & Aprobar Pago
+                  </button>
 
-                <button
-                  onClick={() => handleUpdateStatus(selectedReceipt.id, 'rechazado')}
-                  className="btn-danger"
-                  style={{ flex: 1, padding: '12px' }}
-                >
-                  <XCircle size={18} /> Rechazar Reserva
-                </button>
-              </div>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedReceipt.id, 'rechazado')}
+                    className="btn-danger"
+                    style={{ flex: 1, padding: '12px' }}
+                  >
+                    <XCircle size={18} /> Rechazar Reserva
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

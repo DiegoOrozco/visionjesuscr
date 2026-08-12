@@ -948,7 +948,7 @@ app.post('/api/admin/users', (req, res) => {
       return res.status(400).json({ success: false, message: 'Todos los campos son requeridos.' });
     }
 
-    const validRoles = ['admin', 'tickets', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
+    const validRoles = ['admin', 'tickets', 'tickets_readonly', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ success: false, message: 'Rol no válido.' });
     }
@@ -974,7 +974,7 @@ app.put('/api/admin/users/:id', (req, res) => {
       return res.status(400).json({ success: false, message: 'Usuario, Nombre Completo y Rol son requeridos.' });
     }
 
-    const validRoles = ['admin', 'tickets', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
+    const validRoles = ['admin', 'tickets', 'tickets_readonly', 'scanner', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ success: false, message: 'Rol no válido.' });
     }

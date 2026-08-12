@@ -9,4 +9,9 @@ Sección Sanados       editor_sanados       sanados123      Solo edición de /sa
 Sección Modelo        editor_modelo        modelo123       Solo edición de /modelo
 Sección Tienda        editor_tienda        tienda123       Solo edición de /tienda
 Congreso Auténticas   editor_autenticas    autenticas123   Solo edición de /autenticas
-Gestión de Tiquetes   tickets              (personal)      Solo gestión de reservaciones
+Gestión de Tiquetes   editor_reservaciones reservaciones123     Solo gestión de reservaciones
+Gestión de Tiquetes (Lectura) Evelyn_reservas  Ev8mR9t4        Solo ver reservaciones (Lectura)
+Gestión de Tiquetes   Dayanna_reservas     Dy6qA3w1        Gestión de tiquetes completa
+Escáner de Puerta     Stephanie_scanner    Sp7nS2x8        Solo escaneo de códigos QR
+Escáner de Puerta     Evelyn_scanner       Ev2kS5z9        Solo escaneo de códigos QR
+Escáner de Puerta     Andrea_scanner       An4pS7w2        Solo escaneo de códigos QR
