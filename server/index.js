@@ -53,7 +53,7 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
         filename: 'qrcode.png',
         content: qrBase64,
         contentType: 'image/png',
-        contentId: 'qrcode'
+        content_id: 'qrcode'
       }
     ];
 
@@ -62,7 +62,7 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
         filename: 'logo-anual.png',
         content: logoBase64,
         contentType: 'image/png',
-        contentId: 'logo'
+        content_id: 'logo'
       });
     }
 
