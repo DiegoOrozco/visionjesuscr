@@ -23,8 +23,8 @@ function generateShortCode() {
 // Nodemailer SMTP Transporter setup for Zoho
 const transporter = nodemailer.createTransport({
   host: 'smtp.zoho.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
   auth: {
     user: 'autenticas@visionjesuscr.com',
     pass: 'Visjes@2025'
