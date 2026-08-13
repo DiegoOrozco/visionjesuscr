@@ -12,7 +12,8 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const dbPath = path.join(dbDir, 'event_ticketing.db');
+const isTest = process.env.NODE_ENV === 'test';
+const dbPath = path.join(dbDir, isTest ? 'test_ticketing.db' : 'event_ticketing.db');
 const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
