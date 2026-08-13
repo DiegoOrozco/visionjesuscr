@@ -59,6 +59,44 @@ setTimeout(async () => {
     const holdData = await holdRes.json();
     assert(holdRes.ok && holdData.success, 'Prueba 2: Bloqueo temporal de asientos exitoso.');
 
+    // Test 2b: Concurrency Hold Seats (Multisolicitud)
+    // Both sessions attempt to hold 'PRE-003' at the exact same time
+    const [holdA, holdB] = await Promise.all([
+      fetch(`${BASE_URL}/api/seats/hold`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seat_codes: ['PRE-003'], session_id: 'session-A', zone_id: targetZone.id })
+      }).then(r => r.json()),
+      fetch(`${BASE_URL}/api/seats/hold`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seat_codes: ['PRE-003'], session_id: 'session-B', zone_id: targetZone.id })
+      }).then(r => r.json())
+    ]);
+
+    const onlyOneSucceeded = (holdA.success && !holdB.success && holdB.code === 'SEATS_TAKEN') || 
+                             (!holdA.success && holdA.code === 'SEATS_TAKEN' && holdB.success);
+    assert(onlyOneSucceeded, 'Prueba 2b (Multisolicitud): Un asiento no puede ser reservado por dos usuarios simultáneamente.');
+
+    // Test 2c: Rejection of invalid phone format (letters or wrong length)
+    const badPhoneRes = await fetch(`${BASE_URL}/api/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        purchaser_name: 'QA Test Bad Phone',
+        purchaser_email: 'bad-phone@test.com',
+        purchaser_phone: '8888-9999', // contains symbol (-)
+        zone_id: targetZone.id,
+        quantity: 1,
+        session_id: 'test-session-123',
+        attendees: [
+          { full_name: 'Persona Bad Phone', age: 25, phone: '8888AA88', assigned_ticket_code: 'PRE-001' } // contains letters
+        ]
+      })
+    });
+    const badPhoneData = await badPhoneRes.json();
+    assert(badPhoneRes.status === 400 && !badPhoneData.success, 'Prueba 2c: Bloqueo de números de teléfono con formatos inválidos (deben ser 8 dígitos numéricos).');
+
     // Test 3: Create Reservation
     const reserveRes = await fetch(`${BASE_URL}/api/reservations`, {
       method: 'POST',
@@ -66,14 +104,14 @@ setTimeout(async () => {
       body: JSON.stringify({
         purchaser_name: 'Usuario QA Test',
         purchaser_email: 'test-qa@visionjesuscr.com',
-        purchaser_phone: '88888888',
+        purchaser_phone: '88888888', // 8 digits
         zone_id: targetZone.id,
         quantity: 2,
         session_id: 'test-session-123',
         comprobante_url: '/uploads/comprobantes/test-comprobante.jpg',
         attendees: [
-          { full_name: 'Persona QA 1', age: 25, phone: '77777777', assigned_ticket_code: 'PRE-001' },
-          { full_name: 'Persona QA 2', age: 30, phone: '66666666', assigned_ticket_code: 'PRE-002' }
+          { full_name: 'Persona QA 1', age: 25, phone: '77777777', assigned_ticket_code: 'PRE-001' }, // 8 digits
+          { full_name: 'Persona QA 2', age: 30, phone: '66666666', assigned_ticket_code: 'PRE-002' }  // 8 digits
         ]
       })
     });

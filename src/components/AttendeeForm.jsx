@@ -88,6 +88,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
   const handleAttendeeChange = (index, field, value) => {
     const updated = [...attendees];
+    if (field === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 8);
+    }
     updated[index][field] = value;
     setAttendees(updated);
 
@@ -116,8 +119,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
     e.preventDefault();
     setErrorMsg('');
 
-    if (!purchaserName.trim() || !purchaserEmail.trim() || !purchaserPhone.trim()) {
-      setErrorMsg('Por favor completa todos los datos de contacto de la persona responsable del pago.');
+    const phoneRegex = /^[0-9]{8}$/;
+    if (!phoneRegex.test(purchaserPhone.trim())) {
+      setErrorMsg('El número de teléfono del responsable del pago debe contener exactamente 8 dígitos numéricos.');
       return;
     }
 
@@ -125,6 +129,10 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
       const att = attendees[i];
       if (!att.full_name.trim() || !att.phone.trim() || !att.age || !att.residence.trim()) {
         setErrorMsg(`Por favor completa todos los campos obligatorios de la Persona #${i + 1} (Nombre, Edad, Teléfono y ¿Dónde vive?).`);
+        return;
+      }
+      if (!phoneRegex.test(att.phone.trim())) {
+        setErrorMsg(`El número de teléfono de la Persona #${i + 1} debe contener exactamente 8 dígitos numéricos.`);
         return;
       }
       if (parseInt(att.age, 10) <= 0) {
@@ -569,7 +577,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                   placeholder="Ej. +506 8888 9999"
                   value={purchaserPhone}
                   onChange={(e) => {
-                    setPurchaserPhone(e.target.value);
+                    const clean = e.target.value.replace(/\D/g, '').slice(0, 8);
+                    setPurchaserPhone(clean);
                     setPurchaserPhoneEdited(true);
                   }}
                   required

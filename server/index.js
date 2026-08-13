@@ -404,8 +404,14 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
       attendees = rawAttendees;
     }
 
-    if (!zone_id || !purchaser_name || !purchaser_email || !purchaser_phone || !attendees || attendees.length === 0) {
-      return res.status(400).json({ success: false, message: 'Faltan campos requeridos o la lista de asistentes está vacía.' });
+    const phoneRegex = /^[0-9]{8}$/;
+    if (!phoneRegex.test(purchaser_phone.trim())) {
+      return res.status(400).json({ success: false, message: 'El teléfono del comprador debe constar de exactamente 8 dígitos numéricos.' });
+    }
+    for (let i = 0; i < attendees.length; i++) {
+      if (!attendees[i].phone || !phoneRegex.test(attendees[i].phone.trim())) {
+        return res.status(400).json({ success: false, message: `El teléfono de la Persona #${i + 1} debe constar de exactamente 8 dígitos numéricos.` });
+      }
     }
 
     const quantity = attendees.length;
