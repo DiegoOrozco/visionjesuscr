@@ -593,8 +593,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
               <UploadCloud size={22} color="var(--accent-coffee)" />
               Adjuntar Comprobante de Pago *
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-              Transfiere o deposita la cantidad total de <strong>{totalPrice}</strong> y sube la foto o captura del comprobante.
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.6 }}>
+              Transfiere o deposita por medio de sinpe movil al número <strong style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)' }}>60121225</strong> la cantidad total de <strong>{totalPrice}</strong> y sube la foto o captura del comprobante.
             </p>
 
             <div style={{

@@ -30,11 +30,11 @@ export default function ChurchLanding({ config, onGoToTickets }) {
   
   const heroBg = heroBgRaw 
     ? (heroBgRaw.startsWith('http') ? heroBgRaw : `${API_URL}${heroBgRaw}`)
-    : 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+    : '';
 
   const scheduleBg = config.schedule_bg
     ? (config.schedule_bg.startsWith('http') ? config.schedule_bg : `${API_URL}${config.schedule_bg}`)
-    : 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600';
+    : '';
 
   // Parse schedules
   let schedules = [];
@@ -226,78 +226,18 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       }} />
 
       {/* 1. HERO SECTION */}
-      {!(config.hero_title || config.hero_subtitle) ? (
-        <div id="inicio" style={{
-          position: 'relative',
-          width: '100%',
-          backgroundColor: '#0A0B10',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {isVideoBg ? (
-            <div style={{ position: 'relative', width: '100%', minHeight: '75vh' }}>
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  zIndex: 0
-                }}
-              >
-                <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
-              </video>
-            </div>
-          ) : (
-            <img 
-              src={heroBg} 
-              alt="Portada" 
-              style={{ 
-                width: '100%', 
-                height: 'auto', 
-                display: 'block',
-                maxHeight: '92vh',
-                objectFit: 'contain'
-              }} 
-            />
-          )}
-
-          {/* Bottom gradient line */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
-            zIndex: 3
-          }} />
-        </div>
-      ) : (
-        <div id="inicio" style={{
-          position: 'relative',
-          backgroundImage: !isVideoBg ? `url(${heroBg})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '90vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '120px 20px 80px',
-          overflow: 'hidden'
-        }}>
-          
-          {/* BACKGROUND VIDEO (IF CONFIG HAS A VIDEO) */}
-          {isVideoBg && (
+      <div id="inicio" style={{
+        position: 'relative',
+        width: '100%',
+        backgroundColor: '#0A0B10',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {isVideoBg ? (
+          <div style={{ position: 'relative', width: '100%', minHeight: '75vh' }}>
             <video
               autoPlay
               loop
@@ -315,124 +255,34 @@ export default function ChurchLanding({ config, onGoToTickets }) {
             >
               <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
             </video>
-          )}
-
-          {/* Bottom gradient line */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
-            zIndex: 3
-          }} />
-
-          <div style={{ maxWidth: '1000px', margin: '0 auto', zIndex: 2, textAlign: 'center' }}>
-            
-            {config.hero_badge && (
-              <div style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                backgroundColor: 'rgba(185, 28, 28, 0.4)', 
-                border: '1px solid rgba(185, 28, 28, 0.7)', 
-                color: '#FFD6D6', 
-                padding: '8px 20px', 
-                borderRadius: '50px', 
-                fontSize: '0.9rem', 
-                fontWeight: 800, 
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                marginBottom: '28px',
-                boxShadow: '0 0 20px rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(8px)'
-              }}>
-                <Flame size={16} />
-                <span>{config.hero_badge}</span>
-              </div>
-            )}
-
-            {config.hero_title && (
-              <h1 style={{
-                fontSize: '4.5rem',
-                fontWeight: 900,
-                marginBottom: '20px',
-                lineHeight: 1.05,
-                textTransform: 'uppercase',
-                letterSpacing: '-1.5px',
-                background: 'linear-gradient(to bottom, #FFFFFF 60%, #FFD6D6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 4px 16px rgba(0,0,0,0.8)'
-              }}>
-                {config.hero_title}
-              </h1>
-            )}
-
-            {config.hero_subtitle && (
-              <p style={{
-                fontSize: '1.6rem',
-                color: '#FFFFFF',
-                maxWidth: '800px',
-                margin: '0 auto 48px',
-                fontWeight: 600,
-                lineHeight: 1.4,
-                textShadow: '0 2px 8px rgba(0,0,0,0.8)',
-                letterSpacing: '0.5px'
-              }}>
-                {config.hero_subtitle}
-              </p>
-            )}
-
-            {/* DYNAMIC BUTTONS from config */}
-            {heroButtons.length > 0 && (
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '16px',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                {heroButtons.map((btn, idx) => (
-                  <button
-                    key={btn.id || idx}
-                    onClick={() => handleButtonClick(btn)}
-                    style={{
-                      backgroundColor: btn.style === 'primary' ? '#B91C1C' : 'rgba(0,0,0,0.6)',
-                      color: '#FFFFFF',
-                      border: btn.style === 'primary' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.4)',
-                      borderRadius: '50px',
-                      padding: '16px 36px',
-                      fontSize: '1.05rem',
-                      fontWeight: 800,
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(185,28,28,0.5)' : '0 4px 12px rgba(0,0,0,0.4)',
-                      backdropFilter: 'blur(8px)',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#DC2626';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#B91C1C';
-                    }}
-                  >
-                    <span>{btn.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
-      )}
+        ) : (
+          heroBg && (
+            <img 
+              src={heroBg} 
+              alt="Portada" 
+              style={{ 
+                width: '100%', 
+                height: 'auto', 
+                display: 'block',
+                maxHeight: '92vh',
+                objectFit: 'contain'
+              }} 
+            />
+          )
+        )}
+
+        {/* Bottom gradient line */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
+          zIndex: 3
+        }} />
+      </div>
 
       {/* 2. NEWS / EVENTS GALLERY CAROUSEL */}
       {newsItems.length > 0 && (
