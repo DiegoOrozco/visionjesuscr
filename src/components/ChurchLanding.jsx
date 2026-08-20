@@ -226,52 +226,108 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       }} />
 
       {/* 1. HERO SECTION */}
-      <div id="inicio" style={{
-        position: 'relative',
-        backgroundImage: !isVideoBg ? `url(${heroBg})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        minHeight: (config.hero_title || (heroButtons && heroButtons.length > 0)) ? '90vh' : '75vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: (config.hero_title || (heroButtons && heroButtons.length > 0)) ? '120px 20px 80px' : '40px 20px',
-        overflow: 'hidden'
-      }}>
-        
-        {/* BACKGROUND VIDEO (IF CONFIG HAS A VIDEO) */}
-        {isVideoBg && (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              zIndex: 0
-            }}
-          >
-            <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
-          </video>
-        )}
+      {!(config.hero_title || config.hero_subtitle) ? (
+        <div id="inicio" style={{
+          position: 'relative',
+          width: '100%',
+          backgroundColor: '#0A0B10',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {isVideoBg ? (
+            <div style={{ position: 'relative', width: '100%', minHeight: '75vh' }}>
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  zIndex: 0
+                }}
+              >
+                <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
+              </video>
+            </div>
+          ) : (
+            <img 
+              src={heroBg} 
+              alt="Portada" 
+              style={{ 
+                width: '100%', 
+                height: 'auto', 
+                display: 'block',
+                maxHeight: '92vh',
+                objectFit: 'contain'
+              }} 
+            />
+          )}
 
-        {/* Bottom gradient line */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
-          zIndex: 3
-        }} />
+          {/* Bottom gradient line */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
+            zIndex: 3
+          }} />
+        </div>
+      ) : (
+        <div id="inicio" style={{
+          position: 'relative',
+          backgroundImage: !isVideoBg ? `url(${heroBg})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '90vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '120px 20px 80px',
+          overflow: 'hidden'
+        }}>
+          
+          {/* BACKGROUND VIDEO (IF CONFIG HAS A VIDEO) */}
+          {isVideoBg && (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                zIndex: 0
+              }}
+            >
+              <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
+            </video>
+          )}
 
-        {(config.hero_title || config.hero_subtitle || (heroButtons && heroButtons.length > 0)) && (
+          {/* Bottom gradient line */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
+            zIndex: 3
+          }} />
+
           <div style={{ maxWidth: '1000px', margin: '0 auto', zIndex: 2, textAlign: 'center' }}>
             
             {config.hero_badge && (
@@ -375,8 +431,8 @@ export default function ChurchLanding({ config, onGoToTickets }) {
               </div>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* 2. NEWS / EVENTS GALLERY CAROUSEL */}
       {newsItems.length > 0 && (
