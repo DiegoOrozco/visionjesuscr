@@ -38,14 +38,14 @@ export default function ChurchLanding({ config, onGoToTickets }) {
 
   // Parse schedules
   let schedules = [];
-  try {
-    if (config.schedules) {
+  if (config.schedules !== undefined && config.schedules !== null) {
+    try {
       schedules = typeof config.schedules === 'string' ? JSON.parse(config.schedules) : config.schedules;
+    } catch (e) {
+      console.error('Failed to parse schedules:', e);
+      schedules = [];
     }
-  } catch (e) {
-    console.error('Failed to parse schedules:', e);
-  }
-  if (!schedules || schedules.length === 0) {
+  } else {
     schedules = [
       { id: '1', text: config.schedule_thursday || 'JUEVES 7:30PM', isVirtual: false },
       { id: '2', text: config.schedule_saturday || 'SÁBADOS 5:30PM', isVirtual: false },
@@ -228,48 +228,36 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       {/* 1. HERO SECTION */}
       <div id="inicio" style={{
         position: 'relative',
-        backgroundImage: !isVideoBg ? `linear-gradient(180deg, rgba(10, 11, 16, 0.45) 0%, rgba(10, 11, 16, 0.95) 100%), url(${heroBg})` : 'none',
+        backgroundImage: !isVideoBg ? `url(${heroBg})` : 'none',
         backgroundSize: 'cover',
-        backgroundPosition: 'center 20%',
-        minHeight: '92vh',
+        backgroundPosition: 'center',
+        minHeight: (config.hero_title || (heroButtons && heroButtons.length > 0)) ? '90vh' : '75vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '120px 20px 80px',
-        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)',
+        padding: (config.hero_title || (heroButtons && heroButtons.length > 0)) ? '120px 20px 80px' : '40px 20px',
         overflow: 'hidden'
       }}>
         
         {/* BACKGROUND VIDEO (IF CONFIG HAS A VIDEO) */}
         {isVideoBg && (
-          <>
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                zIndex: 0
-              }}
-            >
-              <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
-            </video>
-            <div style={{
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
               position: 'absolute',
               top: 0,
               left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(180deg, rgba(10, 11, 16, 0.6) 0%, rgba(10, 11, 16, 0.95) 100%)',
-              zIndex: 1
-            }} />
-          </>
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: 0
+            }}
+          >
+            <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
+          </video>
         )}
 
         {/* Bottom gradient line */}
@@ -278,107 +266,116 @@ export default function ChurchLanding({ config, onGoToTickets }) {
           bottom: 0,
           left: 0,
           right: 0,
-          height: '6px',
+          height: '4px',
           background: 'linear-gradient(90deg, #B91C1C 0%, #DC2626 50%, #F59E0B 100%)',
           zIndex: 3
         }} />
 
-        <div style={{ maxWidth: '1000px', margin: '0 auto', zIndex: 2, textAlign: 'center' }}>
-          
-          <div style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            gap: '8px', 
-            backgroundColor: 'rgba(185, 28, 28, 0.25)', 
-            border: '1px solid rgba(185, 28, 28, 0.6)', 
-            color: '#FF8A8A', 
-            padding: '8px 20px', 
-            borderRadius: '50px', 
-            fontSize: '0.9rem', 
-            fontWeight: 800, 
-            textTransform: 'uppercase',
-            letterSpacing: '2px',
-            marginBottom: '28px',
-            boxShadow: '0 0 20px rgba(185,28,28,0.2)'
-          }}>
-            <Flame size={16} />
-            <span>APASIONADOS POR SU PRESENCIA</span>
+        {(config.hero_title || config.hero_subtitle || (heroButtons && heroButtons.length > 0)) && (
+          <div style={{ maxWidth: '1000px', margin: '0 auto', zIndex: 2, textAlign: 'center' }}>
+            
+            {config.hero_badge && (
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                backgroundColor: 'rgba(185, 28, 28, 0.4)', 
+                border: '1px solid rgba(185, 28, 28, 0.7)', 
+                color: '#FFD6D6', 
+                padding: '8px 20px', 
+                borderRadius: '50px', 
+                fontSize: '0.9rem', 
+                fontWeight: 800, 
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                marginBottom: '28px',
+                boxShadow: '0 0 20px rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(8px)'
+              }}>
+                <Flame size={16} />
+                <span>{config.hero_badge}</span>
+              </div>
+            )}
+
+            {config.hero_title && (
+              <h1 style={{
+                fontSize: '4.5rem',
+                fontWeight: 900,
+                marginBottom: '20px',
+                lineHeight: 1.05,
+                textTransform: 'uppercase',
+                letterSpacing: '-1.5px',
+                background: 'linear-gradient(to bottom, #FFFFFF 60%, #FFD6D6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 4px 16px rgba(0,0,0,0.8)'
+              }}>
+                {config.hero_title}
+              </h1>
+            )}
+
+            {config.hero_subtitle && (
+              <p style={{
+                fontSize: '1.6rem',
+                color: '#FFFFFF',
+                maxWidth: '800px',
+                margin: '0 auto 48px',
+                fontWeight: 600,
+                lineHeight: 1.4,
+                textShadow: '0 2px 8px rgba(0,0,0,0.8)',
+                letterSpacing: '0.5px'
+              }}>
+                {config.hero_subtitle}
+              </p>
+            )}
+
+            {/* DYNAMIC BUTTONS from config */}
+            {heroButtons.length > 0 && (
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                justifyContent: 'center',
+                marginBottom: '20px'
+              }}>
+                {heroButtons.map((btn, idx) => (
+                  <button
+                    key={btn.id || idx}
+                    onClick={() => handleButtonClick(btn)}
+                    style={{
+                      backgroundColor: btn.style === 'primary' ? '#B91C1C' : 'rgba(0,0,0,0.6)',
+                      color: '#FFFFFF',
+                      border: btn.style === 'primary' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.4)',
+                      borderRadius: '50px',
+                      padding: '16px 36px',
+                      fontSize: '1.05rem',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(185,28,28,0.5)' : '0 4px 12px rgba(0,0,0,0.4)',
+                      backdropFilter: 'blur(8px)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#DC2626';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#B91C1C';
+                    }}
+                  >
+                    <span>{btn.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-
-          <h1 style={{
-            fontSize: '4.5rem',
-            fontWeight: 900,
-            marginBottom: '20px',
-            lineHeight: 1.05,
-            textTransform: 'uppercase',
-            letterSpacing: '-1.5px',
-            background: 'linear-gradient(to bottom, #FFFFFF 60%, #FFD6D6 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 4px 12px rgba(0,0,0,0.5)'
-          }}>
-            {config.hero_title || 'CONOCÉ LA VISIÓN'}
-          </h1>
-
-          <p style={{
-            fontSize: '1.6rem',
-            color: '#E5E7EB',
-            maxWidth: '800px',
-            margin: '0 auto 48px',
-            fontWeight: 400,
-            lineHeight: 1.4,
-            textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-            letterSpacing: '0.5px'
-          }}>
-            {config.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
-          </p>
-
-          {/* DYNAMIC BUTTONS from config */}
-          {heroButtons.length > 0 && (
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '16px',
-              justifyContent: 'center',
-              marginBottom: '20px'
-            }}>
-              {heroButtons.map((btn, idx) => (
-                <button
-                  key={btn.id || idx}
-                  onClick={() => handleButtonClick(btn)}
-                  style={{
-                    backgroundColor: btn.style === 'primary' ? '#B91C1C' : 'rgba(255,255,255,0.1)',
-                    color: '#FFFFFF',
-                    border: btn.style === 'primary' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.25)',
-                    borderRadius: '50px',
-                    padding: '16px 36px',
-                    fontSize: '1.05rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(185,28,28,0.4)' : 'none',
-                    backdropFilter: btn.style !== 'primary' ? 'blur(10px)' : 'none',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#DC2626';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    if (btn.style === 'primary') e.currentTarget.style.backgroundColor = '#B91C1C';
-                  }}
-                >
-                  <span>{btn.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* 2. NEWS / EVENTS GALLERY CAROUSEL */}
@@ -707,86 +704,112 @@ export default function ChurchLanding({ config, onGoToTickets }) {
       </div>
 
       {/* 4. SCHEDULES SECTION */}
-      <div id="horarios-section" style={{
-        backgroundImage: `linear-gradient(180deg, rgba(10, 11, 16, 0.85) 0%, rgba(10, 11, 16, 0.95) 100%), url(${scheduleBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        padding: '100px 20px',
-        color: '#FFFFFF',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(185, 28, 28, 0.2)',
-        borderBottom: '1px solid rgba(185, 28, 28, 0.2)',
-        position: 'relative'
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '300px',
-          height: '150px',
-          background: 'radial-gradient(circle, rgba(185, 28, 28, 0.3) 0%, rgba(185, 28, 28, 0) 70%)',
-          pointerEvents: 'none'
-        }} />
-
-        <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <Flame size={48} color="#B91C1C" style={{ marginBottom: '20px', filter: 'drop-shadow(0 0 10px rgba(185,28,28,0.5))' }} />
-          
-          <h2 style={{
-            fontSize: '3rem',
-            fontWeight: 900,
-            marginBottom: '48px',
-            letterSpacing: '1px',
-            textTransform: 'uppercase'
-          }}>
-            HORARIOS DE SERVICIOS
-          </h2>
-
+      {schedules && schedules.length > 0 ? (
+        <div id="horarios-section" style={{
+          backgroundImage: `linear-gradient(180deg, rgba(10, 11, 16, 0.8) 0%, rgba(10, 11, 16, 0.95) 100%), url(${scheduleBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          padding: '100px 20px',
+          color: '#FFFFFF',
+          textAlign: 'center',
+          borderTop: '1px solid rgba(185, 28, 28, 0.2)',
+          borderBottom: '1px solid rgba(185, 28, 28, 0.2)',
+          position: 'relative'
+        }}>
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            fontSize: '2rem',
-            fontWeight: 800,
-            letterSpacing: '0.5px'
-          }}>
-            {schedules.map((s, idx) => (
-              <div 
-                key={s.id || idx} 
-                style={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  gap: '16px',
-                  color: s.isVirtual ? 'var(--accent-gold)' : '#FFFFFF'
-                }}
-              >
-                {s.isVirtual ? <Music size={28} color="var(--accent-gold)" /> : <PlayCircle size={28} color="#B91C1C" />}
-                <span>{s.text}</span>
-              </div>
-            ))}
-          </div>
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '300px',
+            height: '150px',
+            background: 'radial-gradient(circle, rgba(185, 28, 28, 0.3) 0%, rgba(185, 28, 28, 0) 70%)',
+            pointerEvents: 'none'
+          }} />
 
-          <button 
-            onClick={() => setModalType('pregunta')}
-            style={{
-              backgroundColor: '#B91C1C',
-              color: '#FFF',
-              border: '2px solid #EF4444',
-              borderRadius: '12px',
-              marginTop: '48px',
-              padding: '16px 36px',
-              fontSize: '1.1rem',
+          <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <Flame size={48} color="#B91C1C" style={{ marginBottom: '20px', filter: 'drop-shadow(0 0 10px rgba(185,28,28,0.5))' }} />
+            
+            <h2 style={{
+              fontSize: '3rem',
+              fontWeight: 900,
+              marginBottom: '48px',
+              letterSpacing: '1px',
+              textTransform: 'uppercase'
+            }}>
+              HORARIOS DE SERVICIOS
+            </h2>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              fontSize: '2rem',
               fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(185,28,28,0.3)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            ¿TENÉS ALGUNA PREGUNTA?
-          </button>
+              letterSpacing: '0.5px'
+            }}>
+              {schedules.map((s, idx) => (
+                <div 
+                  key={s.id || idx} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    gap: '16px',
+                    color: s.isVirtual ? 'var(--accent-gold)' : '#FFFFFF'
+                  }}
+                >
+                  {s.isVirtual ? <Music size={28} color="var(--accent-gold)" /> : <PlayCircle size={28} color="#B91C1C" />}
+                  <span>{s.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setModalType('pregunta')}
+              style={{
+                backgroundColor: '#B91C1C',
+                color: '#FFF',
+                border: '2px solid #EF4444',
+                borderRadius: '12px',
+                marginTop: '48px',
+                padding: '16px 36px',
+                fontSize: '1.1rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(185,28,28,0.3)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ¿TENÉS ALGUNA PREGUNTA?
+            </button>
+          </div>
         </div>
-      </div>
+      ) : scheduleBg ? (
+        <div id="horarios-section" style={{
+          width: '100%',
+          backgroundColor: '#090A0F',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+          borderTop: '1px solid rgba(185, 28, 28, 0.2)',
+          borderBottom: '1px solid rgba(185, 28, 28, 0.2)',
+          position: 'relative'
+        }}>
+          <img 
+            src={scheduleBg} 
+            alt="Horarios de Servicios" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '1200px', 
+              height: 'auto', 
+              display: 'block', 
+              objectFit: 'contain'
+            }} 
+          />
+        </div>
+      ) : null}
 
       {/* 5. FOOTER & CONTACT */}
       <footer id="contacto-section" style={{

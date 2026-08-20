@@ -153,14 +153,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   useEffect(() => {
     if (homepageConfig && Object.keys(homepageConfig).length > 0) {
       let parsedSchedules = [];
-      try {
-        if (homepageConfig.schedules) {
+      if (homepageConfig.schedules !== undefined && homepageConfig.schedules !== null) {
+        try {
           parsedSchedules = typeof homepageConfig.schedules === 'string' ? JSON.parse(homepageConfig.schedules) : homepageConfig.schedules;
+        } catch (e) {
+          console.error('Error parsing schedules:', e);
+          parsedSchedules = [];
         }
-      } catch (e) {
-        console.error('Error parsing schedules:', e);
-      }
-      if (!parsedSchedules || parsedSchedules.length === 0) {
+      } else {
         parsedSchedules = [
           { id: '1', text: homepageConfig.schedule_thursday || 'JUEVES 7:30PM', isVirtual: false },
           { id: '2', text: homepageConfig.schedule_saturday || 'SÁBADOS 5:30PM', isVirtual: false },
@@ -169,7 +169,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           { id: '5', text: homepageConfig.schedule_sunday_virtual || 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
         ];
       }
-      setLocalSchedules(parsedSchedules);
+      setLocalSchedules(Array.isArray(parsedSchedules) ? parsedSchedules : []);
 
       // Parse buttons
       let parsedButtons = [];
@@ -1398,13 +1398,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal de Portada</label>
-                <input type="text" name="hero_title" value={configFields.hero_title} onChange={handleConfigChange} required />
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal de Portada (Opcional)</label>
+                <input type="text" name="hero_title" value={configFields.hero_title} onChange={handleConfigChange} placeholder="Dejar vacío si la imagen ya tiene texto" />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Lema</label>
-                <input type="text" name="hero_subtitle" value={configFields.hero_subtitle} onChange={handleConfigChange} required />
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Lema (Opcional)</label>
+                <input type="text" name="hero_subtitle" value={configFields.hero_subtitle} onChange={handleConfigChange} placeholder="Dejar vacío si no deseas texto" />
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
@@ -1529,12 +1529,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
               <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {localSchedules.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
-                    No hay horarios creados. Presiona "Agregar Culto" para registrar uno.
+                  <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px', backgroundColor: '#FAF8F5' }}>
+                    <p style={{ margin: '0 0 6px 0', fontWeight: 700, color: 'var(--accent-coffee)' }}>No hay horarios en texto.</p>
+                    <span style={{ fontSize: '0.85rem' }}>La sección de la página principal mostrará directamente la imagen de fondo subida arriba.</span>
                   </div>
                 ) : (
                   localSchedules.map((s, idx) => (
-                    <div key={s.id || idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', backgroundColor: '#FAF8F5', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)', flexWrap: 'wrap' }}>
+                    <div key={s.id || idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', backgroundColor: '#FAF8F5', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)' }}>
                       <span style={{ fontWeight: 800, color: 'var(--accent-coffee)', minWidth: '24px' }}>#{idx + 1}</span>
                       <input 
                         type="text" 
@@ -1542,15 +1543,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                         onChange={(e) => handleScheduleTextChange(s.id, e.target.value)} 
                         placeholder="Ej. DOMINGOS 9:00 AM" 
                         required 
-                        style={{ flex: 1, padding: '8px' }}
+                        style={{ flex: 1, minWidth: '180px', padding: '8px' }}
                       />
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
                         <input 
                           type="checkbox" 
                           checked={!!s.isVirtual} 
                           onChange={() => handleScheduleVirtualToggle(s.id)}
                         />
-                        ¿Virtual? (Adoración/Spotify)
+                        ¿Virtual? (Spotify)
                       </label>
                       <button 
                         type="button" 
@@ -1560,10 +1561,12 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                           color: 'var(--color-red)',
                           border: 'none',
                           borderRadius: '8px',
-                          padding: '8px 12px',
+                          padding: '8px 14px',
                           cursor: 'pointer',
                           fontWeight: 700,
-                          fontSize: '0.85rem'
+                          fontSize: '0.85rem',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         Eliminar
