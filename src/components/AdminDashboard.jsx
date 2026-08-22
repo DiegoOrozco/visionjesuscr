@@ -104,6 +104,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [selectedAttendeesModal, setSelectedAttendeesModal] = useState(null);
+  const [editingAmountId, setEditingAmountId] = useState(null);
+  const [editingAmountValue, setEditingAmountValue] = useState(0);
 
   const formatCRC = (val) => `₡${Number(val).toLocaleString('es-CR')}`;
 
@@ -119,6 +121,25 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       console.error('Error fetching reservations:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateAmount = async (id, amount) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/reservations/${id}/amount`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parseFloat(amount) })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingAmountId(null);
+        fetchReservations();
+      } else {
+        alert(data.message || 'Error al actualizar el monto.');
+      }
+    } catch (err) {
+      alert('Error de red al intentar actualizar el monto.');
     }
   };
 
@@ -1250,7 +1271,41 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                         </td>
 
                         <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--accent-coffee)' }}>
-                          {formatCRC(resv.total_amount)}
+                          {adminUser && adminUser.role === 'admin' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.85rem' }}>₡</span>
+                              <input 
+                                type="number"
+                                value={editingAmountId === resv.id ? editingAmountValue : resv.total_amount}
+                                onFocus={() => {
+                                  setEditingAmountId(resv.id);
+                                  setEditingAmountValue(resv.total_amount);
+                                }}
+                                onChange={(e) => setEditingAmountValue(e.target.value)}
+                                style={{ width: '80px', padding: '6px', fontSize: '0.88rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #CCC', textAlign: 'right' }}
+                              />
+                              {editingAmountId === resv.id && (
+                                <div style={{ display: 'flex', gap: '2px' }}>
+                                  <button 
+                                    onClick={() => handleUpdateAmount(resv.id, editingAmountValue)}
+                                    style={{ padding: '4px 8px', backgroundColor: 'var(--color-green)', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
+                                    title="Guardar"
+                                  >
+                                    ✓
+                                  </button>
+                                  <button 
+                                    onClick={() => setEditingAmountId(null)}
+                                    style={{ padding: '4px 8px', backgroundColor: '#9CA3AF', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
+                                    title="Cancelar"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            formatCRC(resv.total_amount)
+                          )}
                         </td>
 
                         <td style={{ padding: '14px 16px' }}>

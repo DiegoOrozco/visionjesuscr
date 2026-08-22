@@ -720,6 +720,40 @@ app.post('/api/admin/reservations/:id/status', (req, res) => {
   }
 });
 
+// Update Reservation Amount (Admin Only)
+app.post('/api/admin/reservations/:id/amount', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    if (amount === undefined || isNaN(parseFloat(amount))) {
+      return res.status(400).json({ success: false, message: 'Monto no válido.' });
+    }
+
+    const reservation = db.prepare('SELECT * FROM reservations WHERE id = ?').get(id);
+    if (!reservation) {
+      return res.status(404).json({ success: false, message: 'Reserva no encontrada.' });
+    }
+
+    db.prepare('UPDATE reservations SET total_amount = ? WHERE id = ?').run(parseFloat(amount), id);
+    
+    // Log activity
+    try {
+      db.prepare(`
+        INSERT INTO activity_logs (username, action, details)
+        VALUES ('admin', 'update_amount', ?)
+      `).run(`Monto de reserva de ${reservation.purchaser_name} (ID: ${id}) actualizado de ${reservation.total_amount} a ${amount}`);
+    } catch (logErr) {
+      console.error('Error logging update amount action:', logErr);
+    }
+
+    res.json({ success: true, message: 'Monto de la reserva actualizado con éxito.' });
+  } catch (error) {
+    console.error('Error updating reservation amount:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar el monto de la reserva.' });
+  }
+});
+
 // 7. Delete Reservation Permanently (API Endpoint for Admin)
 app.delete('/api/admin/reservations/:id', (req, res) => {
   try {
