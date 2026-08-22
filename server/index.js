@@ -441,7 +441,26 @@ app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
       }
     }
 
-    const totalAmount = quantity * zone.price;
+    // Calculate total amount based on active dynamic pricing to prevent any database sync discrepancies
+    const configRows = db.prepare('SELECT key, value FROM homepage_config').all();
+    const config = {};
+    configRows.forEach(r => config[r.key] = r.value);
+
+    const cutoffDateStr = config.presale_cutoff_date || '2026-08-15';
+    const cutoffDate = new Date(`${cutoffDateStr}T23:59:59`);
+    const isPresale = new Date() <= cutoffDate;
+
+    const vipPresale = parseFloat(config.vip_presale_price || '12000');
+    const vipRegular = parseFloat(config.vip_regular_price || '15000');
+    const genPresale = parseFloat(config.general_presale_price || '7500');
+    const genRegular = parseFloat(config.general_regular_price || '10000');
+
+    const isVip = zone_id.startsWith('vip');
+    const activePrice = isVip 
+      ? (isPresale ? vipPresale : vipRegular) 
+      : (isPresale ? genPresale : genRegular);
+
+    const totalAmount = quantity * activePrice;
 
     const reservationTx = db.transaction(() => {
       const availableSeats = db.prepare(`
@@ -1072,6 +1091,43 @@ app.get('/api/admin/logs', (req, res) => {
   }
 });
 
+// Download database backup (Admin)
+app.get('/api/admin/backup/download', (req, res) => {
+  try {
+    const dbPath = path.join(__dirname, 'data', 'event_ticketing.db');
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ success: false, message: 'Base de datos no encontrada.' });
+    }
+    const backupsDir = path.join(__dirname, 'data', 'backups');
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true });
+    }
+    const tempBackupPath = path.join(backupsDir, `download_backup_temp.db`);
+    
+    // Create an online backup safely
+    db.backup(tempBackupPath)
+      .then(() => {
+        res.download(tempBackupPath, 'event_ticketing_backup.db', (err) => {
+          // Cleanup temp file
+          try {
+            if (fs.existsSync(tempBackupPath)) {
+              fs.unlinkSync(tempBackupPath);
+            }
+          } catch (e) {
+            console.error('Error cleaning up temp backup file:', e);
+          }
+        });
+      })
+      .catch((err) => {
+        console.error('Backup download generation error:', err);
+        res.status(500).json({ success: false, message: 'No se pudo generar la copia de seguridad.' });
+      });
+  } catch (e) {
+    console.error('Backup download error:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // --- CSV EXPORT ---
 app.get('/api/admin/export/csv', (req, res) => {
   try {
@@ -1127,6 +1183,29 @@ app.get('/api/admin/export/csv', (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
+
+// Auto-run daily backup at 3:00 AM (Railway persistent container context)
+setInterval(() => {
+  const now = new Date();
+  if (now.getHours() === 3 && now.getMinutes() === 0) {
+    try {
+      const backupScript = path.join(__dirname, 'backup.js');
+      if (fs.existsSync(backupScript)) {
+        console.log('Iniciando backup automático diario...');
+        const { exec } = require('child_process');
+        exec(`node "${backupScript}"`, (error, stdout, stderr) => {
+          if (error) {
+            console.error('Error en backup automático diario:', error);
+          } else {
+            console.log('Backup automático diario completado con éxito:', stdout);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error running daily backup timer:', err);
+    }
+  }
+}, 60 * 1000); // Check once every minute
 
 app.listen(PORT, () => {
   console.log(`Express API Server listening on port ${PORT}`);

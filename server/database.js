@@ -121,13 +121,33 @@ function initDb() {
   try { db.exec(`ALTER TABLE attendees ADD COLUMN invited_by TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE attendees ADD COLUMN attended_encounter TEXT`); } catch (e) {}
 
-  // Determine pricing tier (Preventa: VIP=12000, Gen=7500 | Regular tras 15 Agosto: VIP=15000, Gen=10000)
-  const now = new Date();
-  const cutoffDate = new Date('2026-08-15T23:59:59');
-  const isPresale = now <= cutoffDate;
+  // Determine pricing tier (Preventa: VIP=12000, Gen=7500 | Regular: VIP=15000, Gen=10000)
+  let isPresale = true;
+  let vipPrice = 12000.00;
+  let generalPrice = 7500.00;
 
-  const vipPrice = isPresale ? 12000.00 : 15000.00;
-  const generalPrice = isPresale ? 7500.00 : 10000.00;
+  try {
+    const configRows = db.prepare('SELECT key, value FROM homepage_config').all();
+    const config = {};
+    configRows.forEach(r => config[r.key] = r.value);
+    
+    const cutoffDateStr = config.presale_cutoff_date || '2026-08-15';
+    const cutoffDate = new Date(`${cutoffDateStr}T23:59:59`);
+    const now = new Date();
+    isPresale = now <= cutoffDate;
+
+    const vipPresale = parseFloat(config.vip_presale_price || '12000');
+    const vipRegular = parseFloat(config.vip_regular_price || '15000');
+    const genPresale = parseFloat(config.general_presale_price || '7500');
+    const genRegular = parseFloat(config.general_regular_price || '10000');
+
+    vipPrice = isPresale ? vipPresale : vipRegular;
+    generalPrice = isPresale ? genPresale : genRegular;
+  } catch (e) {
+    isPresale = new Date() <= new Date('2026-08-15T23:59:59');
+    vipPrice = isPresale ? 12000.00 : 15000.00;
+    generalPrice = isPresale ? 7500.00 : 10000.00;
+  }
 
   // New Capacities: VIP = 250 Total, General = 350 Total.
   // VIP Central: 90 seats, VIP Izquierda: 80 seats, VIP Derecha: 80 seats. (Sum = 250)

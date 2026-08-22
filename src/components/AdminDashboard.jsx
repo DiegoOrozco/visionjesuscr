@@ -573,6 +573,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     window.open(`${API_URL}/api/admin/export/csv`, '_blank');
   };
 
+  const handleDownloadBackup = () => {
+    window.open(`${API_URL}/api/admin/backup/download`, '_blank');
+  };
+
   const handleHeroUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -816,6 +820,11 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               <button onClick={handleExportCSV} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10B981', color: '#FFF', borderColor: '#10B981' }}>
                 <Download size={16} /> Exportar CSV
               </button>
+              {adminUser && adminUser.role === 'admin' && (
+                <button onClick={handleDownloadBackup} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#4B5563', color: '#FFF', borderColor: '#4B5563' }}>
+                  <Download size={16} /> Respaldar BD (.db)
+                </button>
+              )}
             </>
           )}
           <button onClick={onLogout} className="btn-secondary" style={{ color: 'var(--color-red)', borderColor: 'var(--color-red)' }}>
