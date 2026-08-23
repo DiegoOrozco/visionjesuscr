@@ -159,11 +159,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.4) 0%, rgba(3, 8, 18, 0.95) 100%), url(${bgUrl})`,
+                backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url(${bgUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 0,
-                opacity: 0.8
+                opacity: 0.95
               }} />
             )}
             
@@ -237,7 +237,12 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
       
       case 'news': {
-        const items = config.news_items ? (typeof config.news_items === 'string' ? JSON.parse(config.news_items) : config.news_items) : [];
+        let items = [];
+        try {
+          items = config.news_items ? (typeof config.news_items === 'string' ? JSON.parse(config.news_items) : config.news_items) : [];
+        } catch (e) {
+          items = [];
+        }
         if (items.length === 0) return null;
 
         return (
@@ -851,11 +856,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           <div style={{
             position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.4) 0%, rgba(3, 8, 18, 0.95) 100%), url(${heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'})`,
+            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url(${heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: 0,
-            opacity: 0.8
+            opacity: 0.95
           }} />
         )}
 
