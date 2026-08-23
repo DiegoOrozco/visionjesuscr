@@ -191,22 +191,14 @@ export default function App() {
 
         {/* VIEW 1A: AUTÉNTICAS PROMO PAGE */}
         {currentView === 'autenticas-promo' && (
-          landingSections.length > 0 ? (
-            <ChurchLanding 
+          <div className="container" style={{ paddingTop: '20px' }}>
+            <AutenticasPromo 
               config={homepageConfig} 
-              sections={landingSections}
-              onGoToTickets={handleGoToTickets}
+              onScrollToMap={() => {
+                setCurrentView('home');
+              }}
             />
-          ) : (
-            <div className="container" style={{ paddingTop: '20px' }}>
-              <AutenticasPromo 
-                config={homepageConfig} 
-                onScrollToMap={() => {
-                  setCurrentView('home');
-                }}
-              />
-            </div>
-          )
+          </div>
         )}
 
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
