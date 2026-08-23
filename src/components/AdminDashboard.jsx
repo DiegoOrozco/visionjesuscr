@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageConfig = {}, onSaveConfig }) {
+export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageConfig = {}, onSaveConfig, sections = [], onSaveSections }) {
   // 1. ALL HOOKS MUST BE DECLARED AT THE VERY TOP
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +32,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [savingPricing, setSavingPricing] = useState(false);
   const [pricingSuccessMsg, setPricingSuccessMsg] = useState('');
 
+  const [footerContacts, setFooterContacts] = useState([]);
+  const [footerSocials, setFooterSocials] = useState([]);
+  const [navbarLinks, setNavbarLinks] = useState([]);
+
   // Config editing state
   const [configFields, setConfigFields] = useState({
     hero_bg: '',
@@ -47,6 +51,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     contact_email: '',
     contact_phone_1: '',
     contact_phone_2: '',
+    maps_google_url: '',
+    maps_waze_url: '',
+    navbar_links: '[]',
     autenticas_hero_bg: '',
     autenticas_title: '',
     autenticas_subtitle: '',
@@ -106,6 +113,97 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [selectedAttendeesModal, setSelectedAttendeesModal] = useState(null);
   const [editingAmountId, setEditingAmountId] = useState(null);
   const [editingAmountValue, setEditingAmountValue] = useState(0);
+  const [reassigningAttendeeId, setReassigningAttendeeId] = useState(null);
+  const [freeSeatsForReassign, setFreeSeatsForReassign] = useState([]);
+  const [selectedNewSeat, setSelectedNewSeat] = useState('');
+  const [reassigningLoading, setReassigningLoading] = useState(false);
+
+  const [localSections, setLocalSections] = useState([]);
+  const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [previewDeviceMode, setPreviewDeviceMode] = useState('desktop');
+  const [builderPagePath, setBuilderPagePath] = useState('/');
+  const [builderSuccessMsg, setBuilderSuccessMsg] = useState('');
+  const [savingBuilder, setSavingBuilder] = useState(false);
+
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [mediaTarget, setMediaTarget] = useState(null);
+  const [mediaList, setMediaList] = useState([]);
+  const [mediaSearch, setMediaSearch] = useState('');
+  const [loadingMedia, setLoadingMedia] = useState(false);
+
+  const initializeDefaultSectionsForPath = (path) => {
+    if (path === '/autenticas') {
+      return [
+        {
+          id: 'sec_hero_autenticas',
+          type: 'hero',
+          content: {
+            title: homepageConfig.autenticas_title || 'AUTÉNTICAS',
+            subtitle: homepageConfig.autenticas_subtitle || 'CONGRESO DE MUJERES',
+            bgUrl: homepageConfig.autenticas_hero_bg || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1600',
+            buttons: [{ id: '1', label: 'Comprar Entradas', url: '#map-selection-section', style: 'primary' }]
+          },
+          styles: { backgroundColor: '#2C1A0E', textColor: '#FFFFFF', accentColor: '#FAF5EF' }
+        },
+        {
+          id: 'sec_desc_autenticas',
+          type: 'image_text',
+          content: {
+            title: 'Acerca del Congreso',
+            text: homepageConfig.autenticas_description || 'Un congreso especial diseñado para empoderar, sanar y restaurar la vida de cada mujer...',
+            bgUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+            imagePosition: 'left'
+          },
+          styles: { backgroundColor: '#FFFFFF', textColor: '#2C1A0E', accentColor: '#2C1A0E' }
+        },
+        {
+          id: 'sec_details_autenticas',
+          type: 'custom_text',
+          content: {
+            title: 'Detalles del Evento',
+            text: `📅 Fecha: ${homepageConfig.autenticas_date_info || 'Por anunciar'}\n📍 Lugar: ${homepageConfig.autenticas_place_info || 'Por anunciar'}\n💰 Inversión: ${homepageConfig.autenticas_price_info || 'Por anunciar'}`
+          },
+          styles: { backgroundColor: '#FAF5EF', textColor: '#2C1A0E', accentColor: '#2C1A0E' }
+        }
+      ];
+    } else if (path === '/sanados' || path === '/modelo' || path === '/move' || path === '/tienda') {
+      const pageName = path.replace('/', '').toUpperCase();
+      return [
+        {
+          id: `sec_hero_${pageName}`,
+          type: 'hero',
+          content: {
+            title: `CONGRESO ${pageName}`,
+            subtitle: 'Página oficial en construcción',
+            bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+            buttons: []
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#0033FF' }
+        }
+      ];
+    }
+    return [];
+  };
+
+  const fetchSectionsForPath = async (path) => {
+    try {
+      const res = await fetch(`${API_URL}/api/landing/sections?path=${encodeURIComponent(path)}`);
+      const data = await res.json();
+      if (data.success) {
+        if (data.sections && data.sections.length > 0) {
+          setLocalSections(data.sections);
+        } else {
+          setLocalSections(initializeDefaultSectionsForPath(path));
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching sections for path:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchSectionsForPath(builderPagePath);
+  }, [builderPagePath]);
 
   const formatCRC = (val) => `₡${Number(val).toLocaleString('es-CR')}`;
 
@@ -140,6 +238,328 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
     } catch (err) {
       alert('Error de red al intentar actualizar el monto.');
+    }
+  };
+
+  const handleOpenReassignSeat = async (attendee, reservation) => {
+    setReassigningAttendeeId(attendee.id);
+    setSelectedNewSeat('');
+    setFreeSeatsForReassign([]);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/zones/${reservation.zone_id}/free-seats`);
+      const data = await res.json();
+      if (data.success) {
+        setFreeSeatsForReassign(data.freeSeats || []);
+      }
+    } catch (err) {
+      console.error('Error fetching free seats:', err);
+    }
+  };
+
+  const handleReassignSeat = async (attendeeId) => {
+    if (!selectedNewSeat) {
+      alert('Por favor selecciona un asiento nuevo.');
+      return;
+    }
+    setReassigningLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/attendees/${attendeeId}/reassign-seat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_ticket_code: selectedNewSeat })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReassigningAttendeeId(null);
+        fetchReservations(); // Refresh to show new seat
+      } else {
+        alert(data.message || 'Error al reasignar el asiento.');
+      }
+    } catch (err) {
+      alert('Error de red al intentar reasignar el asiento.');
+    } finally {
+      setReassigningLoading(false);
+    }
+  };
+
+  const parseTicketCode = (ticketCode) => {
+    const match = ticketCode.match(/^([A-Z\-]+)-(\d+)$/);
+    if (!match) return { rowLabel: 'Otro', seatNum: ticketCode };
+    const prefix = match[1];
+    const queueIndex = parseInt(match[2], 10);
+    const getRowSeat = (qIndex, seatsPerRow, offsetRows = 0) => {
+      const zeroBased = qIndex - 1;
+      const rowIndex = Math.floor(zeroBased / seatsPerRow) - offsetRows;
+      const seatNumber = (zeroBased % seatsPerRow) + 1;
+      return { rowIndex, seatNumber };
+    };
+    let rowLabel = "", seatNum = 0;
+    if (prefix === 'VIP-CTR') {
+      const r = getRowSeat(queueIndex, 9, 2);
+      rowLabel = `Fila ${r.rowIndex + 3}`; seatNum = r.seatNumber;
+    } else if (prefix === 'VIP-IZQ' || prefix === 'VIP-DER') {
+      const r = getRowSeat(queueIndex, 8, 0);
+      rowLabel = `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else if (prefix === 'GEN-CTR') {
+      const r = getRowSeat(queueIndex, 15, 0);
+      const labels = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+      rowLabel = labels[r.rowIndex] || `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else if (prefix === 'GEN-IZQ' || prefix === 'GEN-DER') {
+      const r = getRowSeat(queueIndex, 10, 0);
+      const labels = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+      rowLabel = labels[r.rowIndex] || `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else {
+      return { rowLabel: 'Otro', seatNum: ticketCode };
+    }
+    return { rowLabel, seatNum };
+  };
+
+  const fetchMediaList = async () => {
+    setLoadingMedia(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/media`);
+      const data = await res.json();
+      if (data.success) {
+        setMediaList(data.media || []);
+      }
+    } catch (e) {
+      console.error('Error fetching media:', e);
+    } finally {
+      setLoadingMedia(false);
+    }
+  };
+
+  const handleMediaUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchMediaList();
+      } else {
+        alert(data.message || 'Error al subir el archivo.');
+      }
+    } catch (err) {
+      alert('Error de red al subir el archivo.');
+    }
+  };
+
+  const handleMediaDelete = async (filename) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este archivo de forma permanente de tu servidor?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/media/${encodeURIComponent(filename)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchMediaList();
+      } else {
+        alert(data.message || 'Error al eliminar el archivo.');
+      }
+    } catch (err) {
+      alert('Error de red.');
+    }
+  };
+
+  const openMediaLibrary = (target) => {
+    setMediaTarget(target);
+    setShowMediaLibrary(true);
+    fetchMediaList();
+  };
+
+  const selectMediaItem = (url) => {
+    if (mediaTarget) {
+      const [type, secId, field] = mediaTarget;
+      if (type === 'section') {
+        setLocalSections(prev => prev.map(s => {
+          if (s.id === secId) {
+            return {
+              ...s,
+              content: {
+                ...s.content,
+                [field]: url
+              }
+            };
+          }
+          return s;
+        }));
+      }
+    }
+    setShowMediaLibrary(false);
+    setMediaTarget(null);
+  };
+
+  const handleMoveSection = (index, direction) => {
+    const newSections = [...localSections];
+    if (direction === 'up' && index > 0) {
+      const temp = newSections[index];
+      newSections[index] = newSections[index - 1];
+      newSections[index - 1] = temp;
+    } else if (direction === 'down' && index < newSections.length - 1) {
+      const temp = newSections[index];
+      newSections[index] = newSections[index + 1];
+      newSections[index + 1] = temp;
+    }
+    setLocalSections(newSections);
+  };
+
+  const handleDeleteSection = (id) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta sección de la página principal?')) {
+      const newSections = localSections.filter(s => s.id !== id);
+      setLocalSections(newSections);
+      if (selectedSectionId === id) setSelectedSectionId(null);
+    }
+  };
+
+  const handleAddSection = (type) => {
+    let newSec = {
+      id: `sec_${type}_${Date.now()}`,
+      type: type,
+      content: {},
+      styles: {
+        backgroundColor: '#030812',
+        textColor: '#FFFFFF',
+        accentColor: '#0033FF'
+      }
+    };
+
+    if (type === 'hero') {
+      newSec.content = {
+        title: 'Nueva Portada',
+        subtitle: 'Descripción o lema de la portada',
+        bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+        buttons: []
+      };
+    } else if (type === 'news') {
+      newSec.content = { title: 'Noticias y Eventos' };
+    } else if (type === 'pillars') {
+      newSec.content = {
+        title: 'Nuestros Valores',
+        subtitle: 'Subtítulo del pilar',
+        pillars: [
+          { id: '1', title: 'Ejemplo 1', text: 'Descripción de ejemplo...', icon: 'Compass' }
+        ]
+      };
+    } else if (type === 'schedules') {
+      newSec.content = {
+        title: 'Horarios',
+        bgUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600',
+        schedules: []
+      };
+    } else if (type === 'custom_text') {
+      newSec.content = {
+        title: 'Bloque de Texto',
+        text: 'Escribe aquí tu contenido personalizado para la página principal.'
+      };
+    } else if (type === 'cta') {
+      newSec.content = {
+        title: '¡Llamado a la Acción!',
+        bgUrl: '',
+        buttonText: 'Hacer clic aquí',
+        buttonUrl: '/autenticas'
+      };
+    } else if (type === 'image_text') {
+      newSec.content = {
+        title: 'Sección de Imagen y Texto',
+        text: 'Contenido explicativo...',
+        bgUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1000',
+        imagePosition: 'left'
+      };
+    } else if (type === 'grid') {
+      newSec.content = {
+        title: 'Cuadrícula',
+        columns: 4,
+        cells: [
+          { title: 'Principal', text: 'Elemento destacado', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 2 },
+          { title: 'Secundario 1', text: 'Descripción breve', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 },
+          { title: 'Secundario 2', text: 'Descripción breve', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 }
+        ]
+      };
+    }
+
+    setLocalSections([...localSections, newSec]);
+    setSelectedSectionId(newSec.id);
+  };
+
+  const handleUpdateSectionContent = (key, value) => {
+    setLocalSections(prev => prev.map(s => {
+      if (s.id === selectedSectionId) {
+        return {
+          ...s,
+          content: {
+            ...s.content,
+            [key]: value
+          }
+        };
+      }
+      return s;
+    }));
+  };
+
+  const handleUpdateSectionStyles = (key, value) => {
+    setLocalSections(prev => prev.map(s => {
+      if (s.id === selectedSectionId) {
+        return {
+          ...s,
+          styles: {
+            ...s.styles,
+            [key]: value
+          }
+        };
+      }
+      return s;
+    }));
+  };
+
+  const handleSavePageLayout = async () => {
+    setSavingBuilder(true);
+    setBuilderSuccessMsg('');
+    try {
+      const res = await fetch(`${API_URL}/api/admin/landing/sections`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sections: localSections, page_path: builderPagePath })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBuilderSuccessMsg('¡Estructura y diseño de la página guardados con éxito!');
+        if (onSaveSections) onSaveSections();
+      } else {
+        alert(data.message || 'Error al guardar el diseño de la página.');
+      }
+    } catch (err) {
+      alert('Error de red al guardar el diseño.');
+    } finally {
+      setSavingBuilder(false);
+    }
+  };
+
+  const handleSectionImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.url) {
+        handleUpdateSectionContent('bgUrl', data.url);
+      } else {
+        alert('Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir imagen.');
     }
   };
 
@@ -221,6 +641,54 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
       setLocalAutenticasGallery(parsedAutenticasGallery || []);
 
+      let parsedContacts = [];
+      try {
+        if (homepageConfig.footer_contacts) {
+          parsedContacts = JSON.parse(homepageConfig.footer_contacts);
+        }
+      } catch(e) {}
+      if (parsedContacts.length === 0) {
+        parsedContacts = [
+          { label: 'Correo', value: homepageConfig.contact_email || 'info@somosimpact.com', type: 'email' },
+          { label: 'Teléfono', value: homepageConfig.contact_phone_1 || '+506 4115 1212', type: 'phone' },
+          { label: 'WhatsApp', value: homepageConfig.contact_phone_2 || '+506 6453 1212', type: 'phone' }
+        ];
+      }
+      setFooterContacts(parsedContacts);
+
+      let parsedSocials = [];
+      try {
+        if (homepageConfig.footer_socials) {
+          parsedSocials = JSON.parse(homepageConfig.footer_socials);
+        }
+      } catch(e) {}
+      if (parsedSocials.length === 0) {
+        parsedSocials = [
+          { platform: 'facebook', url: homepageConfig.social_fb || 'https://facebook.com/visionjesus' },
+          { platform: 'instagram', url: homepageConfig.social_ig || 'https://instagram.com/visionjesus' },
+          { platform: 'youtube', url: homepageConfig.social_yt || 'https://youtube.com/visionjesus' },
+          { platform: 'spotify', url: homepageConfig.social_spotify || 'https://spotify.com/visionjesus' }
+        ];
+      }
+      setFooterSocials(parsedSocials);
+
+      let parsedNavLinks = [];
+      try {
+        if (homepageConfig.navbar_links) {
+          parsedNavLinks = JSON.parse(homepageConfig.navbar_links);
+        }
+      } catch(e) {}
+      if (parsedNavLinks.length === 0) {
+        parsedNavLinks = [
+          { label: 'Inicio', url: '/', isButton: false },
+          { label: 'Congreso Mujeres', url: '/autenticas', isButton: false },
+          { label: 'Conocé la Visión', url: '#vision', isButton: false },
+          { label: 'Prédicas y Horarios', url: '#schedules', isButton: false },
+          { label: 'Contacto', url: '#footer', isButton: false }
+        ];
+      }
+      setNavbarLinks(parsedNavLinks);
+
       setConfigFields({
         hero_bg: homepageConfig.hero_bg || '',
         hero_title: homepageConfig.hero_title || '',
@@ -235,6 +703,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         contact_email: homepageConfig.contact_email || '',
         contact_phone_1: homepageConfig.contact_phone_1 || '',
         contact_phone_2: homepageConfig.contact_phone_2 || '',
+        maps_google_url: homepageConfig.maps_google_url || '',
+        maps_waze_url: homepageConfig.maps_waze_url || '',
+        navbar_links: homepageConfig.navbar_links || '[]',
         autenticas_hero_bg: homepageConfig.autenticas_hero_bg || '',
         autenticas_title: homepageConfig.autenticas_title || '',
         autenticas_subtitle: homepageConfig.autenticas_subtitle || '',
@@ -517,6 +988,31 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       alert('Error de red al guardar la configuración.');
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  const handleSaveFooterConfig = async () => {
+    const updatedConfig = {
+      ...configFields,
+      footer_contacts: JSON.stringify(footerContacts),
+      footer_socials: JSON.stringify(footerSocials),
+      navbar_links: JSON.stringify(navbarLinks)
+    };
+    try {
+      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: updatedConfig })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('¡Configuración de contacto y pie de página guardada con éxito!');
+        if (onSaveConfig) onSaveConfig(updatedConfig);
+      } else {
+        alert(data.message || 'Error al guardar la configuración.');
+      }
+    } catch (err) {
+      alert('Error de red al guardar la configuración.');
     }
   };
 
@@ -813,8 +1309,31 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const totalAllTickets = reservations.reduce((acc, r) => acc + r.quantity, 0);
   const pendingCount = reservations.filter(r => r.status === 'pendiente').length;
 
+  const neoCard = {
+    backgroundColor: '#FAF8F5',
+    borderRadius: '24px',
+    boxShadow: '9px 9px 20px rgba(163, 140, 110, 0.15), -9px -9px 20px rgba(255, 255, 255, 0.95)',
+    border: '1px solid rgba(255, 255, 255, 0.6)'
+  };
+
+  const neoInput = {
+    backgroundColor: '#FAF8F5',
+    borderRadius: '12px',
+    boxShadow: 'inset 3px 3px 6px rgba(163, 140, 110, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.95)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    outline: 'none'
+  };
+
+  const neoButton = {
+    backgroundColor: '#FAF8F5',
+    borderRadius: '12px',
+    boxShadow: '4px 4px 10px rgba(163, 140, 110, 0.12), -4px -4px 10px rgba(255, 255, 255, 0.95)',
+    border: '1px solid rgba(255, 255, 255, 0.6)',
+    cursor: 'pointer'
+  };
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '0 20px' }}>
+    <div style={{ maxWidth: activeTab === 'church_web' ? '100%' : '1200px', margin: '20px auto', padding: '0 20px', transition: 'max-width 0.3s ease' }}>
       
       {/* Header */}
       <div style={{
@@ -930,120 +1449,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           </button>
         )}
 
-        {/* Admin or Editor Autenticas */}
-        {(adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
-          <button
-            onClick={() => setActiveTab('autenticas')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'autenticas' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'autenticas' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Heart size={18} />
-            Congreso Auténticas
-          </button>
-        )}
 
-        {/* Admin or Editor Sanados */}
-        {(adminUser.role === 'admin' || adminUser.role === 'editor_sanados') && (
-          <button
-            onClick={() => setActiveTab('sanados')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'sanados' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'sanados' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Heart size={18} />
-            Sección Sanados
-          </button>
-        )}
-
-        {/* Admin or Editor Modelo */}
-        {(adminUser.role === 'admin' || adminUser.role === 'editor_modelo') && (
-          <button
-            onClick={() => setActiveTab('modelo')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'modelo' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'modelo' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Heart size={18} />
-            Sección Modelo
-          </button>
-        )}
-
-        {/* Admin or Editor Move */}
-        {(adminUser.role === 'admin' || adminUser.role === 'editor_move') && (
-          <button
-            onClick={() => setActiveTab('move')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'move' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'move' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Heart size={18} />
-            Sección Move
-          </button>
-        )}
-
-        {/* Admin or Editor Tienda */}
-        {(adminUser.role === 'admin' || adminUser.role === 'editor_tienda') && (
-          <button
-            onClick={() => setActiveTab('tienda')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'tienda' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'tienda' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Heart size={18} />
-            Sección Tienda
-          </button>
-        )}
 
         {/* Only admin role can manage users */}
         {adminUser.role === 'admin' && (
@@ -1437,514 +1843,1281 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         </>
       )}
 
-      {/* TAB 2: CHURCH HOME WEB CONFIGURATION EDITOR */}
+      {/* TAB 2: CHURCH HOME WEB CONFIGURATION EDITOR (PAGE BUILDER) */}
       {activeTab === 'church_web' && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
-          <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
-            Editar Portada e Información de la Iglesia
-          </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
-            Modifica en tiempo real el fondo de la portada, títulos, horarios semanales y redes de contacto.
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.6rem', color: 'var(--accent-coffee)', marginBottom: '6px' }}>
+                Constructor de Página de Inicio (Page Builder)
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                Modifica libremente el orden, contenido y diseño visual de las secciones del sitio principal.
+              </p>
+            </div>
+            <button 
+              onClick={handleSavePageLayout}
+              disabled={savingBuilder}
+              className="btn-primary"
+              style={{ padding: '12px 28px', fontSize: '0.95rem', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)', boxShadow: '0 4px 15px rgba(0,51,255,0.4)', borderRadius: '50px' }}
+            >
+              {savingBuilder ? 'Guardando...' : 'Guardar Todo el Diseño'}
+            </button>
+          </div>
 
-          {saveSuccessMsg && (
-            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
-              {saveSuccessMsg}
+          {builderSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '24px', fontWeight: 700 }}>
+              {builderSuccessMsg}
             </div>
           )}
 
-          <form onSubmit={handleSaveConfigSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-              
-              {/* SECTION: HERO BANNER */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '10px' }}>
-                <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Banner de Bienvenida (Hero)</h4>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal de Portada (Opcional)</label>
-                <input type="text" name="hero_title" value={configFields.hero_title} onChange={handleConfigChange} placeholder="Dejar vacío si la imagen ya tiene texto" />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Lema (Opcional)</label>
-                <input type="text" name="hero_subtitle" value={configFields.hero_subtitle} onChange={handleConfigChange} placeholder="Dejar vacío si no deseas texto" />
-              </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>
-                  Fondo de Portada (Imagen o Video MP4/WebM)
+            {/* PAGE PATH SELECTOR */}
+            <div style={{ marginBottom: '24px', backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)', display: 'flex', justifyBetween: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 850, color: 'var(--accent-coffee)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Selecciona la Página / Ruta a Editar
                 </label>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input 
-                    type="text" 
-                    name="hero_bg" 
-                    value={configFields.hero_bg} 
-                    onChange={handleConfigChange} 
-                    placeholder="URL de imagen/video (o subir archivo mp4/jpg)" 
-                    style={{ flex: 1 }}
-                  />
-                  <label style={{
-                    backgroundColor: 'var(--accent-coffee)',
-                    color: '#FFFFFF',
-                    padding: '12px 20px',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontWeight: 800,
-                    fontSize: '0.88rem',
-                    display: 'inline-block',
-                    textAlign: 'center'
-                  }}>
-                    {uploadingHero ? 'Subiendo...' : 'Subir Fondo (Foto / Video)'}
-                    <input 
-                      type="file" 
-                      accept="image/*,video/*" 
-                      onChange={handleHeroUpload} 
-                      style={{ display: 'none' }} 
-                      disabled={uploadingHero}
-                    />
-                  </label>
-                </div>
-                {configFields.hero_bg && (
-                  <div style={{ marginTop: '10px' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vista previa:</span>
-                    {configFields.hero_bg.match(/\.(mp4|webm|mov|ogg)($|\?)/i) ? (
-                      <video 
-                        src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
-                        controls
-                        muted
-                        style={{ display: 'block', maxHeight: '140px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
-                      />
-                    ) : (
-                      <img 
-                        src={configFields.hero_bg.startsWith('http') || configFields.hero_bg.startsWith('/') ? (configFields.hero_bg.startsWith('/') ? `${API_URL}${configFields.hero_bg}` : configFields.hero_bg) : `${API_URL}/${configFields.hero_bg}`} 
-                        alt="Vista previa fondo" 
-                        style={{ display: 'block', maxHeight: '120px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
-                      />
-                    )}
-                  </div>
-                )}
+                <select 
+                  value={builderPagePath} 
+                  onChange={(e) => {
+                    setBuilderPagePath(e.target.value);
+                    setSelectedSectionId(null);
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    padding: '10px 14px', 
+                    borderRadius: '10px', 
+                    border: '2px solid var(--accent-beige-border)', 
+                    fontWeight: 800, 
+                    fontSize: '0.9rem',
+                    backgroundColor: '#FAF8F5',
+                    color: 'var(--accent-coffee)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="/">Inicio (Página Principal)</option>
+                  <option value="/autenticas">Congreso Auténticas (/autenticas)</option>
+                  <option value="/sanados">Congreso Sanados (/sanados)</option>
+                  <option value="/modelo">Congreso Modelo (/modelo)</option>
+                  <option value="/move">Congreso Move (/move)</option>
+                  <option value="/tienda">Tienda Oficial (/tienda)</option>
+                </select>
               </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Sobre Nosotros / Breve Introducción</label>
-                <textarea name="about_text" rows="3" value={configFields.about_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', alignSelf: 'flex-end' }}>
+                <span style={{ fontSize: '0.82rem', padding: '6px 12px', backgroundColor: 'var(--accent-gold-light)', color: 'var(--accent-coffee)', borderRadius: '30px', fontWeight: 800 }}>
+                  Ruta Activa: <code>{builderPagePath}</code>
+                </span>
               </div>
+            </div>
 
-              {/* SCHEDULE BG IMAGE */}
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo — Sección Horarios</label>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input 
-                    type="text" 
-                    name="schedule_bg" 
-                    value={configFields.schedule_bg} 
-                    onChange={handleConfigChange} 
-                    placeholder="URL de la imagen o ruta del archivo" 
-                    style={{ flex: 1 }}
-                  />
-                  <label style={{
-                    backgroundColor: 'var(--accent-coffee)',
-                    color: '#FFFFFF',
-                    padding: '12px 20px',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontWeight: 800,
-                    fontSize: '0.88rem',
-                    display: 'inline-block',
-                    textAlign: 'center'
-                  }}>
-                    {uploadingScheduleBg ? 'Subiendo...' : 'Subir Fondo Horarios'}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleScheduleBgUpload} 
-                      style={{ display: 'none' }} 
-                      disabled={uploadingScheduleBg}
-                    />
-                  </label>
-                </div>
-                {configFields.schedule_bg && (
-                  <div style={{ marginTop: '10px' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vista previa:</span>
-                    <img 
-                      src={configFields.schedule_bg.startsWith('http') || configFields.schedule_bg.startsWith('/') ? (configFields.schedule_bg.startsWith('/') ? `${API_URL}${configFields.schedule_bg}` : configFields.schedule_bg) : `${API_URL}/${configFields.schedule_bg}`} 
-                      alt="Vista previa fondo horarios" 
-                      style={{ display: 'block', maxHeight: '100px', borderRadius: '12px', marginTop: '4px', border: '1px solid #DDD' }} 
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* SECTION: WEEKLY SCHEDULES */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Horarios de Servicios Semanales</h4>
-                  <button 
-                    type="button" 
-                    onClick={handleAddSchedule}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                  >
-                    Agregar Culto / Servicio
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {localSchedules.length === 0 ? (
-                  <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px', backgroundColor: '#FAF8F5' }}>
-                    <p style={{ margin: '0 0 6px 0', fontWeight: 700, color: 'var(--accent-coffee)' }}>No hay horarios en texto.</p>
-                    <span style={{ fontSize: '0.85rem' }}>La sección de la página principal mostrará directamente la imagen de fondo subida arriba.</span>
-                  </div>
-                ) : (
-                  localSchedules.map((s, idx) => (
-                    <div key={s.id || idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', backgroundColor: '#FAF8F5', padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)' }}>
-                      <span style={{ fontWeight: 800, color: 'var(--accent-coffee)', minWidth: '24px' }}>#{idx + 1}</span>
-                      <input 
-                        type="text" 
-                        value={s.text} 
-                        onChange={(e) => handleScheduleTextChange(s.id, e.target.value)} 
-                        placeholder="Ej. DOMINGOS 9:00 AM" 
-                        required 
-                        style={{ flex: 1, minWidth: '180px', padding: '8px' }}
-                      />
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        <input 
-                          type="checkbox" 
-                          checked={!!s.isVirtual} 
-                          onChange={() => handleScheduleVirtualToggle(s.id)}
-                        />
-                        ¿Virtual? (Spotify)
-                      </label>
-                      <button 
-                        type="button" 
-                        onClick={() => handleRemoveSchedule(s.id)}
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'stretch', marginTop: '10px', width: '100%' }}>
+            
+            {/* LEFT COLUMN: SIDEBAR EDITOR (WordPress Style) */}
+            <div style={{ width: '380px', display: 'flex', flexDirection: 'column', gap: '20px', flexShrink: 0 }}>
+              
+              {/* SECTIONS LIST & REORDERING */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '20px', border: '1px solid var(--accent-beige-border)' }}>
+                <h4 style={{ color: 'var(--accent-coffee)', marginTop: 0, marginBottom: '14px', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Estructura de la Página</h4>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {localSections.length === 0 ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic', textAlign: 'center', padding: '16px', border: '1px dashed #CCC', borderRadius: '10px' }}>
+                      No hay secciones añadidas aún en esta página. ¡Agrega una abajo!
+                    </div>
+                  ) : (
+                    localSections.map((sec, idx) => (
+                      <div 
+                        key={sec.id} 
+                        onClick={() => setSelectedSectionId(sec.id)}
                         style={{
-                          backgroundColor: 'var(--color-red-light)',
-                          color: 'var(--color-red)',
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '8px 14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 14px',
+                          backgroundColor: selectedSectionId === sec.id ? 'rgba(0, 51, 255, 0.08)' : '#FFFFFF',
+                          border: selectedSectionId === sec.id ? '2px solid #0033FF' : '1px solid var(--accent-beige-border)',
+                          borderRadius: '12px',
                           cursor: 'pointer',
-                          fontWeight: 700,
-                          fontSize: '0.85rem',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap'
+                          transition: 'all 0.2s ease',
+                          boxShadow: 'var(--shadow-sm)'
                         }}
                       >
-                        Eliminar
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#977DFF', backgroundColor: '#EAEDF8', width: '22px', height: '22px', borderRadius: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--accent-coffee)' }}>
+                              {sec.type === 'hero' && 'Portada (Hero)'}
+                              {sec.type === 'news' && 'Noticias y Eventos'}
+                              {sec.type === 'pillars' && 'Pilares de la Visión'}
+                              {sec.type === 'schedules' && 'Horarios de Servicios'}
+                              {sec.type === 'custom_text' && 'Bloque de Texto'}
+                              {sec.type === 'cta' && 'Llamado a la Acción'}
+                              {sec.type === 'image_text' && 'Imagen + Texto'}
+                            </strong>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>{sec.type}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '4px' }} onClick={e => e.stopPropagation()}>
+                          <button 
+                            type="button"
+                            onClick={() => handleMoveSection(idx, 'up')}
+                            disabled={idx === 0}
+                            style={{ padding: '4px', borderRadius: '6px', backgroundColor: '#F3F4F6', color: idx === 0 ? '#CCC' : '#4B5563', border: 'none', cursor: 'pointer' }}
+                          >
+                            <ArrowUp size={12} />
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => handleMoveSection(idx, 'down')}
+                            disabled={idx === localSections.length - 1}
+                            style={{ padding: '4px', borderRadius: '6px', backgroundColor: '#F3F4F6', color: idx === localSections.length - 1 ? '#CCC' : '#4B5563', border: 'none', cursor: 'pointer' }}
+                          >
+                            <ArrowDown size={12} />
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => handleDeleteSection(sec.id)}
+                            style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', border: 'none', cursor: 'pointer' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* ADD COMPONENT SELECTOR */}
+                <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '14px' }}>
+                  <h5 style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Agregar Sección</h5>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                    <button type="button" onClick={() => handleAddSection('hero')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Portada
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('news')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Noticias
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('pillars')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Pilares
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('schedules')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Horarios
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('custom_text')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Texto Libre
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('cta')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Banner CTA
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('image_text')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', gridColumn: '1 / -1' }}>
+                      <Plus size={12} /> Imagen + Texto de doble columna
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('grid')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', gridColumn: '1 / -1' }}>
+                      <Plus size={12} /> Cuadrícula (Grid) Multiuso
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* EDITOR PANEL */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '20px', border: '1px solid var(--accent-beige-border)', minHeight: '320px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                {!selectedSectionId ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
+                    <Settings size={36} style={{ opacity: 0.3, marginBottom: '10px' }} />
+                    <p style={{ fontWeight: 700, margin: 0, fontSize: '0.85rem' }}>Selecciona una sección a la izquierda o arriba para configurar sus contenidos y colores.</p>
+                  </div>
+                ) : (
+                  (() => {
+                    const sec = localSections.find(s => s.id === selectedSectionId);
+                    if (!sec) return null;
+
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '10px' }}>
+                          <h4 style={{ margin: 0, color: 'var(--accent-coffee)', fontWeight: 800, fontSize: '0.9rem' }}>
+                            Configurar: {sec.type.toUpperCase()}
+                          </h4>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', backgroundColor: '#EAEDF8', borderRadius: '50px', color: '#977DFF' }}>ID: {sec.id.substring(0, 8)}</span>
+                        </div>
+
+                        {/* EDIT CONTENT FORM */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, overflowY: 'auto', maxHeight: '420px', paddingRight: '4px' }}>
+                          
+                          {/* Title Field */}
+                          {sec.type !== 'news' && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Título</label>
+                              <input 
+                                type="text" 
+                                value={sec.content.title || ''} 
+                                onChange={(e) => handleUpdateSectionContent('title', e.target.value)} 
+                                style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                              />
+                            </div>
+                          )}
+
+                          {/* Subtitle Field */}
+                          {(sec.type === 'hero' || sec.type === 'pillars') && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Subtítulo</label>
+                              <input 
+                                type="text" 
+                                value={sec.content.subtitle || ''} 
+                                onChange={(e) => handleUpdateSectionContent('subtitle', e.target.value)} 
+                                style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                              />
+                            </div>
+                          )}
+
+                          {/* Image/Video URL with Upload */}
+                          {(sec.type === 'hero' || sec.type === 'schedules' || sec.type === 'cta' || sec.type === 'image_text') && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Imagen / Fondo URL</label>
+                              <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                                <input 
+                                  type="text" 
+                                  value={sec.content.bgUrl || ''} 
+                                  onChange={(e) => handleUpdateSectionContent('bgUrl', e.target.value)} 
+                                  style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)', fontSize: '0.8rem' }}
+                                  placeholder="http://..."
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => openMediaLibrary(['section', sec.id, 'bgUrl'])}
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', backgroundColor: '#EFE3D3', padding: '8px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }}
+                                >
+                                  <Download size={12} /> Medios
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Custom Textarea Content */}
+                          {(sec.type === 'custom_text' || sec.type === 'image_text') && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Texto del Párrafo</label>
+                              <textarea 
+                                rows="4"
+                                value={sec.content.text || ''} 
+                                onChange={(e) => handleUpdateSectionContent('text', e.target.value)} 
+                                style={{ width: '100%', border: '1px solid var(--accent-beige-border)', borderRadius: '8px', padding: '8px', fontFamily: 'inherit', fontSize: '0.85rem' }}
+                              />
+                            </div>
+                          )}
+
+                          {/* CTA Fields */}
+                          {sec.type === 'cta' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Texto Botón</label>
+                                <input 
+                                  type="text" 
+                                  value={sec.content.buttonText || ''} 
+                                  onChange={(e) => handleUpdateSectionContent('buttonText', e.target.value)} 
+                                  style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Ruta Enlace</label>
+                                <input 
+                                  type="text" 
+                                  value={sec.content.buttonUrl || ''} 
+                                  onChange={(e) => handleUpdateSectionContent('buttonUrl', e.target.value)} 
+                                  style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Image Position */}
+                          {sec.type === 'image_text' && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Posición de la Imagen</label>
+                              <select 
+                                value={sec.content.imagePosition || 'left'} 
+                                onChange={(e) => handleUpdateSectionContent('imagePosition', e.target.value)}
+                                style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                              >
+                                <option value="left">Izquierda</option>
+                                <option value="right">Derecha</option>
+                              </select>
+                            </div>
+                          )}
+
+                          {/* Pillars Array Editor */}
+                          {sec.type === 'pillars' && (
+                            <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Tarjetas de Pilares</h5>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const list = sec.content.pillars || [];
+                                    handleUpdateSectionContent('pillars', [...list, { id: Date.now().toString(), title: 'Nuevo Pilar', text: 'Descripción...', icon: 'Compass' }]);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '2px 6px', fontSize: '0.7rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                  + Agregar
+                                </button>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {(sec.content.pillars || []).map((p, pIdx) => (
+                                  <div key={p.id || pIdx} style={{ backgroundColor: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', marginBottom: '6px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={p.title || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pillars];
+                                          list[pIdx].title = e.target.value;
+                                          handleUpdateSectionContent('pillars', list);
+                                        }}
+                                        style={{ fontWeight: 700, padding: '4px', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #CCC', flex: 1 }}
+                                        placeholder="Título"
+                                      />
+                                      <button 
+                                        type="button"
+                                        onClick={() => {
+                                          const list = sec.content.pillars.filter((_, i) => i !== pIdx);
+                                          handleUpdateSectionContent('pillars', list);
+                                        }}
+                                        style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                    <textarea 
+                                      rows="2"
+                                      value={p.text || ''} 
+                                      onChange={(e) => {
+                                        const list = [...sec.content.pillars];
+                                        list[pIdx].text = e.target.value;
+                                        handleUpdateSectionContent('pillars', list);
+                                      }}
+                                      style={{ width: '100%', fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      placeholder="Descripción..."
+                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                                      <label style={{ fontSize: '0.7rem', fontWeight: 700 }}>Icono:</label>
+                                      <select 
+                                        value={p.icon || 'Compass'} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pillars];
+                                          list[pIdx].icon = e.target.value;
+                                          handleUpdateSectionContent('pillars', list);
+                                        }}
+                                        style={{ fontSize: '0.7rem', padding: '2px', width: 'auto' }}
+                                      >
+                                        <option value="Compass">Compass</option>
+                                        <option value="Flame">Flame</option>
+                                        <option value="Users">Users</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Schedules Array Editor */}
+                          {sec.type === 'schedules' && (
+                            <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Horarios</h5>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const list = sec.content.schedules || [];
+                                    handleUpdateSectionContent('schedules', [...list, { id: Date.now().toString(), text: 'Servicio 7:00 PM', isVirtual: false }]);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '2px 6px', fontSize: '0.7rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                  + Agregar
+                                </button>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {(sec.content.schedules || []).map((s, sIdx) => (
+                                  <div key={s.id || sIdx} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#FFFFFF', padding: '6px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}>
+                                    <input 
+                                      type="text" 
+                                      value={s.text || ''} 
+                                      onChange={(e) => {
+                                        const list = [...sec.content.schedules];
+                                        list[sIdx].text = e.target.value;
+                                        handleUpdateSectionContent('schedules', list);
+                                      }}
+                                      style={{ flex: 1, padding: '4px', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      placeholder="Horario..."
+                                    />
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                                      <input 
+                                        type="checkbox" 
+                                        checked={s.isVirtual || false}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.schedules];
+                                          list[sIdx].isVirtual = e.target.checked;
+                                          handleUpdateSectionContent('schedules', list);
+                                        }}
+                                        style={{ width: 'auto' }}
+                                      />
+                                      Virt.
+                                    </label>
+                                    <button 
+                                      type="button"
+                                      onClick={() => {
+                                        const list = sec.content.schedules.filter((_, i) => i !== sIdx);
+                                        handleUpdateSectionContent('schedules', list);
+                                      }}
+                                      style={{ padding: '4px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Grid Array Editor */}
+                          {sec.type === 'grid' && (
+                            <>
+                              <div style={{ marginBottom: '10px' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Número de Columnas (Desktop)</label>
+                                <select 
+                                  value={sec.content.columns || 2}
+                                  onChange={(e) => handleUpdateSectionContent('columns', parseInt(e.target.value))}
+                                  style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}
+                                >
+                                  <option value={2}>2 Columnas</option>
+                                  <option value={3}>3 Columnas</option>
+                                  <option value={4}>4 Columnas</option>
+                                </select>
+                              </div>
+                              <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                  <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Celdas de la Cuadrícula</h5>
+                                  <button 
+                                    type="button"
+                                    onClick={() => {
+                                      const list = sec.content.cells || [];
+                                      handleUpdateSectionContent('cells', [...list, { title: 'Nueva Celda', text: '', imageUrl: '', buttonText: '', buttonUrl: '' }]);
+                                    }}
+                                    className="btn-secondary"
+                                    style={{ padding: '4px 8px', fontSize: '0.7rem' }}
+                                  >
+                                    + Agregar Celda
+                                  </button>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  {(sec.content.cells || []).map((cell, cIdx) => (
+                                    <div key={cIdx} style={{ backgroundColor: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid #EAEAEA', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Celda {cIdx + 1}</span>
+                                        <button 
+                                          type="button"
+                                          onClick={() => {
+                                            const list = sec.content.cells.filter((_, i) => i !== cIdx);
+                                            handleUpdateSectionContent('cells', list);
+                                          }}
+                                          style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem' }}
+                                        >
+                                          ✕ Eliminar
+                                        </button>
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+                                        <div style={{ flex: 1 }}>
+                                          <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, marginBottom: '2px', color: 'var(--accent-coffee)' }}>Ancho (Cols)</label>
+                                          <select 
+                                            value={cell.colSpan || 1}
+                                            onChange={(e) => {
+                                              const list = [...sec.content.cells];
+                                              list[cIdx].colSpan = parseInt(e.target.value);
+                                              handleUpdateSectionContent('cells', list);
+                                            }}
+                                            style={{ width: '100%', fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                          >
+                                            <option value={1}>1</option>
+                                            <option value={2}>2</option>
+                                            <option value={3}>3</option>
+                                            <option value={4}>4</option>
+                                          </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                          <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, marginBottom: '2px', color: 'var(--accent-coffee)' }}>Alto (Filas)</label>
+                                          <select 
+                                            value={cell.rowSpan || 1}
+                                            onChange={(e) => {
+                                              const list = [...sec.content.cells];
+                                              list[cIdx].rowSpan = parseInt(e.target.value);
+                                              handleUpdateSectionContent('cells', list);
+                                            }}
+                                            style={{ width: '100%', fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                          >
+                                            <option value={1}>1</option>
+                                            <option value={2}>2</option>
+                                            <option value={3}>3</option>
+                                            <option value={4}>4</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <input 
+                                        type="text" 
+                                        placeholder="Título (opcional)"
+                                        value={cell.title || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.cells];
+                                          list[cIdx].title = e.target.value;
+                                          handleUpdateSectionContent('cells', list);
+                                        }}
+                                        style={{ width: '100%', fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      />
+                                      <textarea 
+                                        rows="2"
+                                        placeholder="Texto descriptivo (opcional)"
+                                        value={cell.text || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.cells];
+                                          list[cIdx].text = e.target.value;
+                                          handleUpdateSectionContent('cells', list);
+                                        }}
+                                        style={{ width: '100%', fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC', fontFamily: 'inherit' }}
+                                      />
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input 
+                                          type="text" 
+                                          placeholder="URL de Imagen (opcional)"
+                                          value={cell.imageUrl || ''}
+                                          onChange={(e) => {
+                                            const list = [...sec.content.cells];
+                                            list[cIdx].imageUrl = e.target.value;
+                                            handleUpdateSectionContent('cells', list);
+                                          }}
+                                          style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        />
+                                        <button 
+                                          type="button" 
+                                          onClick={() => setMediaSelectCallback(() => (url) => {
+                                            const list = [...sec.content.cells];
+                                            list[cIdx].imageUrl = url;
+                                            handleUpdateSectionContent('cells', list);
+                                          })}
+                                          style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
+                                        >
+                                          Medios
+                                        </button>
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input 
+                                          type="text" 
+                                          placeholder="Texto Botón"
+                                          value={cell.buttonText || ''}
+                                          onChange={(e) => {
+                                            const list = [...sec.content.cells];
+                                            list[cIdx].buttonText = e.target.value;
+                                            handleUpdateSectionContent('cells', list);
+                                          }}
+                                          style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        />
+                                        <input 
+                                          type="text" 
+                                          placeholder="URL Botón"
+                                          value={cell.buttonUrl || ''}
+                                          onChange={(e) => {
+                                            const list = [...sec.content.cells];
+                                            list[cIdx].buttonUrl = e.target.value;
+                                            handleUpdateSectionContent('cells', list);
+                                          }}
+                                          style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {/* Hero Buttons Array Editor */}
+                          {sec.type === 'hero' && (
+                            <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Botones de Acción</h5>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const list = sec.content.buttons || [];
+                                    handleUpdateSectionContent('buttons', [...list, { id: Date.now().toString(), label: 'Nuevo Botón', url: '', style: 'primary' }]);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '2px 6px', fontSize: '0.7rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                  + Agregar
+                                </button>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(sec.content.buttons || []).map((b, bIdx) => (
+                                  <div key={b.id || bIdx} style={{ backgroundColor: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}>
+                                    <div style={{ display: 'flex', gap: '6px', marginBottom: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={b.label || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.buttons];
+                                          list[bIdx].label = e.target.value;
+                                          handleUpdateSectionContent('buttons', list);
+                                        }}
+                                        style={{ padding: '4px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CCC', width: '90px' }}
+                                        placeholder="Texto"
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={b.url || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.buttons];
+                                          list[bIdx].url = e.target.value;
+                                          handleUpdateSectionContent('buttons', list);
+                                        }}
+                                        style={{ padding: '4px', fontSize: '0.75rem', flex: 1, borderRadius: '4px', border: '1px solid #CCC' }}
+                                        placeholder="Enlace (ej: /autenticas)"
+                                      />
+                                      <button 
+                                        type="button"
+                                        onClick={() => {
+                                          const list = sec.content.buttons.filter((_, i) => i !== bIdx);
+                                          handleUpdateSectionContent('buttons', list);
+                                        }}
+                                        style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      <label style={{ fontSize: '0.65rem', fontWeight: 700 }}>Estilo:</label>
+                                      <select 
+                                        value={b.style || 'primary'} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.buttons];
+                                          list[bIdx].style = e.target.value;
+                                          handleUpdateSectionContent('buttons', list);
+                                        }}
+                                        style={{ fontSize: '0.65rem', padding: '1px', width: '80px' }}
+                                      >
+                                        <option value="primary">Primario</option>
+                                        <option value="secondary">Secundario</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                        </div>
+
+                        {/* EDIT SECTION STYLES */}
+                        <div style={{ borderTop: '2px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                          <h5 style={{ margin: '0 0 8px 0', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Diseño y Colores</h5>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>Fondo</label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                <input 
+                                  type="color" 
+                                  value={sec.styles.backgroundColor || '#030812'} 
+                                  onChange={(e) => handleUpdateSectionStyles('backgroundColor', e.target.value)} 
+                                  style={{ width: '30px', height: '26px', padding: '1px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{sec.styles.backgroundColor.substring(1, 5)}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>Texto</label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                <input 
+                                  type="color" 
+                                  value={sec.styles.textColor || '#FFFFFF'} 
+                                  onChange={(e) => handleUpdateSectionStyles('textColor', e.target.value)} 
+                                  style={{ width: '30px', height: '26px', padding: '1px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{sec.styles.textColor.substring(1, 5)}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>Acento</label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                <input 
+                                  type="color" 
+                                  value={sec.styles.accentColor || '#0033FF'} 
+                                  onChange={(e) => handleUpdateSectionStyles('accentColor', e.target.value)} 
+                                  style={{ width: '30px', height: '26px', padding: '1px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{sec.styles.accentColor.substring(1, 5)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })()
+                )}
+              </div>
+
+              {/* ACCORDION: BARRA DE NAVEGACIÓN (HEADER) */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '20px', border: '1px solid var(--accent-beige-border)' }}>
+                <h4 style={{ color: 'var(--accent-coffee)', marginTop: 0, marginBottom: '14px', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Barra de Navegación (Header)</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>Links del Menú</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setNavbarLinks([...navbarLinks, { label: 'Nuevo Link', url: '/', isButton: false }])}
+                      style={{ padding: '2px 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                      + Agregar Link
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {navbarLinks.map((link, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '4px', alignItems: 'center', backgroundColor: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid #EAEAEA' }}>
+                        <input 
+                          type="text" 
+                          value={link.label} 
+                          onChange={(e) => {
+                            const list = [...navbarLinks];
+                            list[idx].label = e.target.value;
+                            setNavbarLinks(list);
+                          }}
+                          placeholder="Texto del link"
+                          style={{ flex: 1, padding: '4px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}
+                        />
+                        <input 
+                          type="text" 
+                          value={link.url} 
+                          onChange={(e) => {
+                            const list = [...navbarLinks];
+                            list[idx].url = e.target.value;
+                            setNavbarLinks(list);
+                          }}
+                          placeholder="URL / ruta (#seccion o /pagina)"
+                          style={{ flex: 1.5, padding: '4px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}
+                        />
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={link.isButton || false}
+                            onChange={(e) => {
+                              const list = [...navbarLinks];
+                              list[idx].isButton = e.target.checked;
+                              setNavbarLinks(list);
+                            }}
+                          />
+                          Botón
+                        </label>
+                        <button 
+                          type="button" 
+                          onClick={() => setNavbarLinks(navbarLinks.filter((_, i) => i !== idx))}
+                          style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button 
+                    type="button" 
+                    onClick={handleSaveFooterConfig}
+                    className="btn-primary"
+                    style={{ marginTop: '6px', width: '100%', padding: '8px', fontSize: '0.8rem', fontWeight: 800, backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    Guardar Navbar
+                  </button>
+                </div>
+              </div>
+
+              {/* COLLAPSIBLE ACCORDION 3: GLOBAL FOOTER SETTINGS */}
+              <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '20px', border: '1px solid var(--accent-beige-border)' }}>
+                <h4 style={{ color: 'var(--accent-coffee)', marginTop: 0, marginBottom: '14px', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pie de Página (Footer)</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  
+                  {/* Address */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 750, marginBottom: '4px' }}>Dirección de la Iglesia</label>
+                    <textarea 
+                      rows="2"
+                      value={configFields.contact_address || ''} 
+                      onChange={(e) => setConfigFields({ ...configFields, contact_address: e.target.value })} 
+                      placeholder="Dirección física..."
+                      style={{ width: '100%', fontSize: '0.8rem', padding: '6px', borderRadius: '6px', border: '1px solid #CCC', fontFamily: 'inherit' }}
+                    />
+                  </div>
+
+                  {/* Maps Links */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 750, marginBottom: '4px' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#4285F4"><path d="M12 0C7.31 0 3.07 3.11 1.64 7.56c-.05.16-.1.33-.14.5L12 14l10.5-5.94c-.04-.17-.09-.34-.14-.5C20.93 3.11 16.69 0 12 0zm0 2a7.98 7.98 0 0 1 7.94 7H4.06A7.98 7.98 0 0 1 12 2zM1.08 9.13C.39 11.22 0 13.47 0 15.88 0 20.39 5.37 24 12 24s12-3.61 12-8.12c0-2.41-.39-4.66-1.08-6.75L12 15.06 1.08 9.13z"/></svg>
+                        Google Maps
+                      </label>
+                      <input 
+                        type="text"
+                        value={configFields.maps_google_url || ''} 
+                        onChange={(e) => setConfigFields({ ...configFields, maps_google_url: e.target.value })} 
+                        placeholder="https://maps.google.com/..."
+                        style={{ width: '100%', fontSize: '0.78rem', padding: '6px', borderRadius: '6px', border: '1px solid #CCC' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 750, marginBottom: '4px' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#33CCFF"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Waze
+                      </label>
+                      <input 
+                        type="text"
+                        value={configFields.maps_waze_url || ''} 
+                        onChange={(e) => setConfigFields({ ...configFields, maps_waze_url: e.target.value })} 
+                        placeholder="https://waze.com/ul/..."
+                        style={{ width: '100%', fontSize: '0.78rem', padding: '6px', borderRadius: '6px', border: '1px solid #CCC' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Contacts Array List */}
+                  <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>Contactos Directos</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setFooterContacts([...footerContacts, { label: 'Nuevo Contacto', value: '', type: 'phone' }])}
+                        style={{ padding: '2px 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        + Agregar
                       </button>
                     </div>
-                  ))
-                )}
-              </div>
 
-              {/* SECTION: DYNAMIC HERO BUTTONS */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Botones de Acción (Hero)</h4>
-                  <button 
-                    type="button" 
-                    onClick={handleAddButton}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                  >
-                    Agregar Botón
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {localButtons.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
-                    No hay botones creados. Presiona "Agregar Botón" para añadir uno.
-                  </div>
-                ) : (
-                  localButtons.map((btn, idx) => (
-                    <div key={btn.id || idx} style={{ backgroundColor: '#FAF8F5', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--accent-beige-border)' }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)', minWidth: '60px' }}>Botón #{idx + 1}</span>
-                        <select 
-                          value={btn.style || 'secondary'} 
-                          onChange={(e) => handleButtonChange(btn.id, 'style', e.target.value)}
-                          style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #CCC', fontSize: '0.85rem' }}
-                        >
-                          <option value="primary">Principal (Rojo)</option>
-                          <option value="secondary">Secundario (Oscuro)</option>
-                        </select>
-                        <button 
-                          type="button" 
-                          onClick={() => handleRemoveButton(btn.id)}
-                          style={{
-                            backgroundColor: 'var(--color-red-light)',
-                            color: 'var(--color-red)',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '6px 12px',
-                            cursor: 'pointer',
-                            fontWeight: 700,
-                            fontSize: '0.85rem',
-                            marginLeft: 'auto'
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Icono (opcional)</label>
-                          <input 
-                            type="text" 
-                            value={btn.emoji || ''} 
-                            onChange={(e) => handleButtonChange(btn.id, 'emoji', e.target.value)} 
-                            placeholder="Texto de icono" 
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Texto del Botón</label>
-                          <input 
-                            type="text" 
-                            value={btn.label || ''} 
-                            onChange={(e) => handleButtonChange(btn.id, 'label', e.target.value)} 
-                            placeholder="Congreso de Mujeres" 
-                            required
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>URL / Enlace</label>
-                          <input 
-                            type="text" 
-                            value={btn.url || ''} 
-                            onChange={(e) => handleButtonChange(btn.id, 'url', e.target.value)} 
-                            placeholder="/autenticas o https://..." 
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* SECTION: NEWS / EVENTS GALLERY */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Galería de Noticias / Eventos</h4>
-                  <button 
-                    type="button" 
-                    onClick={handleAddNews}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                  >
-                    Agregar Noticia / Evento
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {localNewsItems.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
-                    No hay noticias/eventos creados. Presiona "Agregar Noticia" para crear uno nuevo.
-                  </div>
-                ) : (
-                  localNewsItems.map((item, idx) => (
-                    <div key={item.id || idx} style={{ backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '14px', border: '1px solid var(--accent-beige-border)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--accent-coffee)' }}>Noticia #{idx + 1}</span>
-                        <button 
-                          type="button" 
-                          onClick={() => handleRemoveNews(item.id)}
-                          style={{
-                            backgroundColor: 'var(--color-red-light)',
-                            color: 'var(--color-red)',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '6px 12px',
-                            cursor: 'pointer',
-                            fontWeight: 700,
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Título</label>
-                          <input 
-                            type="text" 
-                            value={item.title || ''} 
-                            onChange={(e) => handleNewsChange(item.id, 'title', e.target.value)} 
-                            placeholder="Congreso Anual de Mujeres" 
-                            required
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Etiqueta / Badge (opcional)</label>
-                          <input 
-                            type="text" 
-                            value={item.badge || ''} 
-                            onChange={(e) => handleNewsChange(item.id, 'badge', e.target.value)} 
-                            placeholder="NUEVO, PRÓXIMO, EVENTO..." 
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: '10px' }}>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Descripción Breve</label>
-                        <textarea 
-                          rows="2" 
-                          value={item.description || ''} 
-                          onChange={(e) => handleNewsChange(item.id, 'description', e.target.value)} 
-                          placeholder="Breve descripción de la noticia o evento..."
-                          style={{ width: '100%', borderRadius: '8px', border: '1px solid #CCC', padding: '8px' }}
-                        ></textarea>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Enlace (al hacer click)</label>
-                          <input 
-                            type="text" 
-                            value={item.link || ''} 
-                            onChange={(e) => handleNewsChange(item.id, 'link', e.target.value)} 
-                            placeholder="https://... o /ruta" 
-                            style={{ padding: '6px 10px' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '4px' }}>Imagen</label>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {footerContacts.map((c, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', backgroundColor: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid #EAEAEA' }}>
+                          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                             <input 
                               type="text" 
-                              value={item.image || ''} 
-                              onChange={(e) => handleNewsChange(item.id, 'image', e.target.value)} 
-                              placeholder="URL o subir abajo" 
-                              style={{ flex: 1, padding: '6px 10px' }}
+                              value={c.label} 
+                              onChange={(e) => {
+                                const list = [...footerContacts];
+                                list[idx].label = e.target.value;
+                                setFooterContacts(list);
+                              }}
+                              placeholder="Etiqueta (ej: WhatsApp)"
+                              style={{ flex: 1.2, padding: '4px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}
                             />
-                            <label style={{
-                              backgroundColor: 'var(--accent-coffee)',
-                              color: '#FFFFFF',
-                              padding: '8px 14px',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              fontWeight: 700,
-                              fontSize: '0.78rem',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {uploadingNewsImage === item.id ? 'Subiendo...' : 'Subir'}
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={(e) => handleNewsImageUpload(item.id, e)} 
-                                style={{ display: 'none' }} 
-                                disabled={uploadingNewsImage === item.id}
-                              />
-                            </label>
+                            <select 
+                              value={c.type}
+                              onChange={(e) => {
+                                const list = [...footerContacts];
+                                list[idx].type = e.target.value;
+                                setFooterContacts(list);
+                              }}
+                              style={{ flex: 0.8, padding: '4px', fontSize: '0.75rem', border: '1px solid #CCC', borderRadius: '4px' }}
+                            >
+                              <option value="phone">Teléfono / WP</option>
+                              <option value="email">Correo / Web</option>
+                            </select>
+                            <button 
+                              type="button" 
+                              onClick={() => setFooterContacts(footerContacts.filter((_, i) => i !== idx))}
+                              style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
+                            >
+                              ✕
+                            </button>
                           </div>
-                          {item.image && (
-                            <img 
-                              src={item.image.startsWith('http') ? item.image : `${API_URL}${item.image}`} 
-                              alt="Vista previa" 
-                              style={{ display: 'block', maxHeight: '80px', borderRadius: '8px', marginTop: '6px', border: '1px solid #DDD' }} 
-                            />
-                          )}
+                          <input 
+                            type="text" 
+                            value={c.value} 
+                            onChange={(e) => {
+                              const list = [...footerContacts];
+                              list[idx].value = e.target.value;
+                              setFooterContacts(list);
+                            }}
+                            placeholder="Valor (ej: +506 ...)"
+                            style={{ padding: '4px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}
+                          />
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))
-                )}
-              </div>
+                  </div>
 
-              {/* SECTION: MISIÓN, VISIÓN Y VALORES */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Misión, Visión y Valores</h4>
-              </div>
+                  {/* Socials Array List */}
+                  <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>Redes Sociales</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setFooterSocials([...footerSocials, { platform: 'facebook', url: 'https://' }])}
+                        style={{ padding: '2px 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        + Agregar
+                      </button>
+                    </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Visión</label>
-                <input type="text" name="vision_title" value={configFields.vision_title} onChange={handleConfigChange} required />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Visión</label>
-                <textarea name="vision_text" rows="2" value={configFields.vision_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
-              </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {footerSocials.map((s, idx) => (
+                        <div key={idx} style={{ display: 'flex', gap: '4px', alignItems: 'center', backgroundColor: '#FFFFFF', padding: '6px', borderRadius: '8px', border: '1px solid #EAEAEA' }}>
+                          <select 
+                            value={s.platform}
+                            onChange={(e) => {
+                              const list = [...footerSocials];
+                              list[idx].platform = e.target.value;
+                              setFooterSocials(list);
+                            }}
+                            style={{ flex: 1, padding: '4px', fontSize: '0.75rem', border: '1px solid #CCC', borderRadius: '4px' }}
+                          >
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="spotify">Spotify</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="twitter">X / Twitter</option>
+                            <option value="web">Web Externa</option>
+                          </select>
+                          <input 
+                            type="text" 
+                            value={s.url} 
+                            onChange={(e) => {
+                              const list = [...footerSocials];
+                              list[idx].url = e.target.value;
+                              setFooterSocials(list);
+                            }}
+                            placeholder="URL completa..."
+                            style={{ flex: 2, padding: '4px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setFooterSocials(footerSocials.filter((_, i) => i !== idx))}
+                            style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Misión</label>
-                <input type="text" name="mision_title" value={configFields.mision_title} onChange={handleConfigChange} required />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Misión</label>
-                <textarea name="mision_text" rows="2" value={configFields.mision_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título Valores</label>
-                <input type="text" name="valores_title" value={configFields.valores_title} onChange={handleConfigChange} required />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Texto Valores</label>
-                <textarea name="valores_text" rows="2" value={configFields.valores_text} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
-              </div>
-
-              {/* SECTION: CONTACT & SOCIAL MEDIA */}
-              <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid #EEE', paddingBottom: '10px', marginTop: '20px' }}>
-                <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Contacto y Enlaces Sociales</h4>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Dirección Física Auditorio</label>
-                <textarea name="contact_address" rows="2" value={configFields.contact_address} onChange={handleConfigChange} required style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}></textarea>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Correo de Contacto</label>
-                <input type="email" name="contact_email" value={configFields.contact_email} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Teléfono de Contacto 1</label>
-                <input type="text" name="contact_phone_1" value={configFields.contact_phone_1} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Teléfono de Contacto 2 (WhatsApp)</label>
-                <input type="text" name="contact_phone_2" value={configFields.contact_phone_2} onChange={handleConfigChange} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Facebook</label>
-                <input type="text" name="social_fb" value={configFields.social_fb} onChange={handleConfigChange} />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Instagram</label>
-                <input type="text" name="social_ig" value={configFields.social_ig} onChange={handleConfigChange} />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de YouTube</label>
-                <input type="text" name="social_yt" value={configFields.social_yt} onChange={handleConfigChange} />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Spotify</label>
-                <input type="text" name="social_spotify" value={configFields.social_spotify} onChange={handleConfigChange} />
+                  <button 
+                    type="button" 
+                    onClick={handleSaveFooterConfig}
+                    className="btn-primary"
+                    style={{ marginTop: '10px', width: '100%', padding: '8px', fontSize: '0.8rem', fontWeight: 800, backgroundColor: 'var(--accent-coffee)', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    Guardar Datos del Footer
+                  </button>
+                </div>
               </div>
 
             </div>
 
-            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
-              {saveLoading ? 'Guardando...' : 'Guardar Cambios Web Portada'}
-            </button>
-          </form>
+            {/* COLUMN 3: HUGE LIVE PREVIEW SIMULATOR (WordPress Style) */}
+            <div style={{ 
+              flex: 1,
+              backgroundColor: '#1E1E2E', 
+              padding: '24px', 
+              borderRadius: '24px', 
+              border: '4px solid #313244', 
+              boxShadow: '0 12px 40px rgba(0,0,0,0.25)', 
+              minHeight: '750px',
+              display: 'flex',
+              flexDirection: 'column',
+              color: '#CDD6F4',
+              alignSelf: 'stretch',
+              position: 'sticky',
+              top: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #313244', paddingBottom: '12px' }}>
+                <h4 style={{ margin: 0, color: '#F5C2E7', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem' }}>
+                  <Globe size={18} /> Vista Previa en Vivo: <code>{builderPagePath}</code>
+                </h4>
+                <div style={{ display: 'flex', gap: '4px', backgroundColor: '#313244', padding: '4px', borderRadius: '10px' }}>
+                  <button 
+                    type="button"
+                    onClick={() => setPreviewDeviceMode('desktop')} 
+                    style={{ 
+                      padding: '6px 12px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 700, 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      cursor: 'pointer',
+                      backgroundColor: previewDeviceMode === 'desktop' ? '#11111B' : 'transparent',
+                      color: previewDeviceMode === 'desktop' ? '#89B4FA' : '#A6ADC8',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    💻 Escritorio
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setPreviewDeviceMode('mobile')} 
+                    style={{ 
+                      padding: '6px 12px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 700, 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      cursor: 'pointer',
+                      backgroundColor: previewDeviceMode === 'mobile' ? '#11111B' : 'transparent',
+                      color: previewDeviceMode === 'mobile' ? '#89B4FA' : '#A6ADC8',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    📱 Móvil
+                  </button>
+                </div>
+              </div>
+
+              {/* SIMULATED DEVICE VIEWPORT */}
+              <div style={{
+                flex: 1,
+                backgroundColor: '#030812',
+                borderRadius: '16px',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                maxHeight: '800px',
+                border: '1px solid #45475A',
+                width: previewDeviceMode === 'mobile' ? '320px' : '100%',
+                margin: '0 auto',
+                transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.5)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                
+                {/* Dynamic sections mapped inside preview */}
+                {localSections.length === 0 ? (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#BAC2DE', textAlign: 'center' }}>
+                    <p style={{ fontStyle: 'italic', margin: '0 0 10px 0', color: '#6C7086' }}>Esta página está vacía.</p>
+                    <span style={{ fontSize: '0.8rem', color: '#A6ADC8' }}>Mostrará el contenido clásico por defecto o la pantalla "En Construcción" en el sitio público hasta que agregues secciones.</span>
+                  </div>
+                ) : (
+                  localSections.map((sec) => {
+                    const isSelected = selectedSectionId === sec.id;
+                    const bgStyle = {
+                      backgroundColor: sec.styles?.backgroundColor || '#030812',
+                      color: sec.styles?.textColor || '#EAEDF8',
+                      padding: '30px 16px',
+                      position: 'relative',
+                      outline: isSelected ? '4px solid #0033FF' : 'none',
+                      outlineOffset: '-4px',
+                      boxShadow: isSelected ? '0 0 25px rgba(0, 51, 255, 0.45)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      zIndex: isSelected ? 10 : 1
+                    };
+                    const accentColor = sec.styles?.accentColor || '#0033FF';
+
+                    switch (sec.type) {
+                      case 'hero': {
+                        const bgUrl = sec.content.bgUrl || '';
+                        const isVideo = bgUrl && !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle, minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden', padding: '50px 16px' }}>
+                            {bgUrl && (
+                              isVideo ? (
+                                <video src={bgUrl} muted playsInline style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.2, zIndex: 0 }} />
+                              ) : (
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.25, zIndex: 0 }} />
+                              )
+                            )}
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                              <h1 style={{ fontSize: previewDeviceMode === 'mobile' ? '1.2rem' : '1.8rem', fontWeight: 900, marginBottom: '8px', color: '#FFFFFF' }}>{sec.content.title || 'Nueva Portada'}</h1>
+                              <p style={{ fontSize: '0.78rem', color: '#BAC2DE', maxWidth: '350px', margin: '0 auto 16px auto' }}>{sec.content.subtitle || ''}</p>
+                              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                {(sec.content.buttons || []).map((btn) => (
+                                  <button key={btn.id} type="button" style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '50px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    background: btn.style === 'primary' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : '#1e1e2e',
+                                    color: '#FFFFFF'
+                                  }}>{btn.label}</button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'news': {
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle, textAlign: 'center' }}>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '14px', color: '#FFFFFF' }}>{sec.content.title || 'Noticias y Eventos'}</h2>
+                            <div style={{ display: 'grid', gridTemplateColumns: previewDeviceMode === 'mobile' ? '1fr' : 'repeat(2, 1fr)', gap: '10px' }}>
+                              <div style={{ backgroundColor: '#11111B', padding: '10px', borderRadius: '10px', border: '1px solid #313244', textAlign: 'left' }}>
+                                <div style={{ height: '70px', backgroundColor: '#313244', borderRadius: '6px', marginBottom: '6px' }} />
+                                <span style={{ fontSize: '0.6rem', backgroundColor: accentColor, color: '#FFF', padding: '1px 5px', borderRadius: '50px', fontWeight: 800 }}>EJEMPLO</span>
+                                <h4 style={{ fontSize: '0.8rem', margin: '4px 0 2px 0', color: '#FFF' }}>Actividad Especial</h4>
+                                <p style={{ fontSize: '0.7rem', color: '#A6ADC8', margin: 0 }}>Texto de muestra...</p>
+                              </div>
+                              <div style={{ backgroundColor: '#11111B', padding: '10px', borderRadius: '10px', border: '1px solid #313244', textAlign: 'left' }}>
+                                <div style={{ height: '70px', backgroundColor: '#313244', borderRadius: '6px', marginBottom: '6px' }} />
+                                <span style={{ fontSize: '0.6rem', backgroundColor: accentColor, color: '#FFF', padding: '1px 5px', borderRadius: '50px', fontWeight: 800 }}>EJEMPLO</span>
+                                <h4 style={{ fontSize: '0.8rem', margin: '4px 0 2px 0', color: '#FFF' }}>Novedad Semanal</h4>
+                                <p style={{ fontSize: '0.7rem', color: '#A6ADC8', margin: 0 }}>Texto de muestra...</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'pillars': {
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle, textAlign: 'center' }}>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '2px' }}>{sec.content.title || 'Pilares'}</h2>
+                            <p style={{ fontSize: '0.75rem', color: '#BAC2DE', marginBottom: '14px' }}>{sec.content.subtitle || ''}</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {(sec.content.pillars || []).map((p, idx) => (
+                                <div key={p.id || idx} style={{ backgroundColor: '#11111B', padding: '10px', borderRadius: '10px', borderLeft: `4px solid ${accentColor}`, textAlign: 'left' }}>
+                                  <h4 style={{ fontSize: '0.8rem', margin: '0 0 2px 0', color: '#FFFFFF', fontWeight: 800 }}>{p.title}</h4>
+                                  <p style={{ fontSize: '0.7rem', color: '#A6ADC8', margin: 0 }}>{p.text}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'schedules': {
+                        const bgUrl = sec.content.bgUrl || '';
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle, position: 'relative', overflow: 'hidden', padding: '35px 16px', textAlign: 'center' }}>
+                            {bgUrl && (
+                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15, zIndex: 0 }} />
+                            )}
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '12px' }}>{sec.content.title || 'Horarios'}</h2>
+                              <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', width: '100%', maxWidth: '260px' }}>
+                                {(sec.content.schedules || []).map((s, idx) => (
+                                  <div key={s.id || idx} style={{ backgroundColor: 'rgba(17,17,27,0.8)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, border: '1px solid rgba(255,255,255,0.05)', color: '#FFFFFF' }}>
+                                    {s.text} {s.isVirtual && <span style={{ color: '#A6E3A1', fontSize: '0.65rem', marginLeft: '4px' }}>(Virtual)</span>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'custom_text': {
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>{sec.content.title}</h3>
+                            <p style={{ fontSize: '0.75rem', lineHeight: '1.4', color: '#BAC2DE', whiteSpace: 'pre-wrap', margin: 0 }}>{sec.content.text}</p>
+                          </div>
+                        );
+                      }
+                      case 'cta': {
+                        const bgUrl = sec.content.bgUrl || '';
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle, position: 'relative', overflow: 'hidden', padding: '30px 16px', textAlign: 'center' }}>
+                            {bgUrl && (
+                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15, zIndex: 0 }} />
+                            )}
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '10px' }}>{sec.content.title}</h3>
+                              {sec.content.buttonText && (
+                                <button type="button" style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  border: 'none',
+                                  backgroundColor: accentColor,
+                                  color: '#FFFFFF',
+                                  cursor: 'pointer'
+                                }}>{sec.content.buttonText}</button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'image_text': {
+                        const bgUrl = sec.content.bgUrl || '';
+                        const pos = sec.content.imagePosition || 'left';
+                        const imageEl = (
+                          <div style={{ flex: 1, minWidth: '100px', width: '100%' }}>
+                            {bgUrl ? (
+                              <img src={bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`} alt="Visual" style={{ width: '100%', maxHeight: '140px', objectFit: 'cover', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                            ) : (
+                              <div style={{ width: '100%', height: '100px', backgroundColor: '#313244', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: '#A6ADC8' }}>Sin imagen</div>
+                            )}
+                          </div>
+                        );
+                        const textEl = (
+                          <div style={{ flex: 1.5, minWidth: '140px' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>{sec.content.title}</h3>
+                            <p style={{ fontSize: '0.72rem', lineHeight: '1.3', color: '#BAC2DE', margin: 0 }}>{sec.content.text}</p>
+                          </div>
+                        );
+
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle }}>
+                            <div style={{ display: 'flex', gap: '12px', flexDirection: previewDeviceMode === 'mobile' ? 'column' : 'row', alignItems: 'center' }}>
+                              {pos === 'left' ? <>{imageEl}{textEl}</> : <>{textEl}{imageEl}</>}
+                            </div>
+                          </div>
+                        );
+                      }
+                      case 'grid': {
+                        const cols = sec.content.columns || 2;
+                        const cells = sec.content.cells || [];
+                        return (
+                          <div key={sec.id} onClick={() => setSelectedSectionId(sec.id)} style={{ ...bgStyle }}>
+                            {sec.content.title && <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '16px', textAlign: 'center' }}>{sec.content.title}</h2>}
+                            <div style={{ display: 'grid', gridTemplateColumns: previewDeviceMode === 'mobile' ? '1fr' : `repeat(${cols}, 1fr)`, gridAutoRows: previewDeviceMode === 'mobile' ? 'auto' : 'minmax(120px, auto)', gap: '16px' }}>
+                              {cells.map((cell, idx) => (
+                                <div key={idx} style={{ 
+                                  backgroundColor: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
+                                  gridColumn: previewDeviceMode === 'mobile' ? 'span 1' : `span ${cell.colSpan || 1}`,
+                                  gridRow: previewDeviceMode === 'mobile' ? 'span 1' : `span ${cell.rowSpan || 1}`,
+                                  display: 'flex', flexDirection: 'column'
+                                }}>
+                                  {cell.imageUrl && (
+                                    <img src={cell.imageUrl.startsWith('http') || cell.imageUrl.startsWith('/') ? (cell.imageUrl.startsWith('/') ? `${API_URL}${cell.imageUrl}` : cell.imageUrl) : `${API_URL}/${cell.imageUrl}`} alt={cell.title || 'Cell image'} style={{ width: '100%', height: cell.title || cell.text ? '100px' : '100%', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px', flex: (cell.title || cell.text) ? 'none' : 1 }} />
+                                  )}
+                                  {cell.title && <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', margin: '0 0 8px 0' }}>{cell.title}</h3>}
+                                  {cell.text && <p style={{ fontSize: '0.8rem', color: '#BAC2DE', lineHeight: 1.4, margin: '0 0 12px 0', flex: 1 }}>{cell.text}</p>}
+                                  {cell.buttonText && (
+                                    <div style={{ marginTop: 'auto' }}>
+                                      <button type="button" style={{
+                                        padding: '6px 14px', borderRadius: '50px', fontSize: '0.72rem', fontWeight: 800, border: 'none',
+                                        backgroundColor: accentColor, color: '#FFFFFF', cursor: 'pointer', display: 'inline-block'
+                                      }}>{cell.buttonText}</button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      default:
+                        return null;
+                    }
+                  })
+                )}
+
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 
@@ -2758,8 +3931,63 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   padding: '16px',
                   marginBottom: '14px'
                 }}>
-                  <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '10px', fontSize: '1rem', borderBottom: '1px solid #EEE', paddingBottom: '6px' }}>
-                    Persona #{i + 1}: {att.full_name} ({att.assigned_ticket_code && att.assigned_ticket_code.includes(' - ') && !att.assigned_ticket_code.startsWith('Fila') && !att.assigned_ticket_code.startsWith('Asiento') ? att.assigned_ticket_code.split(' - ').slice(1).join(' - ') : att.assigned_ticket_code})
+                  <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '10px', fontSize: '1rem', borderBottom: '1px solid #EEE', paddingBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Persona #{i + 1}: {att.full_name} ({att.assigned_ticket_code && att.assigned_ticket_code.includes(' - ') && !att.assigned_ticket_code.startsWith('Fila') && !att.assigned_ticket_code.startsWith('Asiento') ? att.assigned_ticket_code.split(' - ').slice(1).join(' - ') : att.assigned_ticket_code})</span>
+                    
+                    {reassigningAttendeeId === att.id ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <select 
+                          value={selectedNewSeat}
+                          onChange={(e) => setSelectedNewSeat(e.target.value)}
+                          style={{ padding: '4px', borderRadius: '4px', border: '1px solid #CCC', fontSize: '0.8rem' }}
+                        >
+                          <option value="">-- Asientos Libres --</option>
+                          {(() => {
+                            const groupedFreeSeats = {};
+                            freeSeatsForReassign.forEach(code => {
+                              const parsed = parseTicketCode(code);
+                              if (!groupedFreeSeats[parsed.rowLabel]) groupedFreeSeats[parsed.rowLabel] = [];
+                              groupedFreeSeats[parsed.rowLabel].push({ code, seatNum: parsed.seatNum });
+                            });
+                            
+                            // Sort rows (handling numbers correctly if possible, or just default sort)
+                            return Object.keys(groupedFreeSeats).sort((a, b) => {
+                               const numA = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+                               const numB = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+                               return numA - numB || a.localeCompare(b);
+                            }).map(rowName => (
+                              <optgroup key={rowName} label={rowName}>
+                                {groupedFreeSeats[rowName].sort((a,b) => (parseInt(a.seatNum) || 0) - (parseInt(b.seatNum) || 0)).map(seat => (
+                                  <option key={seat.code} value={seat.code}>
+                                    Asiento #{seat.seatNum}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ));
+                          })()}
+                        </select>
+                        <button 
+                          onClick={() => handleReassignSeat(att.id)}
+                          disabled={reassigningLoading || !selectedNewSeat}
+                          style={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: 'var(--accent-coffee)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                        >
+                          {reassigningLoading ? 'Guardando...' : 'Guardar'}
+                        </button>
+                        <button 
+                          onClick={() => setReassigningAttendeeId(null)}
+                          style={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#EEE', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => handleOpenReassignSeat(att, selectedAttendeesModal)}
+                        style={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: 'transparent', color: 'var(--accent-coffee)', border: '1px solid var(--accent-beige-border)', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        ✏️ Cambiar Asiento
+                      </button>
+                    )}
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '0.88rem' }}>
@@ -2834,6 +4062,179 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. MODAL: BIBLIOTECA DE MEDIOS (MEDIA LIBRARY) */}
+      {showMediaLibrary && (
+        <div className="modal-overlay" onClick={() => setShowMediaLibrary(false)} style={{ zIndex: 99999 }}>
+          <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '850px', width: '90%', borderRadius: '24px', backgroundColor: '#FFFFFF', color: 'var(--accent-coffee)', padding: '24px' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #EAEAEA', paddingBottom: '14px', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Globe size={24} color="var(--accent-gold)" /> Biblioteca de Medios (Media Library)
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowMediaLibrary(false)} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Upload & Search Controls */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              
+              {/* File input wrapper */}
+              <div>
+                <label className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '50px', cursor: 'pointer', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)', border: 'none', color: '#FFFFFF' }}>
+                  <Plus size={18} /> Subir Nuevo Archivo
+                  <input type="file" onChange={handleMediaUpload} style={{ display: 'none' }} accept="image/*,video/*" />
+                </label>
+              </div>
+
+              {/* Search filter input */}
+              <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
+                <input 
+                  type="text" 
+                  placeholder="Buscar archivos por nombre..." 
+                  value={mediaSearch}
+                  onChange={(e) => setMediaSearch(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '50px', border: '1px solid #CCC', fontSize: '0.88rem' }}
+                />
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+              </div>
+            </div>
+
+            {/* Media Gallery Grid */}
+            {loadingMedia ? (
+              <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '1rem' }}>
+                <RefreshCw size={36} className="spin" style={{ margin: '0 auto 12px auto', opacity: 0.3 }} />
+                <span>Cargando archivos de medios...</span>
+              </div>
+            ) : (
+              (() => {
+                const filteredMedia = mediaList.filter(item => 
+                  item.filename.toLowerCase().includes(mediaSearch.toLowerCase())
+                );
+
+                if (filteredMedia.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '60px 20px', border: '2px dashed #DDD', borderRadius: '16px', color: 'var(--text-muted)' }}>
+                      <Eye size={40} style={{ opacity: 0.2, marginBottom: '10px' }} />
+                      <p style={{ margin: 0, fontWeight: 700 }}>No se encontraron archivos en la biblioteca.</p>
+                      <span style={{ fontSize: '0.85rem' }}>¡Usa el botón de arriba para subir tu primera foto o video!</span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '14px', maxHeight: '420px', overflowY: 'auto', padding: '4px' }}>
+                    {filteredMedia.map((item, idx) => {
+                      const isImage = item.filename.match(/\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i);
+                      const isVideo = item.filename.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
+                      return (
+                        <div 
+                          key={idx} 
+                          onClick={() => selectMediaItem(item.url)}
+                          style={{ 
+                            position: 'relative', 
+                            borderRadius: '14px', 
+                            border: '1px solid #E2E8F0', 
+                            overflow: 'hidden', 
+                            aspectRatio: '1', 
+                            cursor: 'pointer',
+                            backgroundColor: '#F8FAFC',
+                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                            boxShadow: 'var(--shadow-sm)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                          }}
+                        >
+                          {/* File Preview */}
+                          {isImage ? (
+                            <img 
+                              src={`${API_URL}${item.url}`} 
+                              alt={item.filename} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            />
+                          ) : isVideo ? (
+                            <video 
+                              src={`${API_URL}${item.url}`} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                              muted
+                            />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
+                              DOC
+                            </div>
+                          )}
+
+                          {/* Hover Overlay Actions */}
+                          <div style={{ 
+                            position: 'absolute', 
+                            bottom: 0, 
+                            left: 0, 
+                            right: 0, 
+                            backgroundColor: 'rgba(0,0,0,0.75)', 
+                            color: '#FFF', 
+                            padding: '6px', 
+                            fontSize: '0.7rem', 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center' 
+                          }}>
+                            <span style={{ 
+                              whiteSpace: 'nowrap', 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis', 
+                              maxWidth: '80px',
+                              fontWeight: 700
+                            }}>
+                              {item.filename}
+                            </span>
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMediaDelete(item.filename);
+                              }}
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: '#FFAAAA', 
+                                cursor: 'pointer', 
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            )}
+
+            {/* Footer tips */}
+            <div style={{ borderTop: '1px solid #EAEAEA', marginTop: '20px', paddingTop: '14px', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+              <span>💡 Haz click en cualquier imagen o video para seleccionarlo y aplicarlo a la sección activa.</span>
+              <span>Total: {mediaList.length} archivos</span>
+            </div>
+
           </div>
         </div>
       )}

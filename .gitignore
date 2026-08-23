@@ -17,11 +17,17 @@ node_modules/
 *.db
 *.sqlite
 *.db-journal
+*.db-shm
+*.db-wal
 *.sqlite3
 server/database.db
+server/data/*.db*
+server/data/*.db-shm
+server/data/*.db-wal
 
 # User Uploads
 server/uploads/
+server/data/uploads/
 uploads/
 
 # IDEs and editors

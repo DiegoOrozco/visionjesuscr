@@ -106,12 +106,22 @@ function initDb() {
       details TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS page_sections (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      sequence_order INTEGER NOT NULL,
+      content TEXT NOT NULL,
+      styles TEXT NOT NULL,
+      page_path TEXT DEFAULT '/'
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);
   `);
 
   // Migrations for columns
+  try { db.exec(`ALTER TABLE page_sections ADD COLUMN page_path TEXT DEFAULT '/'`); } catch (e) {}
   try { db.exec(`ALTER TABLE zones ADD COLUMN regular_price REAL`); } catch (e) {}
   try { db.exec(`ALTER TABLE attendees ADD COLUMN age INTEGER`); } catch (e) {}
   try { db.exec(`ALTER TABLE attendees ADD COLUMN residence TEXT`); } catch (e) {}
@@ -312,6 +322,86 @@ function initDb() {
     INSERT OR IGNORE INTO homepage_config (key, value)
     VALUES ('schedule_bg', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600')
   `).run();
+
+  // Seed default page sections if empty
+  const sectionsCount = db.prepare('SELECT COUNT(*) as count FROM page_sections').get();
+  if (sectionsCount.count === 0) {
+    const insertSection = db.prepare('INSERT INTO page_sections (id, type, sequence_order, content, styles) VALUES (?, ?, ?, ?, ?)');
+    
+    insertSection.run(
+      'sec_hero',
+      'hero',
+      1,
+      JSON.stringify({
+        title: 'Bienvenido a TU CASA',
+        subtitle: 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración',
+        bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+        buttons: [{ id: '1', label: 'Congreso de Mujeres', emoji: '', url: '/autenticas', style: 'primary' }]
+      }),
+      JSON.stringify({
+        backgroundColor: '#030812',
+        textColor: '#FFFFFF',
+        accentColor: '#0033FF'
+      })
+    );
+
+    insertSection.run(
+      'sec_news',
+      'news',
+      2,
+      JSON.stringify({
+        title: 'NOTICIAS Y EVENTOS',
+        items: []
+      }),
+      JSON.stringify({
+        backgroundColor: '#030812',
+        textColor: '#FFFFFF',
+        accentColor: '#0033FF'
+      })
+    );
+
+    insertSection.run(
+      'sec_pillars',
+      'pillars',
+      3,
+      JSON.stringify({
+        title: 'CONOCÉ LA VISIÓN',
+        subtitle: 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo en cada corazón, hogar y comunidad.',
+        pillars: [
+          { id: '1', title: 'NUESTRA VISIÓN', text: 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.', icon: 'Compass' },
+          { id: '2', title: 'NUESTRA MISIÓN', text: 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.', icon: 'Flame' },
+          { id: '3', title: 'NUESTROS VALORES', text: 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.', icon: 'Users' }
+        ]
+      }),
+      JSON.stringify({
+        backgroundColor: '#030812',
+        textColor: '#FFFFFF',
+        accentColor: '#977DFF'
+      })
+    );
+
+    insertSection.run(
+      'sec_schedules',
+      'schedules',
+      4,
+      JSON.stringify({
+        title: 'HORARIOS DE SERVICIOS',
+        bgUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600',
+        schedules: [
+          { id: '1', text: 'JUEVES 7:30PM', isVirtual: false },
+          { id: '2', text: 'SÁBADOS 5:30PM', isVirtual: false },
+          { id: '3', text: 'DOMINGOS 9:00AM', isVirtual: false },
+          { id: '4', text: 'DOMINGOS 11:00AM', isVirtual: false },
+          { id: '5', text: 'DOMINGOS (VIRTUAL) 5:30PM', isVirtual: true }
+        ]
+      }),
+      JSON.stringify({
+        backgroundColor: '#030812',
+        textColor: '#FFFFFF',
+        accentColor: '#977DFF'
+      })
+    );
+  }
 }
 
 initDb();

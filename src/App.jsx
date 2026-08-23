@@ -18,6 +18,7 @@ export default function App() {
   const [zones, setZones] = useState([]);
   const [occupiedSeats, setOccupiedSeats] = useState([]);
   const [homepageConfig, setHomepageConfig] = useState({});
+  const [landingSections, setLandingSections] = useState([]);
   const [constructionPage, setConstructionPage] = useState('');
   
   // Modal & Reservation state
@@ -61,11 +62,24 @@ export default function App() {
       .catch(console.error);
   };
 
+  const fetchLandingSections = (path = window.location.pathname) => {
+    fetch(`${API_URL}/api/landing/sections?path=${encodeURIComponent(path)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setLandingSections(data.sections || []);
+        }
+      })
+      .catch(console.error);
+  };
+
   useEffect(() => {
     fetchZones();
     fetchConfig();
 
     const path = window.location.pathname;
+    fetchLandingSections(path);
+
     if (path.startsWith('/ticket/')) {
       const hash = path.replace('/ticket/', '');
       if (hash) {
@@ -153,6 +167,7 @@ export default function App() {
           setCurrentView={setCurrentView} 
           adminUser={adminUser}
           onLogout={handleAdminLogout}
+          navbarConfig={homepageConfig}
           onGoHome={() => {
             setSelectedZone(null);
             setAttendeeQuantity(1);
@@ -169,20 +184,29 @@ export default function App() {
         {currentView === 'landing' && (
           <ChurchLanding 
             config={homepageConfig} 
+            sections={landingSections}
             onGoToTickets={handleGoToTickets}
           />
         )}
 
         {/* VIEW 1A: AUTÉNTICAS PROMO PAGE */}
         {currentView === 'autenticas-promo' && (
-          <div className="container" style={{ paddingTop: '20px' }}>
-            <AutenticasPromo 
+          landingSections.length > 0 ? (
+            <ChurchLanding 
               config={homepageConfig} 
-              onScrollToMap={() => {
-                setCurrentView('home');
-              }}
+              sections={landingSections}
+              onGoToTickets={handleGoToTickets}
             />
-          </div>
+          ) : (
+            <div className="container" style={{ paddingTop: '20px' }}>
+              <AutenticasPromo 
+                config={homepageConfig} 
+                onScrollToMap={() => {
+                  setCurrentView('home');
+                }}
+              />
+            </div>
+          )
         )}
 
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
@@ -289,6 +313,8 @@ export default function App() {
             onLogin={handleAdminLogin}
             onLogout={handleAdminLogout}
             homepageConfig={homepageConfig}
+            sections={landingSections}
+            onSaveSections={fetchLandingSections}
             onSaveConfig={(updated) => {
               if (updated) {
                 setHomepageConfig(prev => ({ ...prev, ...updated }));
@@ -306,14 +332,27 @@ export default function App() {
 
         {/* VIEW 7: UNDER CONSTRUCTION */}
         {currentView === 'under-construction' && (
-          <UnderConstruction 
-            pageName={constructionPage} 
-            config={homepageConfig}
-            onGoHome={() => {
-              window.history.pushState({}, '', '/');
-              setCurrentView('landing');
-            }} 
-          />
+          landingSections.length > 0 ? (
+            <ChurchLanding 
+              config={homepageConfig} 
+              sections={landingSections}
+              onGoToTickets={() => {
+                window.history.pushState({}, '', '/autenticas');
+                setCurrentView('autenticas-promo');
+                fetchLandingSections('/autenticas');
+              }}
+            />
+          ) : (
+            <UnderConstruction 
+              pageName={constructionPage} 
+              config={homepageConfig}
+              onGoHome={() => {
+                window.history.pushState({}, '', '/');
+                setCurrentView('landing');
+                fetchLandingSections('/');
+              }} 
+            />
+          )
         )}
 
       </main>

@@ -232,6 +232,23 @@ function logActivity(username, action, details) {
   }
 }
 
+// Get Page Builder Layout Sections
+app.get('/api/landing/sections', (req, res) => {
+  try {
+    const pagePath = req.query.path || '/';
+    const sections = db.prepare('SELECT * FROM page_sections WHERE page_path = ? ORDER BY sequence_order ASC').all(pagePath);
+    const result = sections.map(s => ({
+      ...s,
+      content: JSON.parse(s.content),
+      styles: JSON.parse(s.styles)
+    }));
+    res.json({ success: true, sections: result });
+  } catch (e) {
+    console.error('Error fetching page sections:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // 1. Get Zones, Pricing Tiers & List of Occupied/Held Seats
 app.get('/api/zones', (req, res) => {
   try {
@@ -754,6 +771,92 @@ app.post('/api/admin/reservations/:id/amount', (req, res) => {
   }
 });
 
+// Get free seats for a zone
+app.get('/api/admin/zones/:zone_id/free-seats', (req, res) => {
+  try {
+    const { zone_id } = req.params;
+    
+    // Get all unassigned seats for this zone from seat_queues
+    const freeSeats = db.prepare(`
+      SELECT ticket_code 
+      FROM seat_queues 
+      WHERE zone_id = ? AND is_assigned = 0
+      ORDER BY ticket_number ASC
+    `).all(zone_id).map(r => r.ticket_code);
+
+    res.json({ success: true, freeSeats });
+  } catch (error) {
+    console.error('Error fetching free seats:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener asientos libres.' });
+  }
+});
+
+// Reassign a seat for an attendee
+app.post('/api/admin/attendees/:id/reassign-seat', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { new_ticket_code } = req.body;
+
+    if (!new_ticket_code) {
+      return res.status(400).json({ success: false, message: 'Falta el nuevo código de asiento.' });
+    }
+
+    const reassignTx = db.transaction(() => {
+      // 1. Get the attendee
+      const attendee = db.prepare('SELECT * FROM attendees WHERE id = ?').get(id);
+      if (!attendee) {
+        throw new Error('Asistente no encontrado.');
+      }
+      
+      const reservation_id = attendee.reservation_id;
+      const old_ticket_code = attendee.assigned_ticket_code;
+
+      // 2. Validate the new seat is actually free in seat_queues
+      const newSeatEntry = db.prepare(`
+        SELECT id, is_assigned, zone_id FROM seat_queues WHERE ticket_code = ?
+      `).get(new_ticket_code);
+
+      if (!newSeatEntry) {
+        throw new Error('El asiento nuevo no existe en el sistema.');
+      }
+
+      if (newSeatEntry.is_assigned === 1) {
+        throw new Error('El asiento nuevo ya está ocupado.');
+      }
+
+      // 3. Release the old seat (if it exists)
+      if (old_ticket_code) {
+        db.prepare(`
+          UPDATE seat_queues 
+          SET is_assigned = 0, reservation_id = NULL 
+          WHERE ticket_code = ? AND reservation_id = ?
+        `).run(old_ticket_code, reservation_id);
+      }
+
+      // 4. Assign the new seat
+      db.prepare(`
+        UPDATE seat_queues 
+        SET is_assigned = 1, reservation_id = ? 
+        WHERE id = ?
+      `).run(reservation_id, newSeatEntry.id);
+
+      // 5. Update the attendee record
+      db.prepare(`
+        UPDATE attendees 
+        SET assigned_ticket_code = ? 
+        WHERE id = ?
+      `).run(new_ticket_code, id);
+    });
+
+    reassignTx();
+
+    res.json({ success: true, message: 'Asiento reasignado con éxito.' });
+  } catch (error) {
+    console.error('Error reassigning seat:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error al reasignar el asiento.' });
+  }
+});
+
 // 7. Delete Reservation Permanently (API Endpoint for Admin)
 app.delete('/api/admin/reservations/:id', (req, res) => {
   try {
@@ -965,6 +1068,100 @@ app.post('/api/admin/autenticas/gallery-upload', upload.single('image'), (req, r
     const fileUrl = `/uploads/comprobantes/${req.file.filename}`;
     res.json({ success: true, url: fileUrl });
   } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Save Page Builder Sections (Admin Only)
+app.post('/api/admin/landing/sections', (req, res) => {
+  try {
+    const { sections, page_path } = req.body;
+    const pagePath = page_path || req.query.path || '/';
+    if (!sections || !Array.isArray(sections)) {
+      return res.status(400).json({ success: false, message: 'Secciones no provistas o formato inválido.' });
+    }
+
+    const tx = db.transaction(() => {
+      db.prepare('DELETE FROM page_sections WHERE page_path = ?').run(pagePath);
+      const insertStmt = db.prepare(`
+        INSERT INTO page_sections (id, type, sequence_order, content, styles, page_path)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      sections.forEach((sec, index) => {
+        const id = sec.id || `sec_${sec.type}_${Date.now()}_${index}`;
+        insertStmt.run(
+          id,
+          sec.type,
+          index + 1,
+          JSON.stringify(sec.content || {}),
+          JSON.stringify(sec.styles || {}),
+          pagePath
+        );
+      });
+    });
+
+    tx();
+    res.json({ success: true, message: 'Estructura de la página guardada con éxito.' });
+  } catch (e) {
+    console.error('Error saving sections:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Upload image for page builder (Admin Only)
+app.post('/api/admin/landing/upload', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Archivo no subido.' });
+    }
+    const fileUrl = `/uploads/comprobantes/${req.file.filename}`;
+    res.json({ success: true, url: fileUrl });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// List media library files
+app.get('/api/admin/media', (req, res) => {
+  try {
+    const files = fs.readdirSync(uploadsDir);
+    const mediaList = files
+      .filter(file => !file.startsWith('.'))
+      .map(file => {
+        const filePath = path.join(uploadsDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          filename: file,
+          url: `/uploads/comprobantes/${file}`,
+          sizeBytes: stats.size,
+          createdAt: stats.mtime
+        };
+      })
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    res.json({ success: true, media: mediaList });
+  } catch (e) {
+    console.error('Error reading media library:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Delete media file
+app.delete('/api/admin/media/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(400).json({ success: false, message: 'Nombre de archivo inválido.' });
+    }
+    const filePath = path.join(uploadsDir, filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      return res.json({ success: true, message: 'Archivo eliminado con éxito.' });
+    } else {
+      return res.status(404).json({ success: false, message: 'Archivo no encontrado.' });
+    }
+  } catch (e) {
+    console.error('Error deleting media file:', e);
     res.status(500).json({ success: false, message: e.message });
   }
 });
