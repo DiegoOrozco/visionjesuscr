@@ -160,7 +160,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: bgUrl ? `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%)',
+                backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 0,
@@ -865,7 +865,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           <div style={{
             position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: bgUrl ? `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%)',
+            backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: 0,
@@ -904,7 +904,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           )}
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: 'Congreso de Mujeres', url: '/autenticas', style: 'primary' }]).map((btn) => (
+            {heroButtons.map((btn) => (
               <button
                 key={btn.id}
                 onClick={() => handleButtonClick(btn)}

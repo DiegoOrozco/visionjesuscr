@@ -88,18 +88,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
               objectFit: 'contain'
             }}
           />
-          {currentView === 'landing' && (
-            <span style={{ 
-              fontWeight: 900, 
-              fontSize: '1.1rem', 
-              color: '#FFFFFF', 
-              letterSpacing: '1.5px', 
-              textTransform: 'uppercase',
-              display: 'none'
-            }}>
-              VISIÓN JESÚS
-            </span>
-          )}
+
         </div>
 
         {/* Desktop Navigation */}
