@@ -662,107 +662,184 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
 
           {/* Seat Layout Render */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', overflowX: 'auto' }}>
-            {seatLayouts[selectedZone.data.id] ? (
-              selectedZone.data.id === 'vip_central' ? (
-                seatLayouts.vip_central.activeRows.map((r, rIdx) => (
-                  <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
-                      {r.rowLabel}
-                    </span>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      {Array.from({ length: r.seatsCount }, (_, i) => {
-                        const seatNum = i + 1;
-                        const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
-                        const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
-                        const isSelected = selectedSeats.includes(seatCode);
+            {(() => {
+              // 1. Check if dynamic layout_config exists on zone
+              const dynRows = selectedZone.data?.layout_config?.rows;
+              if (dynRows && Array.isArray(dynRows) && dynRows.length > 0) {
+                return dynRows.map((r, rIdx) => {
+                  if (r.isReserved) {
+                    return (
+                      <div key={r.rowLabel} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 16px',
+                        backgroundColor: '#1E293B',
+                        borderRadius: '10px',
+                        border: '1px dashed #475569',
+                        color: '#94A3B8',
+                        fontSize: '0.85rem',
+                        fontWeight: 700
+                      }}>
+                        <span>{r.rowLabel}</span>
+                        <span>🔒 {r.seatsCount} Asientos Reservados (Protocolo)</span>
+                      </div>
+                    );
+                  }
 
-                        return (
-                          <button
-                            key={seatNum}
-                            disabled={isOccupied}
-                            onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
-                            style={{
-                              width: '44px',
-                              height: '44px',
-                              borderRadius: '10px',
-                              border: isOccupied 
-                                ? '1px solid #374151' 
-                                : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                              backgroundColor: isOccupied 
-                                ? '#4B5563' 
-                                : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                              color: isOccupied 
-                                ? '#9CA3AF' 
-                                : isSelected ? '#FFFFFF' : '#1F2937',
-                              fontWeight: 900,
-                              fontSize: '0.85rem',
-                              boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                              transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                              transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                              cursor: isOccupied ? 'not-allowed' : 'pointer',
-                              opacity: isOccupied ? 0.7 : 1
-                            }}
-                          >
-                            {isOccupied ? 'X' : seatNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                seatLayouts[selectedZone.data.id].map((r, rIdx) => (
-                  <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
-                      {r.rowLabel}
-                    </span>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      {Array.from({ length: r.seatsCount }, (_, i) => {
-                        const seatNum = i + 1;
-                        const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
-                        const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
-                        const isSelected = selectedSeats.includes(seatCode);
+                  return (
+                    <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                        {r.rowLabel}
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {Array.from({ length: r.seatsCount }, (_, i) => {
+                          const seatNum = i + 1;
+                          const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
+                          const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
+                          const isSelected = selectedSeats.includes(seatCode);
 
-                        return (
-                          <button
-                            key={seatNum}
-                            disabled={isOccupied}
-                            onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
-                            style={{
-                              width: '44px',
-                              height: '44px',
-                              borderRadius: '10px',
-                              border: isOccupied 
-                                ? '1px solid #374151' 
-                                : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                              backgroundColor: isOccupied 
-                                ? '#4B5563' 
-                                : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                              color: isOccupied 
-                                ? '#9CA3AF' 
-                                : isSelected ? '#FFFFFF' : '#1F2937',
-                              fontWeight: 900,
-                              fontSize: '0.85rem',
-                              boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                              transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                              transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                              cursor: isOccupied ? 'not-allowed' : 'pointer',
-                              opacity: isOccupied ? 0.7 : 1
-                            }}
-                          >
-                            {isOccupied ? 'X' : seatNum}
-                          </button>
-                        );
-                      })}
+                          return (
+                            <button
+                              key={seatNum}
+                              disabled={isOccupied}
+                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
+                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
+                              style={{
+                                width: '44px',
+                                height: '44px',
+                                borderRadius: '10px',
+                                border: isOccupied 
+                                  ? '1px solid #374151' 
+                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
+                                backgroundColor: isOccupied 
+                                  ? '#4B5563' 
+                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
+                                color: isOccupied 
+                                  ? '#9CA3AF' 
+                                  : isSelected ? '#FFFFFF' : '#1F2937',
+                                fontWeight: 900,
+                                fontSize: '0.85rem',
+                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: isOccupied ? 'not-allowed' : 'pointer',
+                                opacity: isOccupied ? 0.7 : 1
+                              }}
+                            >
+                              {isOccupied ? 'X' : seatNum}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))
-              )
-            ) : (
-              // General Zones (Uniform 10 rows: Fila A to J)
-              ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"].map((rLabel, rIdx) => {
+                  );
+                });
+              }
+
+              // Fallback to static seatLayouts
+              if (seatLayouts[selectedZone.data.id]) {
+                if (selectedZone.data.id === 'vip_central') {
+                  return seatLayouts.vip_central.activeRows.map((r, rIdx) => (
+                    <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                        {r.rowLabel}
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {Array.from({ length: r.seatsCount }, (_, i) => {
+                          const seatNum = i + 1;
+                          const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
+                          const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
+                          const isSelected = selectedSeats.includes(seatCode);
+
+                          return (
+                            <button
+                              key={seatNum}
+                              disabled={isOccupied}
+                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
+                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
+                              style={{
+                                width: '44px',
+                                height: '44px',
+                                borderRadius: '10px',
+                                border: isOccupied 
+                                  ? '1px solid #374151' 
+                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
+                                backgroundColor: isOccupied 
+                                  ? '#4B5563' 
+                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
+                                color: isOccupied 
+                                  ? '#9CA3AF' 
+                                  : isSelected ? '#FFFFFF' : '#1F2937',
+                                fontWeight: 900,
+                                fontSize: '0.85rem',
+                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: isOccupied ? 'not-allowed' : 'pointer',
+                                opacity: isOccupied ? 0.7 : 1
+                              }}
+                            >
+                              {isOccupied ? 'X' : seatNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ));
+                } else {
+                  return seatLayouts[selectedZone.data.id].map((r, rIdx) => (
+                    <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                        {r.rowLabel}
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {Array.from({ length: r.seatsCount }, (_, i) => {
+                          const seatNum = i + 1;
+                          const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
+                          const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
+                          const isSelected = selectedSeats.includes(seatCode);
+
+                          return (
+                            <button
+                              key={seatNum}
+                              disabled={isOccupied}
+                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
+                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
+                              style={{
+                                width: '44px',
+                                height: '44px',
+                                borderRadius: '10px',
+                                border: isOccupied 
+                                  ? '1px solid #374151' 
+                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
+                                backgroundColor: isOccupied 
+                                  ? '#4B5563' 
+                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
+                                color: isOccupied 
+                                  ? '#9CA3AF' 
+                                  : isSelected ? '#FFFFFF' : '#1F2937',
+                                fontWeight: 900,
+                                fontSize: '0.85rem',
+                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: isOccupied ? 'not-allowed' : 'pointer',
+                                opacity: isOccupied ? 0.7 : 1
+                              }}
+                            >
+                              {isOccupied ? 'X' : seatNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ));
+                }
+              }
+
+              // General fallback (Uniform 10 rows: Fila A to J)
+              return ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"].map((rLabel, rIdx) => {
                 const cols = selectedZone.data.id === 'central_atras' ? 15 : 10;
                 return (
                   <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -811,8 +888,8 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                     </div>
                   </div>
                 );
-              })
-            )}
+              });
+            })()}
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>

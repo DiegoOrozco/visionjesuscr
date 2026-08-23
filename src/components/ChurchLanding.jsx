@@ -97,25 +97,42 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
   };
 
   const renderDynamicSection = (sec) => {
+    let content = sec.content;
+    while (typeof content === 'string') {
+      try { content = JSON.parse(content); } catch (e) { break; }
+    }
+    content = content || {};
+
+    let styles = sec.styles;
+    while (typeof styles === 'string') {
+      try { styles = JSON.parse(styles); } catch (e) { break; }
+    }
+    styles = styles || {};
+
     const bgStyle = {
-      backgroundColor: sec.styles?.backgroundColor || '#030812',
-      color: sec.styles?.textColor || '#EAEDF8',
+      backgroundColor: styles.backgroundColor || '#030812',
+      color: styles.textColor || '#EAEDF8',
       position: 'relative'
     };
 
-    const accentColor = sec.styles?.accentColor || '#0033FF';
+    const accentColor = styles.accentColor || '#0033FF';
 
     switch (sec.type) {
       case 'hero': {
-        const bgUrl = sec.content.bgUrl || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+        const bgUrl = content.bgUrl || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
         const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
+        const heroTitle = content.title || 'Bienvenido a TU CASA';
+        const heroSubtitle = content.subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
+        const heroButtons = content.buttons && content.buttons.length > 0 
+          ? content.buttons 
+          : [{ id: '1', label: 'Congreso de Mujeres', url: '/autenticas', style: 'primary' }];
 
         return (
           <div 
             id="inicio" 
             key={sec.id}
             style={{
-              height: '100vh',
+              minHeight: '100vh',
               width: '100%',
               position: 'relative',
               display: 'flex',
@@ -123,6 +140,9 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               justifyContent: 'center',
               textAlign: 'center',
               overflow: 'hidden',
+              paddingTop: '120px',
+              paddingBottom: '80px',
+              boxSizing: 'border-box',
               ...bgStyle
             }}
           >
@@ -157,7 +177,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 textTransform: 'uppercase',
                 marginBottom: '24px'
               }} className="hero-welcome-text">
-                {sec.content.title}
+                {heroTitle}
               </h1>
               <p style={{
                 fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
@@ -168,11 +188,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 lineHeight: 1.5,
                 marginBottom: '40px'
               }}>
-                {sec.content.subtitle}
+                {heroSubtitle}
               </p>
 
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {(sec.content.buttons || []).map((btn) => (
+                {heroButtons.map((btn) => (
                   <button
                     key={btn.id}
                     onClick={() => handleButtonClick(btn)}
@@ -235,7 +255,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   letterSpacing: '2px',
                   textTransform: 'uppercase'
                 }}>
-                  {sec.content.title || 'NOTICIAS Y EVENTOS'}
+                  {content.title || 'NOTICIAS Y EVENTOS'}
                 </span>
                 <h2 style={{ fontSize: '3rem', fontWeight: 900, color: '#FFFFFF', marginTop: '16px', textTransform: 'uppercase' }}>
                   LO QUE VIENE EN LA CASA
@@ -307,7 +327,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
 
       case 'pillars': {
-        const pillars = sec.content.pillars || [];
+        const pillars = content.pillars || [
+          { id: '1', title: 'NUESTRA VISIÓN', text: 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.', icon: 'Compass' },
+          { id: '2', title: 'NUESTRA MISIÓN', text: 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.', icon: 'Flame' },
+          { id: '3', title: 'NUESTROS VALORES', text: 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.', icon: 'Users' }
+        ];
         return (
           <div id="vision-section" key={sec.id} style={{ padding: '90px 20px', ...bgStyle }}>
             <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -323,13 +347,13 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   letterSpacing: '2px',
                   textTransform: 'uppercase'
                 }}>
-                  {sec.content.title}
+                  {content.title || 'CONOCÉ LA VISIÓN'}
                 </span>
                 <h2 style={{ fontSize: '3.2rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginTop: '16px', marginBottom: '14px' }}>
                   NUESTRA IGLESIA
                 </h2>
                 <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6 }}>
-                  {sec.content.subtitle}
+                  {content.subtitle || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo.'}
                 </p>
               </div>
 
@@ -383,11 +407,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
 
       case 'schedules': {
-        const schedBgRaw = sec.content.bgUrl || '';
+        const schedBgRaw = content.bgUrl || '';
         const schedBg = schedBgRaw
           ? (schedBgRaw.startsWith('http') || schedBgRaw.startsWith('/') ? (schedBgRaw.startsWith('/') ? `${API_URL}${schedBgRaw}` : schedBgRaw) : `${API_URL}/${schedBgRaw}`)
           : '';
-        const list = sec.content.schedules || [];
+        const list = content.schedules && content.schedules.length > 0 ? content.schedules : schedules;
         return (
           <div 
             id="horarios-section" 
@@ -406,7 +430,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
               <Flame size={48} color={accentColor} style={{ marginBottom: '20px', filter: `drop-shadow(0 0 10px ${accentColor})` }} />
               <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '48px', textTransform: 'uppercase' }}>
-                {sec.content.title || 'HORARIOS DE SERVICIOS'}
+                {content.title || 'HORARIOS DE SERVICIOS'}
               </h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '2rem', fontWeight: 800 }}>
@@ -444,16 +468,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         return (
           <div key={sec.id} style={{ padding: '80px 20px', textAlign: 'center', ...bgStyle }}>
             <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '24px', textTransform: 'uppercase' }}>{sec.content.title}</h2>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '24px', textTransform: 'uppercase' }}>{content.title}</h2>
               <div style={{ height: '3px', width: '60px', backgroundColor: accentColor, margin: '0 auto 24px' }} />
-              <p style={{ fontSize: '1.15rem', lineHeight: 1.7, color: '#EAEDF8', opacity: 0.9 }}>{sec.content.text}</p>
+              <p style={{ fontSize: '1.15rem', lineHeight: 1.7, color: '#EAEDF8', opacity: 0.9 }}>{content.text}</p>
             </div>
           </div>
         );
       }
 
       case 'cta': {
-        const bgUrlRaw = sec.content.bgUrl || '';
+        const bgUrlRaw = content.bgUrl || '';
         const bgUrl = bgUrlRaw
           ? (bgUrlRaw.startsWith('http') || bgUrlRaw.startsWith('/') ? (bgUrlRaw.startsWith('/') ? `${API_URL}${bgUrlRaw}` : bgUrlRaw) : `${API_URL}/${bgUrlRaw}`)
           : '';
@@ -472,10 +496,10 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             }}
           >
             <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-              <h2 style={{ fontSize: '2.8rem', fontWeight: 900, marginBottom: '24px', textTransform: 'uppercase' }}>{sec.content.title}</h2>
-              {sec.content.buttonText && (
+              <h2 style={{ fontSize: '2.8rem', fontWeight: 900, marginBottom: '24px', textTransform: 'uppercase' }}>{content.title}</h2>
+              {content.buttonText && (
                 <button 
-                  onClick={() => sec.content.buttonUrl && (sec.content.buttonUrl.startsWith('http') ? window.open(sec.content.buttonUrl, '_blank') : window.location.href = sec.content.buttonUrl)}
+                  onClick={() => content.buttonUrl && (content.buttonUrl.startsWith('http') ? window.open(content.buttonUrl, '_blank') : window.location.href = content.buttonUrl)}
                   style={{
                     backgroundColor: '#FFFFFF',
                     color: '#030812',
@@ -491,7 +515,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                  {sec.content.buttonText}
+                  {content.buttonText}
                 </button>
               )}
             </div>
@@ -500,8 +524,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
 
       case 'image_text': {
-        const isLeft = sec.content.imagePosition === 'left';
-        const imgUrlRaw = sec.content.bgUrl || '';
+        const isLeft = content.imagePosition === 'left';
+        const imgUrlRaw = content.bgUrl || '';
         const imgUrl = imgUrlRaw
           ? (imgUrlRaw.startsWith('http') || imgUrlRaw.startsWith('/') ? (imgUrlRaw.startsWith('/') ? `${API_URL}${imgUrlRaw}` : imgUrlRaw) : `${API_URL}/${imgUrlRaw}`)
           : '';
@@ -511,17 +535,17 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '48px', alignItems: 'center' }}>
                 {isLeft && imgUrl && (
                   <div style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 15px 40px rgba(0,0,0,0.5)', height: '400px' }}>
-                    <img src={imgUrl} alt={sec.content.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={imgUrl} alt={content.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
                 <div>
-                  <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px', textTransform: 'uppercase' }}>{sec.content.title}</h2>
+                  <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px', textTransform: 'uppercase' }}>{content.title}</h2>
                   <div style={{ height: '3px', width: '60px', backgroundColor: accentColor, marginBottom: '24px' }} />
-                  <p style={{ fontSize: '1.05rem', lineHeight: 1.7, color: '#EAEDF8', opacity: 0.85 }}>{sec.content.text}</p>
+                  <p style={{ fontSize: '1.05rem', lineHeight: 1.7, color: '#EAEDF8', opacity: 0.85 }}>{content.text}</p>
                 </div>
                 {!isLeft && imgUrl && (
                   <div style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 15px 40px rgba(0,0,0,0.5)', height: '400px' }}>
-                    <img src={imgUrl} alt={sec.content.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={imgUrl} alt={content.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
               </div>
@@ -531,8 +555,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
 
       case 'grid': {
-        const cols = sec.content.columns || 4;
-        const cells = sec.content.cells || [];
+        const cols = content.columns || 4;
+        const cells = content.cells || [];
         const gridClass = `grid-bento-${sec.id}`;
         
         return (
@@ -558,9 +582,9 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               `}
             </style>
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              {sec.content.title && (
+              {content.title && (
                 <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                  <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{sec.content.title}</h2>
+                  <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{content.title}</h2>
                   <div style={{ height: '4px', width: '80px', backgroundColor: accentColor, margin: '0 auto', borderRadius: '4px' }} />
                 </div>
               )}
@@ -788,52 +812,100 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         pointerEvents: 'none'
       }} />
 
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION (Fallback) */}
       <div id="inicio" style={{
         position: 'relative',
         width: '100%',
+        minHeight: '100vh',
         backgroundColor: '#030812',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        textAlign: 'center',
+        paddingTop: '120px',
+        paddingBottom: '80px',
+        boxSizing: 'border-box'
       }}>
         {isVideoBg ? (
-          <div style={{ position: 'relative', width: '100%', minHeight: '75vh' }}>
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                zIndex: 0
-              }}
-            >
-              <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
-            </video>
-          </div>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: 0,
+              opacity: 0.35
+            }}
+          >
+            <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
+          </video>
         ) : (
-          heroBg && (
-            <img 
-              src={heroBg} 
-              alt="Portada" 
-              style={{ 
-                width: '100%', 
-                height: 'auto', 
-                display: 'block',
-                maxHeight: '92vh',
-                objectFit: 'contain'
-              }} 
-            />
-          )
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.4) 0%, rgba(3, 8, 18, 0.95) 100%), url(${heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0,
+            opacity: 0.8
+          }} />
         )}
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h1 style={{
+            fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
+            fontWeight: 950,
+            lineHeight: 1.05,
+            color: '#FFFFFF',
+            letterSpacing: '-1.5px',
+            textTransform: 'uppercase',
+            marginBottom: '24px'
+          }} className="hero-welcome-text">
+            {config.hero_title || 'Bienvenido a TU CASA'}
+          </h1>
+          <p style={{
+            fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
+            fontWeight: 500,
+            color: '#EAEDF8',
+            opacity: 0.9,
+            maxWidth: '650px',
+            lineHeight: 1.5,
+            marginBottom: '40px'
+          }}>
+            {config.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
+          </p>
+
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: 'Congreso de Mujeres', url: '/autenticas', style: 'primary' }]).map((btn) => (
+              <button
+                key={btn.id}
+                onClick={() => handleButtonClick(btn)}
+                style={{
+                  background: btn.style === 'primary' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                  color: '#FFFFFF',
+                  border: btn.style === 'primary' ? 'none' : '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '50px',
+                  padding: '16px 36px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(0, 51, 255, 0.3)' : 'none',
+                  transition: 'all 0.25s ease'
+                }}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom gradient line */}
         <div style={{

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -130,6 +130,16 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [mediaList, setMediaList] = useState([]);
   const [mediaSearch, setMediaSearch] = useState('');
   const [loadingMedia, setLoadingMedia] = useState(false);
+
+  // Zone & Seating Layout Management State
+  const [zoneAnalytics, setZoneAnalytics] = useState(null);
+  const [loadingZoneAnalytics, setLoadingZoneAnalytics] = useState(false);
+  const [editingZoneId, setEditingZoneId] = useState(null);
+  const [zoneRowsDraft, setZoneRowsDraft] = useState([]);
+  const [zoneQuickRows, setZoneQuickRows] = useState(10);
+  const [zoneQuickSeats, setZoneQuickSeats] = useState(10);
+  const [zoneSuccessMsg, setZoneSuccessMsg] = useState('');
+  const [zoneSaving, setZoneSaving] = useState(false);
 
   const initializeDefaultSectionsForPath = (path) => {
     if (path === '/autenticas') {
@@ -578,6 +588,104 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const fetchZoneAnalytics = async () => {
+    setLoadingZoneAnalytics(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/zones/analytics`);
+      const data = await res.json();
+      if (data.success) {
+        setZoneAnalytics(data);
+      }
+    } catch (e) {
+      console.error('Error fetching zone analytics:', e);
+    } finally {
+      setLoadingZoneAnalytics(false);
+    }
+  };
+
+  const handleStartEditZone = (zone) => {
+    setEditingZoneId(zone.id);
+    setZoneSuccessMsg('');
+    const rows = zone.layout_config?.rows || [];
+    setZoneRowsDraft(rows.map(r => ({ ...r })));
+    setZoneQuickRows(rows.length > 0 ? rows.length : 10);
+    const avgSeats = rows.length > 0 ? Math.round(rows.reduce((s, r) => s + (parseInt(r.seatsCount) || 0), 0) / rows.length) : 10;
+    setZoneQuickSeats(avgSeats);
+  };
+
+  const handleApplyUniformRows = (numRows, seatsPerRow) => {
+    const nRows = Math.max(1, parseInt(numRows) || 1);
+    const nSeats = Math.max(1, parseInt(seatsPerRow) || 1);
+    const newRows = [];
+    const isGeneral = editingZoneId?.startsWith('lateral_') || editingZoneId === 'central_atras';
+    const rowLetters = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J", "Fila K", "Fila L", "Fila M", "Fila N", "Fila O"];
+
+    for (let i = 0; i < nRows; i++) {
+      const label = isGeneral 
+        ? (rowLetters[i] || `Fila ${i + 1}`) 
+        : `Fila ${i + 1}`;
+      
+      const isReserved = editingZoneId === 'vip_central' && i < 2;
+      newRows.push({
+        rowLabel: label,
+        seatsCount: nSeats,
+        isReserved
+      });
+    }
+    setZoneRowsDraft(newRows);
+  };
+
+  const handleRowChange = (index, field, value) => {
+    const updated = [...zoneRowsDraft];
+    updated[index] = { ...updated[index], [field]: value };
+    setZoneRowsDraft(updated);
+  };
+
+  const handleAddRow = () => {
+    const nextIdx = zoneRowsDraft.length + 1;
+    const isGeneral = editingZoneId?.startsWith('lateral_') || editingZoneId === 'central_atras';
+    const rowLetters = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J", "Fila K", "Fila L", "Fila M", "Fila N", "Fila O"];
+    const label = isGeneral ? (rowLetters[zoneRowsDraft.length] || `Fila ${nextIdx}`) : `Fila ${nextIdx}`;
+    setZoneRowsDraft([...zoneRowsDraft, { rowLabel: label, seatsCount: 10, isReserved: false }]);
+  };
+
+  const handleRemoveRow = (index) => {
+    if (zoneRowsDraft.length <= 1) {
+      alert('La zona debe tener al menos 1 fila.');
+      return;
+    }
+    const updated = zoneRowsDraft.filter((_, i) => i !== index);
+    setZoneRowsDraft(updated);
+  };
+
+  const handleSaveZoneLayout = async (zoneId) => {
+    setZoneSaving(true);
+    setZoneSuccessMsg('');
+    try {
+      const res = await fetch(`${API_URL}/api/admin/zones/layout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zoneId,
+          rows: zoneRowsDraft,
+          username: adminUser?.full_name || adminUser?.username || 'Admin'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setZoneSuccessMsg(data.message);
+        setEditingZoneId(null);
+        fetchZoneAnalytics();
+      } else {
+        alert(data.message || 'Error al guardar la configuración.');
+      }
+    } catch (e) {
+      alert('Error de red al guardar la configuración de la zona.');
+    } finally {
+      setZoneSaving(false);
+    }
+  };
+
   useEffect(() => {
     if (adminUser) {
       fetchReservations();
@@ -587,6 +695,9 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   useEffect(() => {
     if (adminUser && activeTab === 'activity_log') {
       fetchActivityLogs();
+    }
+    if (adminUser && activeTab === 'zones_seating') {
+      fetchZoneAnalytics();
     }
   }, [adminUser, activeTab]);
 
@@ -1446,6 +1557,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Tag size={18} />
             Precios y Preventa
+          </button>
+        )}
+
+        {/* Only admin role can manage zone layouts & seat mapping */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => { setActiveTab('zones_seating'); fetchZoneAnalytics(); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'zones_seating' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'zones_seating' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Armchair size={18} />
+            Zonas y Asientos
           </button>
         )}
 
@@ -3591,6 +3725,327 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               {savingPricing ? 'Guardando...' : 'Guardar Configuración de Precios'}
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB: ZONE & SEATING LAYOUT MANAGEMENT (admin only) */}
+      {activeTab === 'zones_seating' && adminUser.role === 'admin' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', color: 'var(--accent-coffee)', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Armchair size={26} />
+                  Configuración y Remapeo de Zonas y Asientos
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', margin: 0, maxWidth: '750px' }}>
+                  Ajusta la cantidad de filas y asientos por fila para cada sector del auditorio. El sistema calculará en tiempo real los espacios ocupados y libres, sincronizando automáticamente el mapa interactivo.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchZoneAnalytics}
+                disabled={loadingZoneAnalytics}
+                className="btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', fontWeight: 700 }}
+              >
+                <RefreshCw size={16} className={loadingZoneAnalytics ? 'spin' : ''} />
+                {loadingZoneAnalytics ? 'Actualizando...' : 'Actualizar Métricas'}
+              </button>
+            </div>
+
+            {zoneSuccessMsg && (
+              <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px 20px', borderRadius: '12px', marginTop: '20px', fontWeight: 800, border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                ✓ {zoneSuccessMsg}
+              </div>
+            )}
+
+            {/* Global Auditorio KPIs */}
+            {zoneAnalytics && zoneAnalytics.global && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
+                <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>Capacidad Total Auditorio</div>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>{zoneAnalytics.global.total_capacity}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Asientos totales configurados</div>
+                </div>
+
+                <div style={{ backgroundColor: '#FEF2F2', padding: '20px', borderRadius: '16px', border: '1px solid #FECACA' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '6px' }}>🔴 Asientos Ocupados</div>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#DC2626' }}>{zoneAnalytics.global.occupied_count}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#991B1B' }}>Reservas y asignaciones activas</div>
+                </div>
+
+                <div style={{ backgroundColor: '#F0FDF4', padding: '20px', borderRadius: '16px', border: '1px solid #BBF7D0' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>🟢 Asientos Disponibles</div>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#16A34A' }}>{zoneAnalytics.global.available_capacity}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#166534' }}>Libres para reservar</div>
+                </div>
+
+                <div style={{ backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '6px' }}>📊 Ocupación General</div>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0F172A' }}>{zoneAnalytics.global.occupancy_pct}%</div>
+                  <div style={{ width: '100%', height: '6px', backgroundColor: '#E2E8F0', borderRadius: '6px', marginTop: '6px', overflow: 'hidden' }}>
+                    <div style={{ width: `${zoneAnalytics.global.occupancy_pct}%`, height: '100%', backgroundColor: 'var(--accent-coffee)' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Zone Grid Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+            {zoneAnalytics && zoneAnalytics.zones && zoneAnalytics.zones.map((zone) => {
+              const isEditing = editingZoneId === zone.id;
+              const draftTotal = isEditing ? zoneRowsDraft.reduce((s, r) => s + (parseInt(r.seatsCount) || 0), 0) : zone.total_capacity;
+
+              return (
+                <div
+                  key={zone.id}
+                  className="card-glass"
+                  style={{
+                    borderRadius: '20px',
+                    padding: '24px',
+                    border: isEditing ? '2px solid var(--accent-coffee)' : '1px solid var(--accent-beige-border)',
+                    boxShadow: isEditing ? '0 12px 30px rgba(0,0,0,0.1)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div>
+                    {/* Zone Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: zone.color_code }} />
+                        <h4 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--accent-coffee)', fontWeight: 800 }}>{zone.name}</h4>
+                      </div>
+                      <span style={{
+                        backgroundColor: zone.id.startsWith('vip') ? '#FDF2F8' : '#F0FDF4',
+                        color: zone.id.startsWith('vip') ? '#DB2777' : '#10B981',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase'
+                      }}>
+                        {zone.id.startsWith('vip') ? 'Sector Gold' : 'Sector General'}
+                      </span>
+                    </div>
+
+                    {/* Progress Bar & Key Numbers */}
+                    <div style={{ backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '14px', marginBottom: '18px', border: '1px solid #EFECE6' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '8px', fontWeight: 700 }}>
+                        <span style={{ color: '#16A34A' }}>🟢 Libres: {zone.available_capacity}</span>
+                        <span style={{ color: '#DC2626' }}>🔴 Ocupados: {zone.occupied_count}</span>
+                        <span style={{ color: 'var(--accent-coffee)' }}>Total: {zone.total_capacity}</span>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', backgroundColor: '#E5E7EB', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${zone.occupancy_pct}%`, height: '100%', backgroundColor: zone.color_code }} />
+                      </div>
+                      <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        {zone.occupancy_pct}% de ocupación
+                      </div>
+                    </div>
+
+                    {/* VIEW MODE: Rows Summary */}
+                    {!isEditing && (
+                      <div>
+                        <div style={{ fontSize: '0.88rem', color: 'var(--accent-coffee)', fontWeight: 800, marginBottom: '8px' }}>
+                          Distribución Actual de Filas:
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '140px', overflowY: 'auto', padding: '4px' }}>
+                          {zone.layout_config?.rows && zone.layout_config.rows.map((r, rIdx) => (
+                            <span
+                              key={rIdx}
+                              style={{
+                                fontSize: '0.78rem',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                backgroundColor: r.isReserved ? '#1E293B' : '#FFF',
+                                color: r.isReserved ? '#94A3B8' : '#374151',
+                                border: '1px solid var(--accent-beige-border)',
+                                fontWeight: 700
+                              }}
+                            >
+                              {r.rowLabel}: {r.seatsCount} as. {r.isReserved ? '(🔒)' : ''}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* EDIT MODE: Rows & Seats Configurator */}
+                    {isEditing && (
+                      <div style={{ marginTop: '12px' }}>
+                        {/* Quick Uniform Generator */}
+                        <div style={{ backgroundColor: '#F3F4F6', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px solid #E5E7EB' }}>
+                          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '8px' }}>
+                            ⚡ Generador Rápido Uniforme
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px', alignItems: 'center' }}>
+                            <div>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 700, display: 'block' }}>Filas</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="30"
+                                value={zoneQuickRows}
+                                onChange={(e) => setZoneQuickRows(e.target.value)}
+                                style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #CCC', fontSize: '0.85rem' }}
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 700, display: 'block' }}>Asientos/Fila</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="50"
+                                value={zoneQuickSeats}
+                                onChange={(e) => setZoneQuickSeats(e.target.value)}
+                                style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #CCC', fontSize: '0.85rem' }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleApplyUniformRows(zoneQuickRows, zoneQuickSeats)}
+                              className="btn-secondary"
+                              style={{ marginTop: '16px', padding: '6px 10px', fontSize: '0.78rem', fontWeight: 700 }}
+                            >
+                              Aplicar
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Row-by-Row Custom Editor */}
+                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '8px' }}>
+                          Editor Detallado por Fila ({zoneRowsDraft.length} filas):
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '240px', overflowY: 'auto', paddingRight: '4px', marginBottom: '14px' }}>
+                          {zoneRowsDraft.map((row, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: '80px 1fr auto auto',
+                                gap: '8px',
+                                alignItems: 'center',
+                                backgroundColor: '#FFF',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #E5E7EB'
+                              }}
+                            >
+                              <input
+                                type="text"
+                                value={row.rowLabel}
+                                onChange={(e) => handleRowChange(idx, 'rowLabel', e.target.value)}
+                                placeholder="Fila..."
+                                style={{ padding: '4px 6px', fontSize: '0.8rem', borderRadius: '6px', border: '1px solid #CCC', fontWeight: 700 }}
+                              />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="100"
+                                  value={row.seatsCount}
+                                  onChange={(e) => handleRowChange(idx, 'seatsCount', e.target.value)}
+                                  style={{ width: '60px', padding: '4px 6px', fontSize: '0.8rem', borderRadius: '6px', border: '1px solid #CCC', fontWeight: 700 }}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>asientos</span>
+                              </div>
+
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#4B5563', cursor: 'pointer', whiteSpace: 'nowrap' }} title="Fila Reservada de Protocolo">
+                                <input
+                                  type="checkbox"
+                                  checked={!!row.isReserved}
+                                  onChange={(e) => handleRowChange(idx, 'isReserved', e.target.checked)}
+                                />
+                                🔒 Reservada
+                              </label>
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveRow(idx)}
+                                style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '2px' }}
+                                title="Eliminar fila"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleAddRow}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            backgroundColor: '#F3F4F6',
+                            border: '1px dashed #CBD5E1',
+                            borderRadius: '8px',
+                            color: 'var(--accent-coffee)',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            marginBottom: '16px'
+                          }}
+                        >
+                          <Plus size={16} /> Agregar Fila
+                        </button>
+
+                        {/* Real-time Calculation */}
+                        <div style={{ backgroundColor: '#EFF6FF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #BFDBFE', fontSize: '0.82rem', color: '#1E40AF', marginBottom: '16px' }}>
+                          <div><strong>Nueva Capacidad Calculada:</strong> {draftTotal} asientos</div>
+                          <div style={{ fontSize: '0.75rem', marginTop: '2px', color: '#3B82F6' }}>
+                            (Asientos ocupados actuales: {zone.occupied_count} | Disponibles resultantes: {Math.max(0, draftTotal - zone.occupied_count)})
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Actions */}
+                  <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '16px', marginTop: '16px' }}>
+                    {!isEditing ? (
+                      <button
+                        onClick={() => handleStartEditZone(zone)}
+                        className="btn-secondary"
+                        style={{ width: '100%', padding: '10px', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      >
+                        <Settings size={16} />
+                        Editar Filas y Asientos
+                      </button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button
+                          onClick={() => handleSaveZoneLayout(zone.id)}
+                          disabled={zoneSaving}
+                          className="btn-primary"
+                          style={{ flex: 1, padding: '10px', fontSize: '0.9rem', fontWeight: 800 }}
+                        >
+                          {zoneSaving ? 'Guardando...' : '💾 Guardar Distribución'}
+                        </button>
+                        <button
+                          onClick={() => setEditingZoneId(null)}
+                          className="btn-secondary"
+                          style={{ padding: '10px 16px', fontSize: '0.9rem' }}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

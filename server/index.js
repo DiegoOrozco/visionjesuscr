@@ -277,6 +277,17 @@ app.get('/api/zones', (req, res) => {
       FROM zones
     `).all();
 
+    // Read zone layouts config from homepage_config
+    let zoneLayoutsConfig = {};
+    try {
+      const row = db.prepare("SELECT value FROM homepage_config WHERE key = 'zone_layouts_config'").get();
+      if (row && row.value) {
+        zoneLayoutsConfig = JSON.parse(row.value);
+      }
+    } catch (e) {
+      console.error('Error reading zone_layouts_config:', e);
+    }
+
     const zones = rawZones.map(z => {
       const isVip = z.id.startsWith('vip');
       const currentPrice = isVip ? activeVipPrice : activeGenPrice;
@@ -284,7 +295,8 @@ app.get('/api/zones', (req, res) => {
       return {
         ...z,
         price: currentPrice,
-        regular_price: regularPrice
+        regular_price: regularPrice,
+        layout_config: zoneLayoutsConfig[z.id] || null
       };
     });
 
@@ -854,6 +866,184 @@ app.post('/api/admin/attendees/:id/reassign-seat', (req, res) => {
   } catch (error) {
     console.error('Error reassigning seat:', error);
     res.status(500).json({ success: false, message: error.message || 'Error al reasignar el asiento.' });
+  }
+});
+
+// 6b. Get Detailed Zone Seating Analytics & Layouts
+app.get('/api/admin/zones/analytics', (req, res) => {
+  try {
+    const rawZones = db.prepare(`
+      SELECT id, name, price, regular_price, total_capacity, available_capacity, description, color_code
+      FROM zones
+    `).all();
+
+    let zoneLayoutsConfig = {};
+    try {
+      const row = db.prepare("SELECT value FROM homepage_config WHERE key = 'zone_layouts_config'").get();
+      if (row && row.value) {
+        zoneLayoutsConfig = JSON.parse(row.value);
+      }
+    } catch (e) {
+      console.error('Error reading zone_layouts_config:', e);
+    }
+
+    let globalTotal = 0;
+    let globalOccupied = 0;
+
+    const activeZonesOnly = rawZones.filter(z => z.id !== 'vip' && z.id !== 'general');
+
+    const zoneAnalytics = activeZonesOnly.map(z => {
+      const layout = zoneLayoutsConfig[z.id] || {
+        zoneId: z.id,
+        name: z.name,
+        color: z.color_code,
+        rows: []
+      };
+
+      // Count assigned / occupied seats in seat_queues
+      const queueOccupied = db.prepare('SELECT COUNT(*) as count FROM seat_queues WHERE zone_id = ? AND is_assigned = 1').get(z.id).count || 0;
+      
+      // Calculate capacity from rows if defined, else fallback to z.total_capacity
+      const rowCapacity = layout.rows && layout.rows.length > 0 
+        ? layout.rows.reduce((sum, r) => sum + (parseInt(r.seatsCount) || 0), 0)
+        : z.total_capacity;
+
+      const totalCap = rowCapacity > 0 ? rowCapacity : z.total_capacity;
+      const occupied = queueOccupied;
+      const available = Math.max(0, totalCap - occupied);
+      const occupancyPct = totalCap > 0 ? Math.round((occupied / totalCap) * 100) : 0;
+
+      globalTotal += totalCap;
+      globalOccupied += occupied;
+
+      return {
+        id: z.id,
+        name: z.name,
+        color_code: z.color_code,
+        price: z.price,
+        regular_price: z.regular_price,
+        total_capacity: totalCap,
+        occupied_count: occupied,
+        available_capacity: available,
+        occupancy_pct: occupancyPct,
+        layout_config: layout
+      };
+    });
+
+    const globalAvailable = Math.max(0, globalTotal - globalOccupied);
+    const globalOccupancyPct = globalTotal > 0 ? Math.round((globalOccupied / globalTotal) * 100) : 0;
+
+    res.json({
+      success: true,
+      global: {
+        total_capacity: globalTotal,
+        occupied_count: globalOccupied,
+        available_capacity: globalAvailable,
+        occupancy_pct: globalOccupancyPct
+      },
+      zones: zoneAnalytics
+    });
+  } catch (error) {
+    console.error('Error fetching zone analytics:', error);
+    res.status(500).json({ success: false, message: 'Error al consultar analíticas de zonas.' });
+  }
+});
+
+// 6c. Update Zone Row & Seat Layout Configuration
+app.post('/api/admin/zones/layout', (req, res) => {
+  try {
+    const { zoneId, rows, username } = req.body;
+
+    if (!zoneId || !Array.isArray(rows)) {
+      return res.status(400).json({ success: false, message: 'Datos de zona o filas inválidos.' });
+    }
+
+    const zone = db.prepare('SELECT * FROM zones WHERE id = ?').get(zoneId);
+    if (!zone) {
+      return res.status(404).json({ success: false, message: 'Zona no encontrada.' });
+    }
+
+    const newTotalCapacity = rows.reduce((sum, r) => sum + (parseInt(r.seatsCount) || 0), 0);
+    const occupiedCount = db.prepare('SELECT COUNT(*) as count FROM seat_queues WHERE zone_id = ? AND is_assigned = 1').get(zoneId).count || 0;
+
+    if (newTotalCapacity < occupiedCount) {
+      return res.status(400).json({
+        success: false,
+        message: `No se puede reducir la capacidad a ${newTotalCapacity} asientos porque ya existen ${occupiedCount} asientos ocupados/reservados.`
+      });
+    }
+
+    const newAvailableCapacity = Math.max(0, newTotalCapacity - occupiedCount);
+
+    const updateTx = db.transaction(() => {
+      // 1. Update homepage_config
+      let currentConfigs = {};
+      const configRow = db.prepare("SELECT value FROM homepage_config WHERE key = 'zone_layouts_config'").get();
+      if (configRow && configRow.value) {
+        try { currentConfigs = JSON.parse(configRow.value); } catch (e) {}
+      }
+
+      currentConfigs[zoneId] = {
+        zoneId,
+        name: zone.name,
+        color: zone.color_code,
+        rows: rows.map((r, idx) => ({
+          rowLabel: r.rowLabel || `Fila ${idx + 1}`,
+          seatsCount: parseInt(r.seatsCount) || 0,
+          isReserved: !!r.isReserved
+        }))
+      };
+
+      db.prepare(`
+        INSERT OR REPLACE INTO homepage_config (key, value)
+        VALUES ('zone_layouts_config', ?)
+      `).run(JSON.stringify(currentConfigs));
+
+      // 2. Update zones table
+      db.prepare(`
+        UPDATE zones
+        SET total_capacity = ?, available_capacity = ?
+        WHERE id = ?
+      `).run(newTotalCapacity, newAvailableCapacity, zoneId);
+
+      // 3. Expand seat_queues if new capacity exceeds current queue size
+      const currentQueueCount = db.prepare('SELECT COUNT(*) as count FROM seat_queues WHERE zone_id = ?').get(zoneId).count || 0;
+      if (newTotalCapacity > currentQueueCount) {
+        const prefixMap = {
+          'vip_central': 'VIP-CTR',
+          'vip_izquierda': 'VIP-IZQ',
+          'vip_derecha': 'VIP-DER',
+          'central_atras': 'GEN-CTR',
+          'lateral_izquierda': 'GEN-IZQ',
+          'lateral_derecha': 'GEN-DER'
+        };
+        const prefix = prefixMap[zoneId] || 'TKT';
+        const insertQueue = db.prepare('INSERT OR IGNORE INTO seat_queues (zone_id, ticket_number, ticket_code) VALUES (?, ?, ?)');
+        for (let i = currentQueueCount + 1; i <= newTotalCapacity; i++) {
+          const code = `${prefix}-${String(i).padStart(3, '0')}`;
+          insertQueue.run(zoneId, i, code);
+        }
+      }
+
+      // 4. Log activity
+      try {
+        db.prepare('INSERT INTO activity_logs (username, action, details) VALUES (?, ?, ?)').run(
+          username || 'Admin',
+          'Actualizar Mapa de Zona',
+          `Se actualizó la distribución de ${zone.name}: ${rows.length} filas, ${newTotalCapacity} asientos totales.`
+        );
+      } catch (e) {}
+    });
+
+    updateTx();
+
+    res.json({
+      success: true,
+      message: `Configuración de ${zone.name} guardada exitosamente. Capacidad: ${newTotalCapacity} asientos (${newAvailableCapacity} disponibles).`
+    });
+  } catch (error) {
+    console.error('Error updating zone layout:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar la configuración de la zona.' });
   }
 });
 

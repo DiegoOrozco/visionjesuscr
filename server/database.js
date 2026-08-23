@@ -323,6 +323,123 @@ function initDb() {
     VALUES ('schedule_bg', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1600')
   `).run();
 
+  // Ensure default zone_layouts_config exists
+  const defaultZoneLayouts = {
+    vip_central: {
+      zoneId: 'vip_central',
+      name: 'Gold Central',
+      color: '#DB2777',
+      prefix: 'VIP-CTR',
+      rows: [
+        { rowLabel: 'Fila 1', seatsCount: 9, isReserved: true },
+        { rowLabel: 'Fila 2', seatsCount: 9, isReserved: true },
+        { rowLabel: 'Fila 3', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 4', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 5', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 6', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 7', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 8', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 9', seatsCount: 9, isReserved: false },
+        { rowLabel: 'Fila 10', seatsCount: 9, isReserved: false }
+      ]
+    },
+    vip_izquierda: {
+      zoneId: 'vip_izquierda',
+      name: 'Gold Izquierda',
+      color: '#9333EA',
+      prefix: 'VIP-IZQ',
+      rows: [
+        { rowLabel: 'Fila 1', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 2', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 3', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 4', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 5', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 6', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 7', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 8', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 9', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 10', seatsCount: 8, isReserved: false }
+      ]
+    },
+    vip_derecha: {
+      zoneId: 'vip_derecha',
+      name: 'Gold Derecha',
+      color: '#9333EA',
+      prefix: 'VIP-DER',
+      rows: [
+        { rowLabel: 'Fila 1', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 2', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 3', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 4', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 5', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 6', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 7', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 8', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 9', seatsCount: 8, isReserved: false },
+        { rowLabel: 'Fila 10', seatsCount: 8, isReserved: false }
+      ]
+    },
+    central_atras: {
+      zoneId: 'central_atras',
+      name: 'General Central',
+      color: '#10B981',
+      prefix: 'GEN-CTR',
+      rows: [
+        { rowLabel: 'Fila A', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila B', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila C', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila D', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila E', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila F', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila G', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila H', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila I', seatsCount: 15, isReserved: false },
+        { rowLabel: 'Fila J', seatsCount: 15, isReserved: false }
+      ]
+    },
+    lateral_izquierda: {
+      zoneId: 'lateral_izquierda',
+      name: 'General Izquierda',
+      color: '#F59E0B',
+      prefix: 'GEN-IZQ',
+      rows: [
+        { rowLabel: 'Fila A', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila B', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila C', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila D', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila E', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila F', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila G', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila H', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila I', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila J', seatsCount: 10, isReserved: false }
+      ]
+    },
+    lateral_derecha: {
+      zoneId: 'lateral_derecha',
+      name: 'General Derecha',
+      color: '#F59E0B',
+      prefix: 'GEN-DER',
+      rows: [
+        { rowLabel: 'Fila A', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila B', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila C', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila D', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila E', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila F', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila G', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila H', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila I', seatsCount: 10, isReserved: false },
+        { rowLabel: 'Fila J', seatsCount: 10, isReserved: false }
+      ]
+    }
+  };
+
+  db.prepare(`
+    INSERT OR IGNORE INTO homepage_config (key, value)
+    VALUES ('zone_layouts_config', ?)
+  `).run(JSON.stringify(defaultZoneLayouts));
+
   // Seed default page sections if empty
   const sectionsCount = db.prepare('SELECT COUNT(*) as count FROM page_sections').get();
   if (sectionsCount.count === 0) {
