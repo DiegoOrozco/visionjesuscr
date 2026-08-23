@@ -119,8 +119,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
 
     switch (sec.type) {
       case 'hero': {
-        let bgUrl = content.bgUrl || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
-        bgUrl = bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`;
+        let bgUrl = content.bgUrl || '';
+        bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
         const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
         const heroTitle = content.title !== undefined ? content.title : 'Bienvenido a TU CASA';
         const heroSubtitle = content.subtitle !== undefined ? content.subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
@@ -160,7 +160,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")`,
+                backgroundImage: bgUrl ? `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 0,
@@ -839,8 +839,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         boxSizing: 'border-box'
       }}>
         {(() => {
-          let bgUrl = heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
-          bgUrl = bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`;
+          let bgUrl = heroBg || '';
+          bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
           
           return isVideoBg ? (
           <video
@@ -865,7 +865,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           <div style={{
             position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")`,
+            backgroundImage: bgUrl ? `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: 0,
