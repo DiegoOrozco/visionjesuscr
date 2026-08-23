@@ -119,13 +119,14 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
 
     switch (sec.type) {
       case 'hero': {
-        const bgUrl = content.bgUrl || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+        let bgUrl = content.bgUrl || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+        bgUrl = bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`;
         const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
-        const heroTitle = content.title || 'Bienvenido a TU CASA';
-        const heroSubtitle = content.subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
+        const heroTitle = content.title !== undefined ? content.title : 'Bienvenido a TU CASA';
+        const heroSubtitle = content.subtitle !== undefined ? content.subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
         const heroButtons = content.buttons && content.buttons.length > 0 
           ? content.buttons 
-          : [{ id: '1', label: 'Congreso de Mujeres', url: '/autenticas', style: 'primary' }];
+          : [];
 
         return (
           <div 
@@ -159,7 +160,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url(${bgUrl})`,
+                backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 0,
@@ -168,28 +169,32 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             )}
             
             <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h1 style={{
-                fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
-                fontWeight: 950,
-                lineHeight: 1.05,
-                color: '#FFFFFF',
-                letterSpacing: '-1.5px',
-                textTransform: 'uppercase',
-                marginBottom: '24px'
-              }} className="hero-welcome-text">
-                {heroTitle}
-              </h1>
-              <p style={{
-                fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
-                fontWeight: 500,
-                color: '#EAEDF8',
-                opacity: 0.9,
-                maxWidth: '650px',
-                lineHeight: 1.5,
-                marginBottom: '40px'
-              }}>
-                {heroSubtitle}
-              </p>
+              {heroTitle && (
+                <h1 style={{
+                  fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
+                  fontWeight: 950,
+                  lineHeight: 1.05,
+                  color: '#FFFFFF',
+                  letterSpacing: '-1.5px',
+                  textTransform: 'uppercase',
+                  marginBottom: '24px'
+                }} className="hero-welcome-text">
+                  {heroTitle}
+                </h1>
+              )}
+              {heroSubtitle && (
+                <p style={{
+                  fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
+                  fontWeight: 500,
+                  color: '#EAEDF8',
+                  opacity: 0.9,
+                  maxWidth: '650px',
+                  lineHeight: 1.5,
+                  marginBottom: '40px'
+                }}>
+                  {heroSubtitle}
+                </p>
+              )}
 
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {heroButtons.map((btn) => (
@@ -833,7 +838,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         paddingBottom: '80px',
         boxSizing: 'border-box'
       }}>
-        {isVideoBg ? (
+        {(() => {
+          let bgUrl = heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+          bgUrl = bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`;
+          
+          return isVideoBg ? (
           <video
             autoPlay
             loop
@@ -856,26 +865,31 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           <div style={{
             position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url(${heroBg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'})`,
+            backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.4) 100%), url("${bgUrl}")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: 0,
             opacity: 0.95
           }} />
-        )}
+        )
+        })()}
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h1 style={{
-            fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
-            fontWeight: 950,
+          {(config.hero_title !== undefined ? config.hero_title : 'Bienvenido a TU CASA') && (
+            <h1 style={{
+              fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
+              fontWeight: 950,
+
             lineHeight: 1.05,
             color: '#FFFFFF',
             letterSpacing: '-1.5px',
             textTransform: 'uppercase',
             marginBottom: '24px'
           }} className="hero-welcome-text">
-            {config.hero_title || 'Bienvenido a TU CASA'}
+            {config.hero_title !== undefined ? config.hero_title : 'Bienvenido a TU CASA'}
           </h1>
+          )}
+          {(config.hero_subtitle !== undefined ? config.hero_subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración') && (
           <p style={{
             fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
             fontWeight: 500,
@@ -885,8 +899,9 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             lineHeight: 1.5,
             marginBottom: '40px'
           }}>
-            {config.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
+            {config.hero_subtitle !== undefined ? config.hero_subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
           </p>
+          )}
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
             {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: 'Congreso de Mujeres', url: '/autenticas', style: 'primary' }]).map((btn) => (
