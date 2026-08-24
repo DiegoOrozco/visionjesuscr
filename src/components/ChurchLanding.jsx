@@ -430,17 +430,21 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             id="horarios-section" 
             key={sec.id}
             style={{
-              backgroundImage: schedBg ? `url(${schedBg})` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%)',
+              backgroundImage: (displayTitle || list.length > 0) ? (schedBg ? `url(${schedBg})` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%)') : 'none',
+              backgroundColor: '#030812',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              padding: (displayTitle || list.length > 0) ? '100px 20px' : '0', // no padding if it's just an image
+              padding: (displayTitle || list.length > 0) ? '100px 20px' : '40px 20px', 
               textAlign: 'center',
               borderTop: '1px solid rgba(0, 51, 255, 0.15)',
               borderBottom: '1px solid rgba(0, 51, 255, 0.15)',
-              minHeight: (displayTitle || list.length > 0) ? 'auto' : '60vh', // give it some height if it's just an image
+              minHeight: 'auto', 
               ...bgStyle
             }}
           >
+            {!(displayTitle || list.length > 0) && schedBg && (
+              <img src={schedBg} alt="Horarios" style={{ width: '100%', maxWidth: '1200px', height: 'auto', display: 'block', objectFit: 'contain', margin: '0 auto' }} />
+            )}
             {(displayTitle || list.length > 0) && (
               <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 <Flame size={48} color={accentColor} style={{ marginBottom: '20px', filter: `drop-shadow(0 0 10px ${accentColor})` }} />
