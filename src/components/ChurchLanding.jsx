@@ -1373,6 +1373,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         <div id="horarios-section" style={{
           width: '100%',
           backgroundColor: '#030812',
+          padding: '40px 20px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
