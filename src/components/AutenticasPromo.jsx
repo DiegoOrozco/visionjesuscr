@@ -213,7 +213,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
               <div className="au-icon-glow"></div>
             </div>
             <h4>Ubicación</h4>
-            <p>{config.autenticas_place_info || 'Auditorio principal Vision Jesus'}</p>
+            <p>{config.autenticas_place_info || 'Auditorio principal Visión Jesús'}</p>
           </AnimatedSection>
         </div>
 
@@ -271,7 +271,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
           <div className="au-location-bg"></div>
           <div className="au-location-content">
             <h2>¿CÓMO LLEGAR?</h2>
-            <p>del Cementerio de San Antonio, 200mts NE.<br/>Auditorio principal Vision Jesus.</p>
+            <p>del Cementerio de San Antonio, 200mts NE.<br/>{config.autenticas_place_info || 'Auditorio principal Visión Jesús'}.</p>
             
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <a 
