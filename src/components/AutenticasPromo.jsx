@@ -23,10 +23,11 @@ function useOnScreen(options = { threshold: 0.1 }) {
   return [setRef, visible];
 }
 
-const AnimatedSection = ({ children, className = '', style = {}, delay = 0 }) => {
+const AnimatedSection = ({ children, className = '', style = {}, delay = 0, id }) => {
   const [setRef, visible] = useOnScreen();
   return (
     <div
+      id={id}
       ref={setRef}
       className={`${className} ${visible ? 'au-in-view' : 'au-out-view'}`}
       style={{ ...style, transitionDelay: `${delay}ms` }}

@@ -14,13 +14,37 @@ import AcercaDeLaVision from './components/AcercaDeLaVision';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+const getInitialView = () => {
+  const path = window.location.pathname;
+  if (path.startsWith('/ticket/')) return 'ticket-view';
+  if (path === '/admin' || path === '/login' || path === '/portal-admin') {
+    const savedUser = localStorage.getItem('admin_user');
+    const userObj = savedUser ? JSON.parse(savedUser) : null;
+    if (userObj && userObj.role === 'scanner') return 'scanner';
+    return 'admin';
+  }
+  if (path === '/escanear') return 'scanner';
+  if (path === '/autenticas') return 'autenticas-promo';
+  if (path === '/acerca-de-la-vision') return 'acerca-de-la-vision';
+  if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) return 'under-construction';
+  return 'landing';
+};
+
+const getInitialConstructionPage = () => {
+  const path = window.location.pathname;
+  if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) {
+    return path.replace('/', '');
+  }
+  return '';
+};
+
 export default function App() {
-  const [currentView, setCurrentView] = useState('landing');
+  const [currentView, setCurrentView] = useState(getInitialView);
   const [zones, setZones] = useState([]);
   const [occupiedSeats, setOccupiedSeats] = useState([]);
   const [homepageConfig, setHomepageConfig] = useState({});
   const [landingSections, setLandingSections] = useState([]);
-  const [constructionPage, setConstructionPage] = useState('');
+  const [constructionPage, setConstructionPage] = useState(getInitialConstructionPage);
   
   // Modal & Reservation state
   const [selectedZone, setSelectedZone] = useState(null);
