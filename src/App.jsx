@@ -43,6 +43,7 @@ export default function App() {
   const [zones, setZones] = useState([]);
   const [occupiedSeats, setOccupiedSeats] = useState([]);
   const [homepageConfig, setHomepageConfig] = useState({});
+  const [isConfigLoaded, setIsConfigLoaded] = useState(false);
   const [landingSections, setLandingSections] = useState([]);
   const [constructionPage, setConstructionPage] = useState(getInitialConstructionPage);
   
@@ -86,8 +87,12 @@ export default function App() {
         if (data.success) {
           setHomepageConfig(data.config);
         }
+        setIsConfigLoaded(true);
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        setIsConfigLoaded(true);
+      });
   };
 
   const fetchLandingSections = (path = window.location.pathname) => {
@@ -210,7 +215,11 @@ export default function App() {
 
       <main style={{ flex: 1, paddingBottom: currentView === 'landing' ? '0px' : '60px' }}>
         
-        {/* VIEW 0: CHURCH LANDING PAGE */}
+        {!isConfigLoaded ? (
+          <div style={{ height: '100vh', backgroundColor: '#FDFBF7' }}></div>
+        ) : (
+          <>
+            {/* VIEW 0: CHURCH LANDING PAGE */}
         {currentView === 'landing' && (
           <ChurchLanding 
             config={homepageConfig} 
@@ -389,6 +398,8 @@ export default function App() {
               }} 
             />
           )
+        )}
+          </>
         )}
 
       </main>
