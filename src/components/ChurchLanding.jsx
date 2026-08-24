@@ -883,32 +883,31 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         })()}
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {(config.hero_title !== undefined ? config.hero_title : 'Bienvenido a TU CASA') && (
+          {(config.hero_title !== undefined ? config.hero_title : '') && (
             <h1 style={{
               fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
               fontWeight: 950,
-
-            lineHeight: 1.05,
-            color: '#FFFFFF',
-            letterSpacing: '-1.5px',
-            textTransform: 'uppercase',
-            marginBottom: '24px'
-          }} className="hero-welcome-text">
-            {config.hero_title !== undefined ? config.hero_title : 'Bienvenido a TU CASA'}
-          </h1>
+              lineHeight: 1.05,
+              color: '#FFFFFF',
+              letterSpacing: '-1.5px',
+              textTransform: 'uppercase',
+              marginBottom: '24px'
+            }} className="hero-welcome-text">
+              {config.hero_title !== undefined ? config.hero_title : ''}
+            </h1>
           )}
-          {(config.hero_subtitle !== undefined ? config.hero_subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración') && (
-          <p style={{
-            fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
-            fontWeight: 500,
-            color: '#EAEDF8',
-            opacity: 0.9,
-            maxWidth: '650px',
-            lineHeight: 1.5,
-            marginBottom: '40px'
-          }}>
-            {config.hero_subtitle !== undefined ? config.hero_subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
-          </p>
+          {(config.hero_subtitle !== undefined ? config.hero_subtitle : '') && (
+            <p style={{
+              fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
+              fontWeight: 500,
+              color: '#EAEDF8',
+              opacity: 0.9,
+              maxWidth: '650px',
+              lineHeight: 1.5,
+              marginBottom: '40px'
+            }}>
+              {config.hero_subtitle !== undefined ? config.hero_subtitle : ''}
+            </p>
           )}
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
