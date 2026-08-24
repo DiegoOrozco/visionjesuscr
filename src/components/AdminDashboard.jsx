@@ -70,6 +70,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     autenticas_price_general_regular: '',
     autenticas_price_gold_presale: '',
     autenticas_price_gold_regular: '',
+    autenticas_features_general: '',
+    autenticas_features_gold: '',
     autenticas_gallery: '[]',
     vision_title: '',
     vision_text: '',
@@ -853,6 +855,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         autenticas_price_general_regular: homepageConfig.autenticas_price_general_regular || '',
         autenticas_price_gold_presale: homepageConfig.autenticas_price_gold_presale || '',
         autenticas_price_gold_regular: homepageConfig.autenticas_price_gold_regular || '',
+        autenticas_features_general: homepageConfig.autenticas_features_general || '',
+        autenticas_features_gold: homepageConfig.autenticas_features_gold || '',
         autenticas_gallery: homepageConfig.autenticas_gallery || '[]',
         vision_title: homepageConfig.vision_title || '',
         vision_text: homepageConfig.vision_text || '',
@@ -3487,6 +3491,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Gold: Precio Oficial</label>
                     <input type="text" name="autenticas_price_gold_regular" value={configFields.autenticas_price_gold_regular} onChange={handleConfigChange} placeholder="Ej: ₡15.000" />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Características: Acceso General (Una por línea)</label>
+                    <textarea name="autenticas_features_general" value={configFields.autenticas_features_general} onChange={handleConfigChange} rows="3" placeholder="Ej:&#10;Viernes 18: Ingreso a las 7:00pm&#10;Sábado 19: Ingreso a las 5:00pm" />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Características: Acceso Gold (Una por línea)</label>
+                    <textarea name="autenticas_features_gold" value={configFields.autenticas_features_gold} onChange={handleConfigChange} rows="4" placeholder="Ej:&#10;Viernes 18: Ingreso a las 7:00pm&#10;Sábado 19: Mañana de sanidad a las 9:00am&#10;Taller Entre nosotras" />
                   </div>
                 </div>
               </div>

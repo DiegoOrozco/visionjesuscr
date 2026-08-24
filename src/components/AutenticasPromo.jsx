@@ -126,6 +126,14 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
   const generalPrice = isPresale ? (config.autenticas_price_general_presale || '₡7.500') : (config.autenticas_price_general_regular || '₡10.000');
   const goldPrice = isPresale ? (config.autenticas_price_gold_presale || '₡12.000') : (config.autenticas_price_gold_regular || '₡15.000');
 
+  const generalFeatures = config.autenticas_features_general
+    ? config.autenticas_features_general.split('\n').filter(f => f.trim())
+    : ['Viernes 18: Ingreso a las 7:00pm', 'Sábado 19: Ingreso a las 5:00pm'];
+
+  const goldFeatures = config.autenticas_features_gold
+    ? config.autenticas_features_gold.split('\n').filter(f => f.trim())
+    : ['Viernes 18: Ingreso a las 7:00pm', 'Sábado 19: Mañana de sanidad a las 9:00am', 'Taller "Entre nosotras"', 'Brunch especial'];
+
   return (
     <div className="au-wrapper">
       
@@ -225,8 +233,9 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
               <span className="au-ticket-label">Acceso</span>
               <h3 className="au-ticket-name">GENERAL</h3>
               <ul className="au-ticket-features" style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', color: '#FFF', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                <li>✔️ Viernes 18: Ingreso a las 7:00pm</li>
-                <li>✔️ Sábado 19: Ingreso a las 5:00pm</li>
+                {generalFeatures.map((f, i) => (
+                  <li key={i}>✔️ {f}</li>
+                ))}
               </ul>
               <p className="au-ticket-price">{generalPrice}</p>
               <button onClick={() => onScrollToMap('general')} className="au-ticket-btn">
@@ -245,10 +254,9 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
               <span className="au-ticket-label">Acceso</span>
               <h3 className="au-ticket-name">GOLD</h3>
               <ul className="au-ticket-features" style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', color: '#FFF', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                <li>⭐ Viernes 18: Ingreso a las 7:00pm</li>
-                <li>⭐ Sábado 19: Mañana de sanidad a las 9:00am</li>
-                <li>⭐ Taller "Entre nosotras"</li>
-                <li>⭐ Brunch especial</li>
+                {goldFeatures.map((f, i) => (
+                  <li key={i}>⭐ {f}</li>
+                ))}
               </ul>
               <p className="au-ticket-price">{goldPrice}</p>
               <button onClick={() => onScrollToMap('gold')} className="au-ticket-btn">
