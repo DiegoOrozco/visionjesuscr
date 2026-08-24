@@ -132,17 +132,18 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           <div 
             id="inicio" 
             key={sec.id}
+            className="hero-container"
             style={{
-              minHeight: '100vh',
               width: '100%',
-              position: 'relative',
+              minHeight: '100vh',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-end',
               textAlign: 'center',
               overflow: 'hidden',
               paddingTop: '120px',
-              paddingBottom: '80px',
+              paddingBottom: '120px',
               boxSizing: 'border-box',
               ...bgStyle
             }}
@@ -422,32 +423,37 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         const schedBg = schedBgRaw
           ? (schedBgRaw.startsWith('http') || schedBgRaw.startsWith('/') ? (schedBgRaw.startsWith('/') ? `${API_URL}${schedBgRaw}` : schedBgRaw) : `${API_URL}/${schedBgRaw}`)
           : '';
-        const list = content.schedules && content.schedules.length > 0 ? content.schedules : schedules;
+        const list = content.schedules && content.schedules.length > 0 ? content.schedules : (schedBg ? [] : schedules);
+        const displayTitle = content.title !== undefined ? content.title : (schedBg ? '' : 'HORARIOS DE SERVICIOS');
         return (
           <div 
             id="horarios-section" 
             key={sec.id}
             style={{
-              backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%), url(${schedBg})`,
+              backgroundImage: schedBg ? `url(${schedBg})` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              padding: '100px 20px',
+              padding: (displayTitle || list.length > 0) ? '100px 20px' : '0', // no padding if it's just an image
               textAlign: 'center',
               borderTop: '1px solid rgba(0, 51, 255, 0.15)',
               borderBottom: '1px solid rgba(0, 51, 255, 0.15)',
+              minHeight: (displayTitle || list.length > 0) ? 'auto' : '60vh', // give it some height if it's just an image
               ...bgStyle
             }}
           >
-            <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-              <Flame size={48} color={accentColor} style={{ marginBottom: '20px', filter: `drop-shadow(0 0 10px ${accentColor})` }} />
-              <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '48px', textTransform: 'uppercase' }}>
-                {content.title || 'HORARIOS DE SERVICIOS'}
-              </h2>
+            {(displayTitle || list.length > 0) && (
+              <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                <Flame size={48} color={accentColor} style={{ marginBottom: '20px', filter: `drop-shadow(0 0 10px ${accentColor})` }} />
+                {displayTitle && (
+                  <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '48px', textTransform: 'uppercase' }}>
+                    {displayTitle}
+                  </h2>
+                )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '2rem', fontWeight: 800 }}>
-                {list.map((s, sIdx) => (
-                  <div key={s.id || sIdx} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', color: s.isVirtual ? accentColor : '#FFFFFF' }}>
-                    {s.isVirtual ? <Music size={28} color={accentColor} /> : <PlayCircle size={28} color={accentColor} />}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '2rem', fontWeight: 800 }}>
+                  {list.map((s, sIdx) => (
+                    <div key={s.id || sIdx} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', color: s.isVirtual ? accentColor : '#FFFFFF' }}>
+                      {s.isVirtual ? <Music size={28} color={accentColor} /> : <PlayCircle size={28} color={accentColor} />}
                     <span>{s.text}</span>
                   </div>
                 ))}
@@ -468,9 +474,9 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   boxShadow: `0 8px 24px rgba(0, 51, 255, 0.3)`
                 }}
               >
-                ¿TENÉS ALGUNA PREGUNTA?
               </button>
             </div>
+            )}
           </div>
         );
       }
@@ -821,19 +827,22 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }} />
 
       {/* 1. HERO SECTION (Fallback) */}
-      <div id="inicio" style={{
-        position: 'relative',
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: '#030812',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
+      <div 
+        id="inicio"
+        className="hero-container"
+        style={{
+          position: 'relative',
+          width: '100%',
+          minHeight: '100vh',
+          backgroundColor: '#030812',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        justifyContent: 'flex-end',
         textAlign: 'center',
         paddingTop: '120px',
-        paddingBottom: '80px',
+        paddingBottom: '120px',
         boxSizing: 'border-box'
       }}>
         {(() => {

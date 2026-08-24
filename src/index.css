@@ -328,7 +328,18 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 768px) {
   .hero-bg-image {
-    background-size: 100% auto;
-    background-position: top center;
+    background-size: cover;
+    background-position: center 20%;
+  }
+}
+
+.hero-container {
+  min-height: 100vh !important;
+}
+
+@media (max-width: 768px) {
+  .hero-container {
+    min-height: 80vh !important;
+    padding-bottom: 80px !important;
   }
 }
