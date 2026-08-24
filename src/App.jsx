@@ -37,6 +37,9 @@ export default function App() {
   // URL Hash state for /ticket/:qrHash
   const [ticketQrHash, setTicketQrHash] = useState('');
 
+  // Zone Highlight state
+  const [highlightedZone, setHighlightedZone] = useState(null);
+
   // Fetch zones & occupied seats on mount
   const fetchZones = () => {
     fetch(`${API_URL}/api/zones`)
@@ -197,7 +200,8 @@ export default function App() {
           <div className="container" style={{ paddingTop: '20px' }}>
             <AutenticasPromo 
               config={homepageConfig} 
-              onScrollToMap={() => {
+              onScrollToMap={(type) => {
+                setHighlightedZone(type); // 'general' or 'gold'
                 setCurrentView('home');
               }}
             />
@@ -251,6 +255,7 @@ export default function App() {
               occupiedSeats={occupiedSeats} 
               onSelectZone={handleSelectZone} 
               onRefresh={fetchZones}
+              highlightedZone={highlightedZone}
             />
 
             {/* Zone Modal Popup (if needed) */}

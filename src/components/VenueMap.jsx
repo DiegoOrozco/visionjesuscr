@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RotateCcw, Check, MousePointerClick, Star, Ticket } from 'lucide-react';
 
-export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRefresh }) {
+export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRefresh, highlightedZone }) {
   const [hoveredZoneId, setHoveredZoneId] = useState(null);
   const [selectedZone, setSelectedZone] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -130,11 +130,75 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
   const toggleSeatSelection = (seatCode, isOccupied) => {
     if (isOccupied) return;
 
-    if (selectedSeats.includes(seatCode)) {
-      setSelectedSeats(selectedSeats.filter(s => s !== seatCode));
+    const parts = seatCode.split(' - ');
+    if (parts.length < 3) return;
+    const zId = parts[0];
+    const rLabel = parts[1];
+
+    let maxSeats = 10;
+    let rowIndex = 0;
+
+    if (zId === 'vip_central') {
+      const activeRow = seatLayouts.vip_central.activeRows.find((r, idx) => {
+        if (r.rowLabel === rLabel) { rowIndex = idx; return true; }
+        return false;
+      });
+      maxSeats = activeRow ? activeRow.seatsCount : 9;
+    } else if (zId === 'vip_izquierda' || zId === 'vip_derecha') {
+      const row = seatLayouts[zId].find((r, idx) => {
+        if (r.rowLabel === rLabel) { rowIndex = idx; return true; }
+        return false;
+      });
+      maxSeats = row ? row.seatsCount : 8;
     } else {
-      setSelectedSeats([...selectedSeats, seatCode]);
+      const rows = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+      rowIndex = rows.indexOf(rLabel);
+      maxSeats = (zId === 'central_atras') ? 15 : 10;
     }
+
+    const proposedSelected = selectedSeats.includes(seatCode)
+      ? selectedSeats.filter(s => s !== seatCode)
+      : [...selectedSeats, seatCode];
+
+    const rowState = [];
+    for (let i = 0; i < maxSeats; i++) {
+      const code = `${zId} - ${rLabel} - Asiento #${i + 1}`;
+      rowState.push({
+        index: i,
+        isOccupied: checkSeatOccupied(zId, rLabel, rowIndex, i),
+        isSelected: proposedSelected.includes(code)
+      });
+    }
+
+    let currentBlock = [];
+    const blocks = [];
+    for (let i = 0; i < maxSeats; i++) {
+      if (rowState[i].isOccupied || rowState[i].isSelected) {
+        currentBlock.push(rowState[i]);
+      } else {
+        if (currentBlock.length > 0) {
+          blocks.push(currentBlock);
+          currentBlock = [];
+        }
+      }
+    }
+    if (currentBlock.length > 0) blocks.push(currentBlock);
+
+    let isValid = true;
+    for (const block of blocks) {
+      const hasAnchor = block.some(s => s.index === 0 || s.index === maxSeats - 1 || s.isOccupied);
+      if (!hasAnchor) {
+        isValid = false;
+        break;
+      }
+    }
+
+    if (!isValid) {
+      alert("Por orden, debes empezar eligiendo los asientos de las orillas (el primero o el último) y luego continuar escogiendo los que están a la par.");
+      return;
+    }
+
+    setSelectedSeats(proposedSelected);
   };
 
   const checkSeatOccupied = (zoneId, rowLabel, rowIndex, seatIndex) => {
@@ -173,72 +237,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     });
   };
 
-  // Validate single gaps of exactly 1 empty space
-  const validateRowGaps = () => {
-    const seatsByRow = {};
-    for (const seat of selectedSeats) {
-      const parts = seat.split(' - ');
-      if (parts.length < 3) continue;
-      const zId = parts[0];
-      const rLabel = parts[1];
-      const key = `${zId}::${rLabel}`;
-      if (!seatsByRow[key]) seatsByRow[key] = [];
-      seatsByRow[key].push(seat);
-    }
-
-    for (const [key, selectedInRow] of Object.entries(seatsByRow)) {
-      const [zId, rLabel] = key.split('::');
-      let maxSeats = 10;
-      let rowIndex = 0;
-
-      if (zId === 'vip_central') {
-        const activeRows = seatLayouts.vip_central.activeRows;
-        const activeRow = activeRows.find((r, idx) => {
-          if (r.rowLabel === rLabel) {
-            rowIndex = idx;
-            return true;
-          }
-          return false;
-        });
-        maxSeats = activeRow ? activeRow.seatsCount : 9;
-      } else if (zId === 'vip_izquierda' || zId === 'vip_derecha') {
-        const rows = seatLayouts[zId];
-        const row = rows.find((r, idx) => {
-          if (r.rowLabel === rLabel) {
-            rowIndex = idx;
-            return true;
-          }
-          return false;
-        });
-        maxSeats = row ? row.seatsCount : 8;
-      } else {
-        const rows = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
-        rowIndex = rows.indexOf(rLabel);
-        if (zId === 'central_atras') maxSeats = 15;
-        else maxSeats = 10;
-      }
-
-      const rowState = [];
-      for (let i = 0; i < maxSeats; i++) {
-        const seatCode = `${zId} - ${rLabel} - Asiento #${i + 1}`;
-        const isOccupied = checkSeatOccupied(zId, rLabel, rowIndex, i);
-        const isSelected = selectedSeats.includes(seatCode);
-        rowState.push(isOccupied || isSelected);
-      }
-
-      for (let i = 0; i < maxSeats; i++) {
-        if (rowState[i] === false) {
-          const leftIsBoundOrTaken = (i === 0 || rowState[i - 1] === true);
-          const rightIsBoundOrTaken = (i === maxSeats - 1 || rowState[i + 1] === true);
-          if (leftIsBoundOrTaken && rightIsBoundOrTaken) {
-            alert(`No se permite dejar asientos vacíos individuales (fila: ${rLabel}, asiento: ${i + 1}). Por favor selecciona este asiento o reorganiza tus selecciones para no dejar huecos aislados.`);
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  };
+  // Validación estricta de llenado (bordes a centro) manejada directamente en toggleSeatSelection
 
   const [holdingSeats, setHoldingSeats] = useState(false);
 
@@ -257,7 +256,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
       alert("Por favor selecciona al menos un asiento.");
       return;
     }
-    if (!validateRowGaps()) return;
+
 
     setHoldingSeats(true);
     const sessionId = getOrCreateSessionId();
@@ -498,7 +497,18 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
             {zoneList.map((cfg) => {
               const isSelected = selectedZone && selectedZone.data.id === cfg.data.id;
               const isHovered = !selectedZone && hoveredZoneId === cfg.data.id;
-              const isDimmed = selectedZone && !isSelected;
+              let isDimmed = selectedZone && !isSelected;
+
+              const isGoldZone = cfg.data.id.includes('vip');
+              let isHighlightedTarget = false;
+              if (highlightedZone === 'gold' && isGoldZone) isHighlightedTarget = true;
+              if (highlightedZone === 'general' && !isGoldZone) isHighlightedTarget = true;
+
+              if (!selectedZone && highlightedZone && !isHighlightedTarget) {
+                isDimmed = true;
+              }
+
+              const shouldHighlight = isHighlightedTarget && !selectedZone;
 
               return (
                 <g
@@ -508,8 +518,9 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                   onClick={() => handleZoneClick(cfg)}
                   style={{ 
                     cursor: selectedZone && !isSelected ? 'default' : 'pointer',
-                    opacity: isDimmed ? 0.35 : 1,
-                    transition: 'all 0.3s ease'
+                    opacity: isDimmed ? 0.25 : 1,
+                    transition: 'all 0.3s ease',
+                    animation: shouldHighlight ? 'pulseHighlight 2s infinite' : 'none'
                   }}
                 >
                   <rect
@@ -518,9 +529,9 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                     width={cfg.width}
                     height={cfg.height}
                     rx={cfg.rx}
-                    fill={isSelected || isHovered ? cfg.hoverColor : '#D1D5DB'}
-                    stroke={isSelected || isHovered ? '#2C1A0E' : '#FFFFFF'}
-                    strokeWidth={isSelected || isHovered ? "4" : "3"}
+                    fill={isSelected || isHovered || shouldHighlight ? cfg.hoverColor : '#D1D5DB'}
+                    stroke={isSelected || isHovered ? '#2C1A0E' : (shouldHighlight ? '#111' : '#FFFFFF')}
+                    strokeWidth={isSelected || isHovered ? "4" : (shouldHighlight ? "4" : "3")}
                     style={{ transition: 'all 0.25s ease' }}
                   />
 

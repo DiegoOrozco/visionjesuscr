@@ -164,7 +164,12 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
           </div>
 
           <div className="au-animate-up au-delay-3" style={{ marginTop: '40px' }}>
-            <button onClick={onScrollToMap} className="au-glow-btn au-btn-primary">
+            <button 
+              onClick={() => {
+                document.getElementById('accesos-section')?.scrollIntoView({ behavior: 'smooth' });
+              }} 
+              className="au-glow-btn au-btn-primary"
+            >
               <span className="au-btn-text">Reservar Mi Lugar</span>
               <span className="au-btn-icon"><ShoppingCart size={20} /></span>
             </button>
@@ -204,7 +209,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
         </div>
 
         {/* 4. ADQUIRIR ACCESOS (TICKETS) */}
-        <AnimatedSection className="au-section-title-wrap" style={{ marginTop: '80px', marginBottom: '40px' }}>
+        <AnimatedSection id="accesos-section" className="au-section-title-wrap" style={{ marginTop: '80px', marginBottom: '40px' }}>
           <h2 className="au-section-title">Adquirir Accesos</h2>
           <div className="au-title-divider"></div>
         </AnimatedSection>
@@ -223,7 +228,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
                 <li>✔️ Sábado 19: Ingreso a las 5:00pm</li>
               </ul>
               <p className="au-ticket-price">{generalPrice}</p>
-              <button onClick={onScrollToMap} className="au-ticket-btn">
+              <button onClick={() => onScrollToMap('general')} className="au-ticket-btn">
                 <Ticket size={18} /> Comprar General
               </button>
             </div>
@@ -245,7 +250,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
                 <li>⭐ Brunch especial</li>
               </ul>
               <p className="au-ticket-price">{goldPrice}</p>
-              <button onClick={onScrollToMap} className="au-ticket-btn">
+              <button onClick={() => onScrollToMap('gold')} className="au-ticket-btn">
                 <Star size={18} /> Comprar Gold
               </button>
             </div>
