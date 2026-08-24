@@ -299,18 +299,21 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '30px'
         }}>
-          {speakers.map((s, idx) => (
-            <AnimatedSection key={idx} delay={idx * 150} className="au-speaker-card">
-              <div className="au-speaker-image-wrap">
-                <img src={s.img} alt={s.name} />
-                <div className="au-speaker-overlay"></div>
-              </div>
-              <div className="au-speaker-info">
-                <h3 className="au-speaker-name">{s.name}</h3>
-                <span className="au-speaker-title">{s.title}</span>
-              </div>
-            </AnimatedSection>
-          ))}
+          {speakers.map((s, idx) => {
+            const imgSrc = s.img ? (s.img.startsWith('http') ? s.img : `${API_URL}${s.img}`) : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800';
+            return (
+              <AnimatedSection key={idx} delay={idx * 150} className="au-speaker-card">
+                <div className="au-speaker-image-wrap">
+                  <img src={imgSrc} alt={s.name} />
+                  <div className="au-speaker-overlay"></div>
+                </div>
+                <div className="au-speaker-info">
+                  <h3 className="au-speaker-name">{s.name}</h3>
+                  <span className="au-speaker-title">{s.title}</span>
+                </div>
+              </AnimatedSection>
+            );
+          })}
         </div>
 
         {/* 7. CARRETE / CAROUSEL DE FOTOS */}
