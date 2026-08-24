@@ -207,11 +207,13 @@
 .au-gallery-btn:hover { background: #CBA276; border-color: #CBA276; transform: scale(1.1); }
 
 @media (max-width: 768px) {
-  .au-hero-title { font-size: 3rem; }
-  .au-hero-subtitle { font-size: 1.2rem; }
-  .au-countdown { gap: 15px; flex-wrap: wrap; }
-  .au-countdown-item { min-width: 80px; padding: 15px; }
-  .au-countdown-val { font-size: 2.2rem; }
+  .au-hero-video { object-fit: contain; }
+  .au-hero-title { font-size: clamp(2rem, 8vw, 3rem); }
+  .au-hero-subtitle { font-size: clamp(0.9rem, 4vw, 1.2rem); }
+  .au-countdown { gap: 10px; flex-wrap: nowrap; margin-top: 30px; }
+  .au-countdown-item { min-width: 65px; padding: 12px 10px; }
+  .au-countdown-val { font-size: 1.8rem; }
+  .au-countdown-label { font-size: 0.7rem; }
   .au-desc-box { padding: 30px 20px; }
   .au-desc-text { font-size: 1.2rem; }
   .au-section-title { font-size: 2.2rem; }
