@@ -188,13 +188,13 @@
 
 /* Speakers */
 .au-speakers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
-.au-speaker-card { background: #FFF; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(44, 26, 14, 0.05); transition: transform 0.4s ease; }
+.au-speaker-card { background: #2c1a0e; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(44, 26, 14, 0.05); transition: transform 0.4s ease; display: flex; flex-direction: column; }
 .au-speaker-card:hover { transform: translateY(-15px); }
 .au-speaker-image-wrap { position: relative; width: 100%; aspect-ratio: 1/1.1; overflow: hidden; }
 .au-speaker-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
 .au-speaker-card:hover img { transform: scale(1.05); }
 .au-speaker-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(180deg, transparent 0%, rgba(44, 26, 14, 0.9) 100%); }
-.au-speaker-info { padding: 30px; text-align: center; background: #2c1a0e; color: #FFF; }
+.au-speaker-info { flex-grow: 1; padding: 30px; text-align: center; background: #2c1a0e; color: #FFF; display: flex; flex-direction: column; justify-content: flex-start; }
 .au-speaker-name { font-size: 1.6rem; font-weight: 800; margin: 0 0 8px 0; color: #CBA276; }
 .au-speaker-title { font-size: 1rem; color: #E8E2D9; text-transform: uppercase; letter-spacing: 2px; }
 
