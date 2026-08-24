@@ -126,7 +126,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         const heroSubtitle = content.subtitle !== undefined ? content.subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
         const heroButtons = content.buttons && content.buttons.length > 0 
           ? content.buttons 
-          : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '/acerca-de-la-vision', style: 'primary' }];
+          : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }];
 
         return (
           <div 
@@ -911,7 +911,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           )}
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '/acerca-de-la-vision', style: 'primary' }]).map((btn) => (
+            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }]).map((btn) => (
               <button
                 key={btn.id}
                 onClick={() => handleButtonClick(btn)}
