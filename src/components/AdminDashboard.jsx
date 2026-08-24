@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair } from 'lucide-react';
+import AutenticasPromo from './AutenticasPromo';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -61,6 +62,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     autenticas_date_info: '',
     autenticas_place_info: '',
     autenticas_price_info: '',
+    autenticas_waze_url: '',
+    autenticas_maps_url: '',
+    autenticas_presale_end: '',
+    autenticas_date_countdown: '',
+    autenticas_price_general_presale: '',
+    autenticas_price_general_regular: '',
+    autenticas_price_gold_presale: '',
+    autenticas_price_gold_regular: '',
     autenticas_gallery: '[]',
     vision_title: '',
     vision_text: '',
@@ -94,6 +103,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [localButtons, setLocalButtons] = useState([]);
   const [localNewsItems, setLocalNewsItems] = useState([]);
   const [localAutenticasGallery, setLocalAutenticasGallery] = useState([]);
+  const [localAutenticasSpeakers, setLocalAutenticasSpeakers] = useState([]);
+  const [uploadingSpeakerImage, setUploadingSpeakerImage] = useState(null);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingAutenticasHero, setUploadingAutenticasHero] = useState(false);
   const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
@@ -752,6 +763,16 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
       setLocalAutenticasGallery(parsedAutenticasGallery || []);
 
+      let parsedAutenticasSpeakers = [];
+      try {
+        if (homepageConfig.autenticas_speakers) {
+          parsedAutenticasSpeakers = typeof homepageConfig.autenticas_speakers === 'string' ? JSON.parse(homepageConfig.autenticas_speakers) : homepageConfig.autenticas_speakers;
+        }
+      } catch (e) {
+        console.error('Error parsing Autenticas speakers:', e);
+      }
+      setLocalAutenticasSpeakers(parsedAutenticasSpeakers || []);
+
       let parsedContacts = [];
       try {
         if (homepageConfig.footer_contacts) {
@@ -824,6 +845,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         autenticas_date_info: homepageConfig.autenticas_date_info || '',
         autenticas_place_info: homepageConfig.autenticas_place_info || '',
         autenticas_price_info: homepageConfig.autenticas_price_info || '',
+        autenticas_waze_url: homepageConfig.autenticas_waze_url || '',
+        autenticas_maps_url: homepageConfig.autenticas_maps_url || '',
+        autenticas_presale_end: homepageConfig.autenticas_presale_end || '',
+        autenticas_date_countdown: homepageConfig.autenticas_date_countdown || '',
+        autenticas_price_general_presale: homepageConfig.autenticas_price_general_presale || '',
+        autenticas_price_general_regular: homepageConfig.autenticas_price_general_regular || '',
+        autenticas_price_gold_presale: homepageConfig.autenticas_price_gold_presale || '',
+        autenticas_price_gold_regular: homepageConfig.autenticas_price_gold_regular || '',
         autenticas_gallery: homepageConfig.autenticas_gallery || '[]',
         vision_title: homepageConfig.vision_title || '',
         vision_text: homepageConfig.vision_text || '',
@@ -1021,6 +1050,32 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleSpeakerImageUpload = async (e, idx) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingSpeakerImage(idx);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setLocalAutenticasSpeakers(prev => {
+          const arr = [...prev];
+          arr[idx].img = data.url;
+          return arr;
+        });
+      }
+    } catch(err) {
+      alert('Error subiendo foto de invitada.');
+    } finally {
+      setUploadingSpeakerImage(null);
+    }
+  };
+
   const handleRemoveGalleryImage = (imageUrl) => {
     setLocalAutenticasGallery(prev => prev.filter(img => img !== imageUrl));
   };
@@ -1057,7 +1112,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     try {
       const updatedConfig = {
         ...configFields,
-        autenticas_gallery: JSON.stringify(localAutenticasGallery)
+        autenticas_gallery: JSON.stringify(localAutenticasGallery),
+        autenticas_speakers: JSON.stringify(localAutenticasSpeakers)
       };
       
       const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
@@ -2044,7 +2100,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
             </div>
 
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'stretch', marginTop: '10px', width: '100%' }}>
+          {builderPagePath !== '/autenticas' && (
+            <div style={{ display: 'flex', gap: '24px', alignItems: 'stretch', marginTop: '10px', width: '100%' }}>
             
             {/* LEFT COLUMN: SIDEBAR EDITOR (WordPress Style) */}
             <div style={{ width: '380px', display: 'flex', flexDirection: 'column', gap: '20px', flexShrink: 0 }}>
@@ -3251,12 +3308,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
             </div>
 
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* TAB: AUTÉNTICAS CONGRESO CONFIGURATION */}
-      {activeTab === 'autenticas' && (adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
+      {(activeTab === 'autenticas' || (activeTab === 'church_web' && builderPagePath === '/autenticas')) && (adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
           <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
             Configuración de la Sección Auténticas
@@ -3282,7 +3340,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   name="autenticas_title" 
                   value={configFields.autenticas_title} 
                   onChange={handleConfigChange} 
-                  required 
                   placeholder="Ej: AUTÉNTICAS"
                 />
               </div>
@@ -3295,7 +3352,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   name="autenticas_subtitle" 
                   value={configFields.autenticas_subtitle} 
                   onChange={handleConfigChange} 
-                  required 
                   placeholder="Ej: CONGRESO DE MUJERES"
                 />
               </div>
@@ -3308,7 +3364,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   rows="3" 
                   value={configFields.autenticas_description} 
                   onChange={handleConfigChange} 
-                  required 
                   style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}
                 />
               </div>
@@ -3323,7 +3378,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     value={configFields.autenticas_hero_bg} 
                     onChange={handleConfigChange} 
                     placeholder="URL de la imagen o sube un archivo" 
-                    required 
                     style={{ flex: 1 }}
                   />
                   <label style={{
@@ -3355,7 +3409,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   name="autenticas_date_info" 
                   value={configFields.autenticas_date_info} 
                   onChange={handleConfigChange} 
-                  required 
                   placeholder="Ej: Sábado 15 de Noviembre - 5:00 PM"
                 />
               </div>
@@ -3368,9 +3421,32 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   name="autenticas_place_info" 
                   value={configFields.autenticas_place_info} 
                   onChange={handleConfigChange} 
-                  required 
                   placeholder="Ej: Auditorio Principal - Desamparados"
                 />
+              </div>
+
+              {/* MAPS URLs */}
+              <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Waze (Cómo Llegar)</label>
+                  <input 
+                    type="text" 
+                    name="autenticas_waze_url" 
+                    value={configFields.autenticas_waze_url} 
+                    onChange={handleConfigChange} 
+                    placeholder="Ej: https://waze.com/ul?ll=..."
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Google Maps (Cómo Llegar)</label>
+                  <input 
+                    type="text" 
+                    name="autenticas_maps_url" 
+                    value={configFields.autenticas_maps_url} 
+                    onChange={handleConfigChange} 
+                    placeholder="Ej: https://goo.gl/maps/..."
+                  />
+                </div>
               </div>
 
               {/* PRICE INFO */}
@@ -3381,9 +3457,101 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   name="autenticas_price_info" 
                   value={configFields.autenticas_price_info} 
                   onChange={handleConfigChange} 
-                  required 
                   placeholder="Ej: General ₡7.500 / Gold ₡12.000"
                 />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
+                <h4 style={{ color: 'var(--accent-gold)', margin: '0 0 14px 0' }}>Fechas y Precios Avanzados</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha Objetivo del Reloj</label>
+                    <input type="datetime-local" name="autenticas_date_countdown" value={configFields.autenticas_date_countdown} onChange={handleConfigChange} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha de Cierre de Preventa</label>
+                    <input type="datetime-local" name="autenticas_presale_end" value={configFields.autenticas_presale_end} onChange={handleConfigChange} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>General: Precio Preventa</label>
+                    <input type="text" name="autenticas_price_general_presale" value={configFields.autenticas_price_general_presale} onChange={handleConfigChange} placeholder="Ej: ₡7.500" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>General: Precio Oficial</label>
+                    <input type="text" name="autenticas_price_general_regular" value={configFields.autenticas_price_general_regular} onChange={handleConfigChange} placeholder="Ej: ₡10.000" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Gold: Precio Preventa</label>
+                    <input type="text" name="autenticas_price_gold_presale" value={configFields.autenticas_price_gold_presale} onChange={handleConfigChange} placeholder="Ej: ₡12.000" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Gold: Precio Oficial</label>
+                    <input type="text" name="autenticas_price_gold_regular" value={configFields.autenticas_price_gold_regular} onChange={handleConfigChange} placeholder="Ej: ₡15.000" />
+                  </div>
+                </div>
+              </div>
+
+              {/* SPEAKERS MANAGEMENT */}
+              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Invitadas Especiales</h4>
+                  <button 
+                    type="button" 
+                    onClick={() => setLocalAutenticasSpeakers([...localAutenticasSpeakers, { name: '', title: '', img: '' }])}
+                    className="btn-secondary"
+                  >
+                    + Agregar Invitada
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {localAutenticasSpeakers.map((speaker, idx) => (
+                    <div key={idx} style={{ display: 'flex', gap: '16px', background: '#F9F9F9', padding: '16px', borderRadius: '12px', alignItems: 'flex-start', border: '1px solid #EEE' }}>
+                      <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#E0E0E0', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                        {speaker.img ? (
+                          <img src={speaker.img.startsWith('http') ? speaker.img : `${API_URL}${speaker.img}`} alt="speaker" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '0.7rem' }}>Sin Foto</div>
+                        )}
+                        <label style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.6)', color: '#FFF', fontSize: '0.6rem', textAlign: 'center', cursor: 'pointer', padding: '2px 0' }}>
+                          {uploadingSpeakerImage === idx ? '...' : 'Subir'}
+                          <input type="file" accept="image/*" onChange={(e) => handleSpeakerImageUpload(e, idx)} style={{ display: 'none' }} disabled={uploadingSpeakerImage === idx} />
+                        </label>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <input 
+                          type="text" 
+                          placeholder="Nombre (Ej: Pr. Rebeca López)" 
+                          value={speaker.name} 
+                          onChange={(e) => {
+                            const arr = [...localAutenticasSpeakers];
+                            arr[idx].name = e.target.value;
+                            setLocalAutenticasSpeakers(arr);
+                          }}
+                          style={{ width: '100%' }}
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Cargo/Título (Ej: Pastora Principal)" 
+                          value={speaker.title} 
+                          onChange={(e) => {
+                            const arr = [...localAutenticasSpeakers];
+                            arr[idx].title = e.target.value;
+                            setLocalAutenticasSpeakers(arr);
+                          }}
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => setLocalAutenticasSpeakers(localAutenticasSpeakers.filter((_, i) => i !== idx))}
+                        style={{ background: 'transparent', color: 'var(--color-red)', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '8px' }}
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
+                  {localAutenticasSpeakers.length === 0 && <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay invitadas configuradas. Haz clic en "Agregar Invitada".</p>}
+                </div>
               </div>
 
               {/* GALLERY MANAGEMENT */}
@@ -3458,6 +3626,20 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               {saveLoading ? 'Guardando...' : 'Guardar Configuración Congreso Auténticas'}
             </button>
           </form>
+
+          <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px dashed #E0E0E0' }}>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)', marginBottom: '16px' }}>Vista Previa en Vivo</h3>
+            <div style={{ borderRadius: '24px', overflow: 'hidden', border: '4px solid #333', maxHeight: '800px', overflowY: 'auto', backgroundColor: '#FFF' }}>
+              <AutenticasPromo 
+                config={{ 
+                  ...configFields, 
+                  autenticas_speakers: JSON.stringify(localAutenticasSpeakers),
+                  autenticas_gallery: JSON.stringify(localAutenticasGallery)
+                }} 
+                onScrollToMap={() => alert('Esto desplazará hacia el mapa de entradas.')} 
+              />
+            </div>
+          </div>
         </div>
       )}
       {/* TAB: SANADOS CONFIGURATION */}

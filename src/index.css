@@ -1,3 +1,4 @@
+@import url("./autenticas.css");
 :root {
   /* Color Palette - White, Beige, Coffee/Brown */
   --bg-primary: #FAF8F5;
@@ -299,7 +300,6 @@ input:focus, select:focus, textarea:focus {
     font-size: 0.95rem !important;
   }
   .container {
-    padding: 0 12px !important;
   }
   
   /* Horizontal scroll wrapper for SVG map to prevent squishing */
@@ -340,6 +340,5 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 768px) {
   .hero-container {
     min-height: 80vh !important;
-    padding-bottom: 80px !important;
   }
 }

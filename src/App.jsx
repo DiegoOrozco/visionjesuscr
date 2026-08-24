@@ -212,7 +212,7 @@ export default function App() {
             homepageConfig={homepageConfig}
             adminUser={adminUser}
             handleLogout={handleAdminLogout}
-            handleGoHome={handleGoHome}
+            handleGoHome={() => setCurrentView('landing')}
           />
         )}
 
