@@ -10,6 +10,7 @@ import DoorScanner from './components/DoorScanner';
 import ChurchLanding from './components/ChurchLanding';
 import AutenticasPromo from './components/AutenticasPromo';
 import UnderConstruction from './components/UnderConstruction';
+import AcercaDeLaVision from './components/AcercaDeLaVision';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -101,6 +102,8 @@ export default function App() {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
       setCurrentView('autenticas-promo');
+    } else if (path === '/acerca-de-la-vision') {
+      setCurrentView('acerca-de-la-vision');
     } else if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) {
       setConstructionPage(path.replace('/', ''));
       setCurrentView('under-construction');
@@ -199,6 +202,18 @@ export default function App() {
               }}
             />
           </div>
+        )}
+
+        {/* VIEW 1B: ACERCA DE LA VISIÓN PAGE */}
+        {currentView === 'acerca-de-la-vision' && (
+          <AcercaDeLaVision
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            homepageConfig={homepageConfig}
+            adminUser={adminUser}
+            handleLogout={handleAdminLogout}
+            handleGoHome={handleGoHome}
+          />
         )}
 
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}

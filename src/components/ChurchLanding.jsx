@@ -126,7 +126,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         const heroSubtitle = content.subtitle !== undefined ? content.subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
         const heroButtons = content.buttons && content.buttons.length > 0 
           ? content.buttons 
-          : [];
+          : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '/acerca-de-la-vision', style: 'primary' }];
 
         return (
           <div 
@@ -157,15 +157,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.35 }} 
               />
             ) : (
-              <div style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                zIndex: 0,
-                opacity: 0.95
-              }} />
+              <div 
+                className="hero-bg-image"
+                style={{
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
+                  zIndex: 0,
+                  opacity: 0.95
+                }} 
+              />
             )}
             
             <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -725,9 +726,6 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '62px', objectFit: 'contain' }} />
-          <span style={{ fontWeight: 900, fontSize: '1.25rem', letterSpacing: '2px', color: '#FFFFFF', textTransform: 'uppercase' }}>
-            VISIÓN JESÚS
-          </span>
         </div>
 
         {/* MENU LINKS */}
@@ -862,15 +860,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
           </video>
         ) : (
-          <div style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            zIndex: 0,
-            opacity: 0.95
-          }} />
+          <div 
+            className="hero-bg-image"
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
+              zIndex: 0,
+              opacity: 0.95
+            }} 
+          />
         )
         })()}
 
@@ -904,7 +903,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           )}
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {heroButtons.map((btn) => (
+            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '/acerca-de-la-vision', style: 'primary' }]).map((btn) => (
               <button
                 key={btn.id}
                 onClick={() => handleButtonClick(btn)}
@@ -1442,7 +1441,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 )}
                 {config.maps_waze_url && (
                   <a 
-                    href={config.maps_waze_url} 
+                    href={config.maps_waze_url.match(/^https?:\/\//) || config.maps_waze_url.startsWith('waze://') ? config.maps_waze_url : `https://${config.maps_waze_url}`} 
+
                     target="_blank" 
                     rel="noreferrer"
                     style={{
