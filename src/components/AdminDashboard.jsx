@@ -2530,6 +2530,104 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                             </div>
                           )}
 
+                          {/* News Array Editor */}
+                          {sec.type === 'news' && (
+                            <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Noticias y Eventos</h5>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const list = sec.content.newsItems || [];
+                                    handleUpdateSectionContent('newsItems', [...list, { id: Date.now().toString(), title: 'Nueva Noticia', description: '', image: '', link: '', badge: '' }]);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '2px 6px', fontSize: '0.7rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                  + Agregar
+                                </button>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {(sec.content.newsItems || []).map((n, nIdx) => (
+                                  <div key={n.id || nIdx} style={{ backgroundColor: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid var(--accent-beige-border)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', marginBottom: '6px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={n.title || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.newsItems];
+                                          list[nIdx].title = e.target.value;
+                                          handleUpdateSectionContent('newsItems', list);
+                                        }}
+                                        style={{ fontWeight: 700, padding: '4px', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #CCC', flex: 1 }}
+                                        placeholder="Título"
+                                      />
+                                      <button 
+                                        type="button"
+                                        onClick={() => {
+                                          const list = sec.content.newsItems.filter((_, i) => i !== nIdx);
+                                          handleUpdateSectionContent('newsItems', list);
+                                        }}
+                                        style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                    <textarea 
+                                      rows="2"
+                                      value={n.description || ''} 
+                                      onChange={(e) => {
+                                        const list = [...sec.content.newsItems];
+                                        list[nIdx].description = e.target.value;
+                                        handleUpdateSectionContent('newsItems', list);
+                                      }}
+                                      style={{ width: '100%', fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC', marginBottom: '6px' }}
+                                      placeholder="Descripción..."
+                                    />
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '6px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={n.badge || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.newsItems];
+                                          list[nIdx].badge = e.target.value;
+                                          handleUpdateSectionContent('newsItems', list);
+                                        }}
+                                        style={{ fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        placeholder="Etiqueta (Ej: NUEVO)"
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={n.link || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.newsItems];
+                                          list[nIdx].link = e.target.value;
+                                          handleUpdateSectionContent('newsItems', list);
+                                        }}
+                                        style={{ fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        placeholder="Enlace (opcional)"
+                                      />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={n.image || ''} 
+                                        onChange={(e) => {
+                                          const list = [...sec.content.newsItems];
+                                          list[nIdx].image = e.target.value;
+                                          handleUpdateSectionContent('newsItems', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        placeholder="URL de Imagen"
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Grid Array Editor */}
                           {sec.type === 'grid' && (
                             <>

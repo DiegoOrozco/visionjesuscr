@@ -244,11 +244,13 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
       
       case 'news': {
-        let items = [];
-        try {
-          items = config.news_items ? (typeof config.news_items === 'string' ? JSON.parse(config.news_items) : config.news_items) : [];
-        } catch (e) {
-          items = [];
+        let items = content.newsItems;
+        if (!items || items.length === 0) {
+          try {
+            items = config.news_items ? (typeof config.news_items === 'string' ? JSON.parse(config.news_items) : config.news_items) : [];
+          } catch (e) {
+            items = [];
+          }
         }
         if (items.length === 0) return null;
 
