@@ -71,6 +71,43 @@ export default function TicketView({ qrHash, onGoHome }) {
     );
   }
 
+  const formatTicketCode = (ticketCode) => {
+    if (!ticketCode) return '';
+    const match = ticketCode.match(/^([A-Z\-]+)-(\d+)$/);
+    if (!match) {
+      return ticketCode.includes(' - ') && !ticketCode.startsWith('Fila') && !ticketCode.startsWith('Asiento') 
+        ? ticketCode.split(' - ').slice(1).join(' - ') 
+        : ticketCode;
+    }
+    const prefix = match[1];
+    const queueIndex = parseInt(match[2], 10);
+    const getRowSeat = (qIndex, seatsPerRow, offsetRows = 0) => {
+      const zeroBased = qIndex - 1;
+      const rowIndex = Math.floor(zeroBased / seatsPerRow) - offsetRows;
+      const seatNumber = (zeroBased % seatsPerRow) + 1;
+      return { rowIndex, seatNumber };
+    };
+    let rowLabel = "", seatNum = 0;
+    const labels = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+    
+    if (prefix === 'VIP-CTR') {
+      const r = getRowSeat(queueIndex, 9, 2);
+      rowLabel = `Fila ${r.rowIndex + 3}`; seatNum = r.seatNumber;
+    } else if (prefix === 'VIP-IZQ' || prefix === 'VIP-DER') {
+      const r = getRowSeat(queueIndex, 8, 0);
+      rowLabel = `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else if (prefix === 'GEN-CTR') {
+      const r = getRowSeat(queueIndex, 15, 0);
+      rowLabel = labels[r.rowIndex] || `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else if (prefix === 'GEN-IZQ' || prefix === 'GEN-DER') {
+      const r = getRowSeat(queueIndex, 10, 0);
+      rowLabel = labels[r.rowIndex] || `Fila ${r.rowIndex + 1}`; seatNum = r.seatNumber;
+    } else {
+      return ticketCode;
+    }
+    return `${rowLabel} - Asiento #${seatNum}`;
+  };
+
   if (errorMsg || !ticket) {
     return (
       <div style={{ maxWidth: '500px', margin: '60px auto', padding: '0 20px' }}>
@@ -134,12 +171,7 @@ export default function TicketView({ qrHash, onGoHome }) {
                 {ticket.zone_name}
               </div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2C1A0E', lineHeight: 1.2 }}>
-                {ticket.attendees.map(a => {
-                  const t = a.assigned_ticket_code || '';
-                  return t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
-                    ? t.split(' - ').slice(1).join(' - ') 
-                    : t;
-                }).join(' • ')}
+                {ticket.attendees.map(a => formatTicketCode(a.assigned_ticket_code)).join(' • ')}
               </div>
               <div style={{ fontSize: '0.78rem', color: '#6B7280', marginTop: '14px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
                 CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{ticket.qr_code_hash.substring(0, 6).toUpperCase()}</strong>
@@ -209,10 +241,7 @@ export default function TicketView({ qrHash, onGoHome }) {
              </span>
              <ul style={{ listStyle: 'none', marginTop: '8px', padding: 0 }}>
                {ticket.attendees.map((att, i) => {
-                 const t = att.assigned_ticket_code || '';
-                 const cleanSeat = t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
-                   ? t.split(' - ').slice(1).join(' - ') 
-                   : t;
+                 const cleanSeat = formatTicketCode(att.assigned_ticket_code);
                  return (
                    <li key={i} style={{ fontSize: '0.88rem', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
                      <span>• <strong>{att.full_name}</strong> ({att.phone})</span>

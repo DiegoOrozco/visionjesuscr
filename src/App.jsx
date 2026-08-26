@@ -142,6 +142,11 @@ export default function App() {
     }
   }, []);
 
+  // Fetch sections whenever the view changes (e.g. going back to home)
+  useEffect(() => {
+    fetchLandingSections(window.location.pathname);
+  }, [currentView]);
+
   const handleAdminLogin = (user, token) => {
     setAdminUser(user);
     localStorage.setItem('admin_user', JSON.stringify(user));
