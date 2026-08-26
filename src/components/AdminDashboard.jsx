@@ -415,7 +415,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const selectMediaItem = (url) => {
     if (mediaTarget) {
-      const [type, secId, field] = mediaTarget;
+      const [type, secId, field, subField] = mediaTarget;
       if (type === 'section') {
         setLocalSections(prev => prev.map(s => {
           if (s.id === secId) {
@@ -424,6 +424,21 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               content: {
                 ...s.content,
                 [field]: url
+              }
+            };
+          }
+          return s;
+        }));
+      } else if (type === 'section_news') {
+        setLocalSections(prev => prev.map(s => {
+          if (s.id === secId) {
+            const list = [...(s.content.newsItems || [])];
+            list[field] = { ...list[field], [subField]: url };
+            return {
+              ...s,
+              content: {
+                ...s.content,
+                newsItems: list
               }
             };
           }
@@ -2621,6 +2636,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                         style={{ flex: 1, fontSize: '0.75rem', padding: '4px', borderRadius: '4px', border: '1px solid #CCC' }}
                                         placeholder="URL de Imagen"
                                       />
+                                      <button
+                                        type="button"
+                                        onClick={() => openMediaLibrary(['section_news', sec.id, nIdx, 'image'])}
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', backgroundColor: '#EFE3D3', padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }}
+                                      >
+                                        <Download size={12} /> Medios
+                                      </button>
                                     </div>
                                   </div>
                                 ))}
