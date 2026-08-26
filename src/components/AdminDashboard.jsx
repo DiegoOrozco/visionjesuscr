@@ -10,6 +10,21 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
+  const authFetch = async (url, options = {}) => {
+    const token = localStorage.getItem('admin_token');
+    const headers = {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...(options.headers || {})
+    };
+    const response = await fetch(url, { ...options, headers });
+    if (response.status === 401 && !url.includes('/api/admin/login')) {
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('admin_token');
+      if (onLogout) onLogout();
+    }
+    return response;
+  };
+
   const [activeTab, setActiveTab] = useState(() => {
     if (adminUser) {
       if (adminUser.role === 'editor_autenticas') return 'autenticas';
@@ -233,7 +248,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/reservations`);
+      const res = await authFetch(`${API_URL}/api/admin/reservations`);
       const data = await res.json();
       if (data.success) {
         setReservations(data.reservations);
@@ -247,7 +262,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const handleUpdateAmount = async (id, amount) => {
     try {
-      const res = await fetch(`${API_URL}/api/admin/reservations/${id}/amount`, {
+      const res = await authFetch(`${API_URL}/api/admin/reservations/${id}/amount`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: parseFloat(amount) })
@@ -269,7 +284,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSelectedNewSeat('');
     setFreeSeatsForReassign([]);
     try {
-      const res = await fetch(`${API_URL}/api/admin/zones/${reservation.zone_id}/free-seats`);
+      const res = await authFetch(`${API_URL}/api/admin/zones/${reservation.zone_id}/free-seats`);
       const data = await res.json();
       if (data.success) {
         setFreeSeatsForReassign(data.freeSeats || []);
@@ -286,7 +301,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
     setReassigningLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/attendees/${attendeeId}/reassign-seat`, {
+      const res = await authFetch(`${API_URL}/api/admin/attendees/${attendeeId}/reassign-seat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ new_ticket_code: selectedNewSeat })
@@ -340,7 +355,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const fetchMediaList = async () => {
     setLoadingMedia(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/media`);
+      const res = await authFetch(`${API_URL}/api/admin/media`);
       const data = await res.json();
       if (data.success) {
         setMediaList(data.media || []);
@@ -360,7 +375,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     formData.append('image', file);
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/landing/upload`, {
         method: 'POST',
         body: formData
       });
@@ -378,7 +393,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const handleMediaDelete = async (filename) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este archivo de forma permanente de tu servidor?')) return;
     try {
-      const res = await fetch(`${API_URL}/api/admin/media/${encodeURIComponent(filename)}`, {
+      const res = await authFetch(`${API_URL}/api/admin/media/${encodeURIComponent(filename)}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -546,7 +561,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSavingBuilder(true);
     setBuilderSuccessMsg('');
     try {
-      const res = await fetch(`${API_URL}/api/admin/landing/sections`, {
+      const res = await authFetch(`${API_URL}/api/admin/landing/sections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sections: localSections, page_path: builderPagePath })
@@ -571,7 +586,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/landing/upload`, {
         method: 'POST',
         body: formData
       });
@@ -589,7 +604,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const fetchActivityLogs = async () => {
     setLogsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/logs`);
+      const res = await authFetch(`${API_URL}/api/admin/logs`);
       const data = await res.json();
       if (data.success) {
         setActivityLogs(data.logs);
@@ -604,7 +619,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const fetchZoneAnalytics = async () => {
     setLoadingZoneAnalytics(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/zones/analytics`);
+      const res = await authFetch(`${API_URL}/api/admin/zones/analytics`);
       const data = await res.json();
       if (data.success) {
         setZoneAnalytics(data);
@@ -675,7 +690,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setZoneSaving(true);
     setZoneSuccessMsg('');
     try {
-      const res = await fetch(`${API_URL}/api/admin/zones/layout`, {
+      const res = await authFetch(`${API_URL}/api/admin/zones/layout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -898,7 +913,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSavingPricing(true);
     setPricingSuccessMsg('');
     try {
-      const res = await fetch(`${API_URL}/api/admin/pricing`, {
+      const res = await authFetch(`${API_URL}/api/admin/pricing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pricingFields)
@@ -961,7 +976,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
         method: 'POST',
         body: formData
       });
@@ -986,7 +1001,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
         method: 'POST',
         body: formData
       });
@@ -1011,7 +1026,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
         method: 'POST',
         body: formData
       });
@@ -1036,7 +1051,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
         method: 'POST',
         body: formData
       });
@@ -1061,7 +1076,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
         method: 'POST',
         body: formData
       });
@@ -1091,7 +1106,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/autenticas/gallery-upload`, {
         method: 'POST',
         body: formData
       });
@@ -1120,7 +1135,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         autenticas_speakers: JSON.stringify(localAutenticasSpeakers)
       };
       
-      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config: updatedConfig })
@@ -1143,7 +1158,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSaveLoading(true);
     setConstructionSuccessMsg('');
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config: configFields })
@@ -1170,7 +1185,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       navbar_links: JSON.stringify(navbarLinks)
     };
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config: updatedConfig })
@@ -1190,7 +1205,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   // --- USER MANAGEMENT ---
   const fetchAdminUsers = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/admin/users`);
+      const res = await authFetch(`${API_URL}/api/admin/users`);
       const data = await res.json();
       if (data.success) setAdminUsers(data.users);
     } catch (err) {
@@ -1201,7 +1216,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/api/admin/users`, {
+      const res = await authFetch(`${API_URL}/api/admin/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser)
@@ -1222,7 +1237,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/api/admin/users/${editingUser.id}`, {
+      const res = await authFetch(`${API_URL}/api/admin/users/${editingUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingUser)
@@ -1243,7 +1258,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const handleDeleteUser = async (userId, username) => {
     if (!window.confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) return;
     try {
-      const res = await fetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
+      const res = await authFetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         alert(data.message);
@@ -1257,12 +1272,44 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   };
 
   // --- CSV EXPORT ---
-  const handleExportCSV = () => {
-    window.open(`${API_URL}/api/admin/export/csv`, '_blank');
+  const handleExportCSV = async () => {
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/export/csv`);
+      if (!res.ok) {
+        alert('Error al descargar el reporte CSV. Asegúrate de tener permisos.');
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reservaciones_autenticas.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      alert('Error de red al descargar el reporte CSV.');
+    }
   };
 
-  const handleDownloadBackup = () => {
-    window.open(`${API_URL}/api/admin/backup/download`, '_blank');
+  const handleDownloadBackup = async () => {
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/backup/download`);
+      if (!res.ok) {
+        alert('Error al descargar la copia de seguridad.');
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'event_ticketing_backup.db';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      alert('Error de red al descargar copia de seguridad.');
+    }
   };
 
   const handleHeroUpload = async (e) => {
@@ -1273,7 +1320,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     formData.append('image', file);
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/upload`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
         method: 'POST',
         body: formData
       });
@@ -1297,14 +1344,17 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       e.preventDefault();
       setLoginError('');
       try {
-        const res = await fetch(`${API_URL}/api/admin/login`, {
+        const res = await authFetch(`${API_URL}/api/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
         const data = await res.json();
         if (data.success) {
-          onLogin(data.user);
+          if (data.token) {
+            localStorage.setItem('admin_token', data.token);
+          }
+          onLogin(data.user, data.token);
         } else {
           setLoginError(data.message || 'Credenciales inválidas.');
         }
@@ -1380,7 +1430,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     if (!window.confirm(confirmMsg)) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}/status`, {
+      const res = await authFetch(`${API_URL}/api/admin/reservations/${reservationId}/status`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -1406,7 +1456,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/reservations/${reservationId}`, {
+      const res = await authFetch(`${API_URL}/api/admin/reservations/${reservationId}`, {
         method: 'DELETE',
         headers: {
           'X-Admin-User': adminUser ? adminUser.username : 'desconocido'
@@ -1429,7 +1479,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSaveLoading(true);
     setSaveSuccessMsg('');
     try {
-      const res = await fetch(`${API_URL}/api/admin/homepage/config`, {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

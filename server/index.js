@@ -7,9 +7,63 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'vision_jesus_secret_key_2026_super_secure_98765';
+
+// Rate Limiters
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Demasiadas solicitudes desde esta IP, por favor intenta de nuevo más tarde.' }
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Demasiados intentos de inicio de sesión. Por favor intenta en 15 minutos.' }
+});
+
+const scanLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Límite de velocidad de escaneo alcanzado.' }
+});
+
+const reservationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Límite de reservaciones alcanzado desde esta IP.' }
+});
+
+// JWT Authentication Middleware
+function verifyAdminToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Acceso no autorizado. Token no proporcionado.' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Sesión expirada o token de acceso inválido.' });
+  }
+}
 
 function generateShortCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid ambiguous chars like O, 0, I, 1
@@ -174,8 +228,13 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
   }
 }
 
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors());
 app.use(express.json());
+app.use('/api/', globalLimiter);
 
 const uploadsDir = path.join(__dirname, 'data', 'uploads', 'comprobantes');
 if (!fs.existsSync(uploadsDir)) {
@@ -196,7 +255,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 }, // Max 10MB limit for security
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp|heic|pdf|mp4|webm|mov|ogg/;
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
@@ -422,7 +481,7 @@ app.post('/api/seats/release', (req, res) => {
 });
 
 // 2. Create Reservation & Save Complete Attendee Form
-app.post('/api/reservations', upload.single('comprobante'), (req, res) => {
+app.post('/api/reservations', reservationLimiter, upload.single('comprobante'), (req, res) => {
   try {
     const { zone_id, purchaser_name, purchaser_email, purchaser_phone, attendees: rawAttendees } = req.body;
     let attendees = [];
@@ -641,17 +700,47 @@ app.get('/api/tickets/:qrHash', (req, res) => {
 });
 
 // 4. Admin Login
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', loginLimiter, (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = db.prepare('SELECT * FROM admin_users WHERE username = ? AND password_hash = ?').get(username, password);
-    
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Usuario y contraseña son requeridos.' });
+    }
+
+    const user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username);
     if (!user) {
+      logActivity(username || 'anonimo', 'login_fallido', `Intento de login fallido para usuario inexistente desde IP: ${clientIp}`);
       return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos.' });
     }
 
+    let isValidPassword = false;
+    if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$')) {
+      isValidPassword = bcrypt.compareSync(password, user.password_hash);
+    } else if (password === user.password_hash) {
+      // Auto-migrate legacy plain text password on successful login
+      isValidPassword = true;
+      const newHash = bcrypt.hashSync(password, 10);
+      db.prepare('UPDATE admin_users SET password_hash = ? WHERE id = ?').run(newHash, user.id);
+    }
+
+    if (!isValidPassword) {
+      logActivity(username, 'login_fallido', `Contraseña incorrecta intentada desde IP: ${clientIp}`);
+      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos.' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role, full_name: user.full_name },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    logActivity(user.username, 'login_exitoso', `Inicio de sesión exitoso desde IP: ${clientIp}`);
+
     res.json({
       success: true,
+      token,
       user: {
         id: user.id,
         username: user.username,
@@ -661,12 +750,12 @@ app.post('/api/admin/login', (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Error en el servidor durante login.' });
+    res.status(500).json({ success: false, message: 'Error interno en el servidor.' });
   }
 });
 
 // 5. Get Reservations (Admin)
-app.get('/api/admin/reservations', (req, res) => {
+app.get('/api/admin/reservations', verifyAdminToken, (req, res) => {
   try {
     const reservations = db.prepare(`
       SELECT r.*, z.name as zone_name
@@ -696,7 +785,7 @@ app.get('/api/admin/reservations', (req, res) => {
 });
 
 // 6. Update Status
-app.post('/api/admin/reservations/:id/status', (req, res) => {
+app.post('/api/admin/reservations/:id/status', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const { status, notes } = req.body;
@@ -750,7 +839,7 @@ app.post('/api/admin/reservations/:id/status', (req, res) => {
 });
 
 // Update Reservation Amount (Admin Only)
-app.post('/api/admin/reservations/:id/amount', (req, res) => {
+app.post('/api/admin/reservations/:id/amount', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const { amount } = req.body;
@@ -784,7 +873,7 @@ app.post('/api/admin/reservations/:id/amount', (req, res) => {
 });
 
 // Get free seats for a zone
-app.get('/api/admin/zones/:zone_id/free-seats', (req, res) => {
+app.get('/api/admin/zones/:zone_id/free-seats', verifyAdminToken, (req, res) => {
   try {
     const { zone_id } = req.params;
     
@@ -804,7 +893,7 @@ app.get('/api/admin/zones/:zone_id/free-seats', (req, res) => {
 });
 
 // Reassign a seat for an attendee
-app.post('/api/admin/attendees/:id/reassign-seat', (req, res) => {
+app.post('/api/admin/attendees/:id/reassign-seat', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const { new_ticket_code } = req.body;
@@ -870,7 +959,7 @@ app.post('/api/admin/attendees/:id/reassign-seat', (req, res) => {
 });
 
 // 6b. Get Detailed Zone Seating Analytics & Layouts
-app.get('/api/admin/zones/analytics', (req, res) => {
+app.get('/api/admin/zones/analytics', verifyAdminToken, (req, res) => {
   try {
     const rawZones = db.prepare(`
       SELECT id, name, price, regular_price, total_capacity, available_capacity, description, color_code
@@ -950,7 +1039,7 @@ app.get('/api/admin/zones/analytics', (req, res) => {
 });
 
 // 6c. Update Zone Row & Seat Layout Configuration
-app.post('/api/admin/zones/layout', (req, res) => {
+app.post('/api/admin/zones/layout', verifyAdminToken, (req, res) => {
   try {
     const { zoneId, rows, username } = req.body;
 
@@ -1048,7 +1137,7 @@ app.post('/api/admin/zones/layout', (req, res) => {
 });
 
 // 7. Delete Reservation Permanently (API Endpoint for Admin)
-app.delete('/api/admin/reservations/:id', (req, res) => {
+app.delete('/api/admin/reservations/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1106,7 +1195,7 @@ app.delete('/api/admin/reservations/:id', (req, res) => {
 });
 
 // 8. Door Scanner Check
-app.post('/api/scan', (req, res) => {
+app.post('/api/scan', scanLimiter, (req, res) => {
   try {
     const { qr_hash, scanned_by } = req.body;
 
@@ -1235,7 +1324,7 @@ app.get('/api/homepage/config', (req, res) => {
   }
 });
 
-app.post('/api/admin/homepage/upload', upload.single('image'), (req, res) => {
+app.post('/api/admin/homepage/upload', verifyAdminToken, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo no subido.' });
@@ -1250,7 +1339,7 @@ app.post('/api/admin/homepage/upload', upload.single('image'), (req, res) => {
   }
 });
 
-app.post('/api/admin/autenticas/gallery-upload', upload.single('image'), (req, res) => {
+app.post('/api/admin/autenticas/gallery-upload', verifyAdminToken, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo no subido.' });
@@ -1263,7 +1352,7 @@ app.post('/api/admin/autenticas/gallery-upload', upload.single('image'), (req, r
 });
 
 // Save Page Builder Sections (Admin Only)
-app.post('/api/admin/landing/sections', (req, res) => {
+app.post('/api/admin/landing/sections', verifyAdminToken, (req, res) => {
   try {
     const { sections, page_path } = req.body;
     const pagePath = page_path || req.query.path || '/';
@@ -1299,7 +1388,7 @@ app.post('/api/admin/landing/sections', (req, res) => {
 });
 
 // Upload image for page builder (Admin Only)
-app.post('/api/admin/landing/upload', upload.single('image'), (req, res) => {
+app.post('/api/admin/landing/upload', verifyAdminToken, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo no subido.' });
@@ -1312,7 +1401,7 @@ app.post('/api/admin/landing/upload', upload.single('image'), (req, res) => {
 });
 
 // List media library files
-app.get('/api/admin/media', (req, res) => {
+app.get('/api/admin/media', verifyAdminToken, (req, res) => {
   try {
     const files = fs.readdirSync(uploadsDir);
     const mediaList = files
@@ -1337,7 +1426,7 @@ app.get('/api/admin/media', (req, res) => {
 });
 
 // Delete media file
-app.delete('/api/admin/media/:filename', (req, res) => {
+app.delete('/api/admin/media/:filename', verifyAdminToken, (req, res) => {
   try {
     const filename = req.params.filename;
     if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
@@ -1356,7 +1445,7 @@ app.delete('/api/admin/media/:filename', (req, res) => {
   }
 });
 
-app.post('/api/admin/homepage/config', (req, res) => {
+app.post('/api/admin/homepage/config', verifyAdminToken, (req, res) => {
   try {
     const { config } = req.body;
     if (!config) {
@@ -1376,7 +1465,7 @@ app.post('/api/admin/homepage/config', (req, res) => {
 });
 
 // Admin Pricing and Presale Config
-app.post('/api/admin/pricing', (req, res) => {
+app.post('/api/admin/pricing', verifyAdminToken, (req, res) => {
   try {
     const {
       presale_cutoff_date,
@@ -1421,7 +1510,7 @@ app.post('/api/admin/pricing', (req, res) => {
 // --- ADMIN USER MANAGEMENT ---
 
 // List all admin users (no passwords)
-app.get('/api/admin/users', (req, res) => {
+app.get('/api/admin/users', verifyAdminToken, (req, res) => {
   try {
     const users = db.prepare('SELECT id, username, full_name, role FROM admin_users').all();
     res.json({ success: true, users });
@@ -1431,7 +1520,7 @@ app.get('/api/admin/users', (req, res) => {
 });
 
 // Create new admin user
-app.post('/api/admin/users', (req, res) => {
+app.post('/api/admin/users', verifyAdminToken, (req, res) => {
   try {
     const { username, password, full_name, role } = req.body;
     if (!username || !password || !full_name || !role) {
@@ -1448,7 +1537,8 @@ app.post('/api/admin/users', (req, res) => {
       return res.status(400).json({ success: false, message: 'El nombre de usuario ya existe.' });
     }
 
-    db.prepare('INSERT INTO admin_users (username, password_hash, full_name, role) VALUES (?, ?, ?, ?)').run(username, password, full_name, role);
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    db.prepare('INSERT INTO admin_users (username, password_hash, full_name, role) VALUES (?, ?, ?, ?)').run(username, hashedPassword, full_name, role);
     res.json({ success: true, message: `Usuario "${username}" creado con rol "${role}".` });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
@@ -1456,7 +1546,7 @@ app.post('/api/admin/users', (req, res) => {
 });
 
 // Update admin user
-app.put('/api/admin/users/:id', (req, res) => {
+app.put('/api/admin/users/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const { username, password, full_name, role } = req.body;
@@ -1475,8 +1565,9 @@ app.put('/api/admin/users/:id', (req, res) => {
     }
 
     if (password && password.trim() !== '') {
+      const hashedPassword = bcrypt.hashSync(password, 10);
       db.prepare('UPDATE admin_users SET username = ?, password_hash = ?, full_name = ?, role = ? WHERE id = ?')
-        .run(username, password, full_name, role, id);
+        .run(username, hashedPassword, full_name, role, id);
     } else {
       db.prepare('UPDATE admin_users SET username = ?, full_name = ?, role = ? WHERE id = ?')
         .run(username, full_name, role, id);
@@ -1488,7 +1579,7 @@ app.put('/api/admin/users/:id', (req, res) => {
 });
 
 // Delete admin user
-app.delete('/api/admin/users/:id', (req, res) => {
+app.delete('/api/admin/users/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const user = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(id);
@@ -1503,7 +1594,7 @@ app.delete('/api/admin/users/:id', (req, res) => {
 });
 
 // Get Activity Logs (Admin)
-app.get('/api/admin/logs', (req, res) => {
+app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
   try {
     const logs = db.prepare('SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 500').all();
     res.json({ success: true, logs });
@@ -1513,7 +1604,7 @@ app.get('/api/admin/logs', (req, res) => {
 });
 
 // Download database backup (Admin)
-app.get('/api/admin/backup/download', (req, res) => {
+app.get('/api/admin/backup/download', verifyAdminToken, (req, res) => {
   try {
     const dbPath = path.join(__dirname, 'data', 'event_ticketing.db');
     if (!fs.existsSync(dbPath)) {
@@ -1550,7 +1641,7 @@ app.get('/api/admin/backup/download', (req, res) => {
 });
 
 // --- CSV EXPORT ---
-app.get('/api/admin/export/csv', (req, res) => {
+app.get('/api/admin/export/csv', verifyAdminToken, (req, res) => {
   try {
     const reservations = db.prepare(`
       SELECT r.id, r.purchaser_name, r.purchaser_email, r.purchaser_phone, r.quantity, r.total_amount, r.status, r.created_at, r.approved_at, z.name as zone_name

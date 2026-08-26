@@ -1,6 +1,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 const dbDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dbDir)) {
@@ -198,20 +199,34 @@ function initDb() {
     }
   })();
 
-  // Seed default admin and editor users
+  // Seed default admin and editor users using bcrypt
+  const hashPass = (p) => bcrypt.hashSync(p, 10);
   const insertUser = db.prepare('INSERT OR IGNORE INTO admin_users (username, password_hash, role, full_name) VALUES (?, ?, ?, ?)');
-  insertUser.run('admin', 'admin123', 'admin', 'Administrador Principal');
-  insertUser.run('scanner', 'puerta123', 'scanner', 'Personal de Puerta / Escáner');
-  insertUser.run('editor_move', 'move123', 'editor_move', 'Editor de Move');
-  insertUser.run('editor_sanados', 'sanados123', 'editor_sanados', 'Editor de Sanados');
-  insertUser.run('editor_modelo', 'modelo123', 'editor_modelo', 'Editor de Modelo');
-  insertUser.run('editor_tienda', 'tienda123', 'editor_tienda', 'Editor de Tienda');
-  insertUser.run('editor_autenticas', 'autenticas123', 'editor_autenticas', 'Editor de Auténticas');
-  insertUser.run('Evelyn_reservas', 'Ev8mR9t4', 'tickets_readonly', 'Evelyn Reservas (Lectura)');
-  insertUser.run('Dayanna_reservas', 'Dy6qA3w1', 'tickets', 'Dayanna Reservas');
-  insertUser.run('Stephanie_scanner', 'Sp7nS2x8', 'scanner', 'Stephanie Scanner');
-  insertUser.run('Evelyn_scanner', 'Ev2kS5z9', 'scanner', 'Evelyn Scanner');
-  insertUser.run('Andrea_scanner', 'An4pS7w2', 'scanner', 'Andrea Scanner');
+  insertUser.run('admin', hashPass('admin123'), 'admin', 'Administrador Principal');
+  insertUser.run('scanner', hashPass('puerta123'), 'scanner', 'Personal de Puerta / Escáner');
+  insertUser.run('editor_move', hashPass('move123'), 'editor_move', 'Editor de Move');
+  insertUser.run('editor_sanados', hashPass('sanados123'), 'editor_sanados', 'Editor de Sanados');
+  insertUser.run('editor_modelo', hashPass('modelo123'), 'editor_modelo', 'Editor de Modelo');
+  insertUser.run('editor_tienda', hashPass('tienda123'), 'editor_tienda', 'Editor de Tienda');
+  insertUser.run('editor_autenticas', hashPass('autenticas123'), 'editor_autenticas', 'Editor de Auténticas');
+  insertUser.run('Evelyn_reservas', hashPass('Ev8mR9t4'), 'tickets_readonly', 'Evelyn Reservas (Lectura)');
+  insertUser.run('Dayanna_reservas', hashPass('Dy6qA3w1'), 'tickets', 'Dayanna Reservas');
+  insertUser.run('Stephanie_scanner', hashPass('Sp7nS2x8'), 'scanner', 'Stephanie Scanner');
+  insertUser.run('Evelyn_scanner', hashPass('Ev2kS5z9'), 'scanner', 'Evelyn Scanner');
+  insertUser.run('Andrea_scanner', hashPass('An4pS7w2'), 'scanner', 'Andrea Scanner');
+
+  // Automatic migration for any pre-existing plain text passwords in admin_users
+  try {
+    const existingUsers = db.prepare('SELECT id, password_hash FROM admin_users').all();
+    for (const u of existingUsers) {
+      if (u.password_hash && !u.password_hash.startsWith('$2a$') && !u.password_hash.startsWith('$2b$')) {
+        const hashed = bcrypt.hashSync(u.password_hash, 10);
+        db.prepare('UPDATE admin_users SET password_hash = ? WHERE id = ?').run(hashed, u.id);
+      }
+    }
+  } catch (e) {
+    console.error('Error auto-migrating passwords to bcrypt:', e);
+  }
 
   // Seed default homepage config values
   const configCount = db.prepare('SELECT COUNT(*) as count FROM homepage_config').get();

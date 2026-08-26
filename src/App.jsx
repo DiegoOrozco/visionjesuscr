@@ -142,9 +142,12 @@ export default function App() {
     }
   }, []);
 
-  const handleAdminLogin = (user) => {
+  const handleAdminLogin = (user, token) => {
     setAdminUser(user);
     localStorage.setItem('admin_user', JSON.stringify(user));
+    if (token) {
+      localStorage.setItem('admin_token', token);
+    }
     window.history.pushState({}, '', '/login');
     if (user.role === 'scanner') {
       setCurrentView('scanner');
@@ -156,6 +159,7 @@ export default function App() {
   const handleAdminLogout = () => {
     setAdminUser(null);
     localStorage.removeItem('admin_user');
+    localStorage.removeItem('admin_token');
     setCurrentView('landing');
   };
 

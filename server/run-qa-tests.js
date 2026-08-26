@@ -98,6 +98,20 @@ setTimeout(async () => {
     assert(badPhoneRes.status === 400 && !badPhoneData.success, 'Prueba 2c: Bloqueo de números de teléfono con formatos inválidos (deben ser 8 dígitos numéricos).');
 
     // Test 3: Create Reservation
+    // Test 3b: Unauthenticated Admin Route Access (Security Check)
+    const unauthRes = await fetch(`${BASE_URL}/api/admin/reservations`);
+    assert(unauthRes.status === 401, 'Prueba 3b (OWASP A01): Bloqueo 401 Unauthorized en rutas administrativas sin token de autenticación.');
+
+    // Test 3c: Admin Login & JWT Generation (Security Check)
+    const loginRes = await fetch(`${BASE_URL}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'admin', password: 'admin123' })
+    });
+    const loginData = await loginRes.json();
+    assert(loginRes.ok && loginData.success && !!loginData.token, 'Prueba 3c (OWASP A02 & A07): Autenticación administrativa con bcrypt y generación de token JWT exitosos.');
+    const adminToken = loginData.token || '';
+
     const reserveRes = await fetch(`${BASE_URL}/api/reservations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -119,10 +133,12 @@ setTimeout(async () => {
     assert(reserveRes.ok && reserveData.success && reserveData.reservation, 'Prueba 3: Creación de reservación en base de datos completada.');
     const reservation = reserveData.reservation;
 
-    // Test 4: View Reservations (Admin)
-    const adminRes = await fetch(`${BASE_URL}/api/admin/reservations`);
+    // Test 4: View Reservations (Admin with Token)
+    const adminRes = await fetch(`${BASE_URL}/api/admin/reservations`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
     const adminData = await adminRes.json();
-    assert(adminRes.ok && adminData.reservations.length > 0, 'Prueba 4: Recuperación de reservación por el módulo de administración.');
+    assert(adminRes.ok && adminData.reservations.length > 0, 'Prueba 4: Recuperación de reservación por el módulo de administración con token JWT.');
 
     // Test 5: Scan Ticket - Pending state (should fail)
     const scanPendingRes = await fetch(`${BASE_URL}/api/scan`, {
@@ -138,6 +154,7 @@ setTimeout(async () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`,
         'X-Admin-User': 'Dayanna_reservas'
       },
       body: JSON.stringify({ status: 'aprobado' })
@@ -164,7 +181,9 @@ setTimeout(async () => {
     assert(scanUsedRes.ok && scanUsedData.code === 'ALREADY_USED', 'Prueba 8: Detección y bloqueo de intento de reingreso (boleto ya usado).');
 
     // Test 9: Verify Activity logs
-    const logsRes = await fetch(`${BASE_URL}/api/admin/logs`);
+    const logsRes = await fetch(`${BASE_URL}/api/admin/logs`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
     const logsData = await logsRes.json();
     assert(
       logsRes.ok && 
