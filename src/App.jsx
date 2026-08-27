@@ -11,6 +11,7 @@ import ChurchLanding from './components/ChurchLanding';
 import AutenticasPromo from './components/AutenticasPromo';
 import UnderConstruction from './components/UnderConstruction';
 import AcercaDeLaVision from './components/AcercaDeLaVision';
+import LegalPolicies from './components/LegalPolicies';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -26,6 +27,7 @@ const getInitialView = () => {
   if (path === '/escanear') return 'scanner';
   if (path === '/autenticas') return 'autenticas-promo';
   if (path === '/acerca-de-la-vision') return 'acerca-de-la-vision';
+  if (path === '/politicas') return 'politicas';
   if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) return 'under-construction';
   return 'landing';
 };
@@ -134,6 +136,8 @@ export default function App() {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
       setCurrentView('autenticas-promo');
+    } else if (path === '/politicas') {
+      setCurrentView('politicas');
     } else if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision'].includes(path)) {
       setConstructionPage(path.replace('/', ''));
       setCurrentView('under-construction');
@@ -246,6 +250,10 @@ export default function App() {
               }}
             />
           </div>
+        )}
+
+        {currentView === 'politicas' && (
+          <LegalPolicies />
         )}
 
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
