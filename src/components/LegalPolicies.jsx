@@ -1,11 +1,16 @@
 import React from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 const LegalPolicies = () => {
   return (
-    <div style={{ backgroundColor: '#030812', color: '#EAEDF8', minHeight: '100vh', paddingTop: '100px', paddingBottom: '60px' }}>
-      <div className="container" style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: '#0A1128', padding: '40px', borderRadius: '16px', border: '1px solid rgba(151, 125, 255, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+    <div style={{ backgroundColor: '#030812', color: '#EAEDF8', minHeight: '100vh', paddingTop: '60px', paddingBottom: '60px' }}>
+      <div className="container" style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: '#0A1128', padding: '40px', borderRadius: '16px', border: '1px solid rgba(151, 125, 255, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', position: 'relative' }}>
         
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <button onClick={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} style={{ position: 'absolute', top: '30px', left: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: '#977DFF', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: 600 }}>
+          <ArrowLeft size={20} /> Volver
+        </button>
+
+        <div style={{ textAlign: 'center', marginBottom: '30px', marginTop: '20px' }}>
           <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
         </div>
 

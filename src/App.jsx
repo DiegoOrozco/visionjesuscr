@@ -207,7 +207,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {!['landing', 'under-construction'].includes(currentView) && (
+      {!['landing', 'under-construction', 'politicas'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
           setCurrentView={setCurrentView} 
@@ -408,7 +408,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      {!['landing', 'under-construction', 'scanner'].includes(currentView) && (
+      {!['landing', 'under-construction', 'scanner', 'politicas'].includes(currentView) && (
         <footer style={{
           backgroundColor: 'var(--bg-dark)',
           color: '#FAF8F5',
