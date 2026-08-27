@@ -1524,17 +1524,10 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
 
           <div>
             <h3 style={{ fontSize: '1.3rem', color: '#FFFFFF', fontWeight: 800, marginBottom: '20px' }}>
-              Legal y Políticas
+              Legal
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', color: '#EAEDF8', opacity: 0.9 }}>
-              <a href="/politicas#envio" style={{ color: '#EAEDF8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'} onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}>Políticas de Envío</a>
-              <a href="/politicas#cancelacion" style={{ color: '#EAEDF8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'} onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}>Políticas de Devolución</a>
-              <a href="/politicas#privacidad" style={{ color: '#EAEDF8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'} onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}>Políticas de Privacidad</a>
-              <a href="/politicas#seguridad" style={{ color: '#EAEDF8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'} onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}>Políticas de Seguridad</a>
-            </div>
-            <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.7 }}>
-              <ShieldCheck size={18} color="#4CAF50" />
-              <span style={{ fontSize: '0.8rem', color: '#FFFFFF' }}>Sitio Seguro TLS 1.2 / SSL 256-bit</span>
+              <a href="/politicas" style={{ color: '#EAEDF8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'} onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}>Términos y Políticas</a>
             </div>
           </div>
 
