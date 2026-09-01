@@ -10,7 +10,6 @@ import DoorScanner from './components/DoorScanner';
 import ChurchLanding from './components/ChurchLanding';
 import AutenticasPromo from './components/AutenticasPromo';
 import UnderConstruction from './components/UnderConstruction';
-import AcercaDeLaVision from './components/AcercaDeLaVision';
 import LegalPolicies from './components/LegalPolicies';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -26,15 +25,14 @@ const getInitialView = () => {
   }
   if (path === '/escanear') return 'scanner';
   if (path === '/autenticas') return 'autenticas-promo';
-  if (path === '/acerca-de-la-vision') return 'acerca-de-la-vision';
   if (path === '/politicas') return 'politicas';
-  if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) return 'under-construction';
+  if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
   return 'landing';
 };
 
 const getInitialConstructionPage = () => {
   const path = window.location.pathname;
-  if (['/sanados', '/modelo', '/move', '/tienda'].includes(path)) {
+  if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
     return path.replace('/', '');
   }
   return '';
@@ -138,7 +136,7 @@ export default function App() {
       setCurrentView('autenticas-promo');
     } else if (path === '/politicas') {
       setCurrentView('politicas');
-    } else if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision'].includes(path)) {
+    } else if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
       setConstructionPage(path.replace('/', ''));
       setCurrentView('under-construction');
     } else {
@@ -272,9 +270,15 @@ export default function App() {
               background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF5EF 100%)'
             }}>
 
-              <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-gold)', color: '#FFFFFF', marginBottom: '12px', fontSize: '0.9rem', padding: '6px 18px' }}>
-                PREVENTA ABIERTA • CONGRESO ANUAL 2026
-              </span>
+              {(() => {
+                const cutoffStr = homepageConfig.presale_cutoff_date || (homepageConfig.autenticas_presale_end ? homepageConfig.autenticas_presale_end.split('T')[0] : '2026-08-30');
+                const isPresale = new Date().getTime() <= new Date(`${cutoffStr}T23:59:59`).getTime();
+                return (
+                  <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-gold)', color: '#FFFFFF', marginBottom: '12px', fontSize: '0.9rem', padding: '6px 18px' }}>
+                    {isPresale ? 'PREVENTA ABIERTA • CONGRESO ANUAL 2026' : 'ENTRADAS DISPONIBLES • CONGRESO ANUAL 2026'}
+                  </span>
+                );
+              })()}
 
               <h1 style={{ fontSize: '2.5rem', marginTop: '8px', color: 'var(--accent-coffee)', fontFamily: 'var(--font-heading)' }}>
                 CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026
@@ -378,7 +382,7 @@ export default function App() {
           <DoorScanner adminUser={adminUser} />
         )}
 
-        {/* VIEW 7: UNDER CONSTRUCTION */}
+        {/* VIEW 8: UNDER CONSTRUCTION */}
         {currentView === 'under-construction' && (
           landingSections.length > 0 ? (
             <ChurchLanding 

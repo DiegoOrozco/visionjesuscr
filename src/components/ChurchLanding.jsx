@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, Compass, Users, Flame, ArrowRight, ArrowLeft, Music, PlayCircle, Ticket, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, Compass, Users, Flame, ArrowRight, ArrowLeft, Music, PlayCircle, Ticket, ChevronLeft, ChevronRight, ShieldCheck, Instagram, Facebook } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -640,6 +641,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                         </div>
                       )}
                       <div style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        {cell.iconName && LucideIcons[cell.iconName] && (
+                          <div style={{ marginBottom: '16px', color: accentColor }}>
+                            {React.createElement(LucideIcons[cell.iconName], { size: 36 })}
+                          </div>
+                        )}
                         {cell.title && <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '14px' }}>{cell.title}</h3>}
                         {cell.text && <p style={{ fontSize: '1rem', color: '#BAC2DE', lineHeight: 1.6, marginBottom: '24px', flex: 1 }}>{cell.text}</p>}
                         {cell.buttonText && cell.buttonUrl && (
@@ -668,6 +674,72 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                           </div>
                         )}
                       </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 'pastors_profile': {
+        const pastors = content.pastors || [];
+        return (
+          <div key={sec.id} style={{ padding: '100px 20px', ...bgStyle }}>
+            <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{content.title}</h2>
+                {content.subtitle && <p style={{ fontSize: '1.2rem', color: '#BAC2DE', maxWidth: '600px', margin: '0 auto' }}>{content.subtitle}</p>}
+                <div style={{ height: '4px', width: '80px', backgroundColor: accentColor, margin: '24px auto 0', borderRadius: '4px' }} />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
+                {pastors.map((pastor, idx) => {
+                  const isEven = idx % 2 === 0;
+                  const imgUrlRaw = pastor.imageUrl || '';
+                  const imgUrl = imgUrlRaw ? (imgUrlRaw.startsWith('http') || imgUrlRaw.startsWith('/') ? (imgUrlRaw.startsWith('/') ? `${API_URL}${imgUrlRaw}` : imgUrlRaw) : `${API_URL}/${imgUrlRaw}`) : '';
+                  
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexWrap: isEven ? 'wrap' : 'wrap-reverse', gap: '50px', alignItems: 'center' }}>
+                      {!isEven && imgUrl && (
+                        <div style={{ flex: '1 1 400px' }}>
+                          <img src={imgUrl} alt={pastor.name} style={{ width: '100%', borderRadius: '12px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                        </div>
+                      )}
+                      <div style={{ flex: '1 1 400px' }}>
+                        {pastor.role && <p style={{ fontSize: '0.9rem', letterSpacing: '2px', color: accentColor, textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>{pastor.role}</p>}
+                        <h3 style={{ fontSize: '2.5rem', color: '#FFFFFF', marginBottom: '20px', fontWeight: 800 }}>{pastor.name}</h3>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: accentColor }}></div>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: accentColor }}></div>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: accentColor }}></div>
+                        </div>
+                        
+                        {pastor.description && pastor.description.split('\n\n').map((paragraph, pIdx) => (
+                          <p key={pIdx} style={{ color: '#EAEDF8', opacity: 0.85, lineHeight: 1.8, fontSize: '1.05rem', marginBottom: '20px' }}>
+                            {paragraph}
+                          </p>
+                        ))}
+                        
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+                          {pastor.instagramUrl && (
+                            <a href={pastor.instagramUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#E1306C', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                              <Instagram size={32} />
+                            </a>
+                          )}
+                          {pastor.facebookUrl && (
+                            <a href={pastor.facebookUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#4267B2', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                              <Facebook size={32} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      {isEven && imgUrl && (
+                        <div style={{ flex: '1 1 400px' }}>
+                          <img src={imgUrl} alt={pastor.name} style={{ width: '100%', borderRadius: '12px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -748,6 +820,18 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             style={{ color: '#FFFFFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
           >
             INICIO
+          </a>
+          <a 
+            href="/nosotros" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              window.location.href = '/nosotros';
+            }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.target.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.target.style.color = '#EAEDF8'}
+          >
+            NOSOTROS
           </a>
           <a 
             href="#vision-section" 

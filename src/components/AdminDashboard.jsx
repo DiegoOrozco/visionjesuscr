@@ -531,9 +531,24 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         title: 'Cuadrícula',
         columns: 4,
         cells: [
-          { title: 'Principal', text: 'Elemento destacado', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 2 },
-          { title: 'Secundario 1', text: 'Descripción breve', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 },
-          { title: 'Secundario 2', text: 'Descripción breve', imageUrl: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 }
+          { title: 'Principal', text: 'Elemento destacado', imageUrl: '', iconName: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 2 },
+          { title: 'Secundario 1', text: 'Descripción breve', imageUrl: '', iconName: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 },
+          { title: 'Secundario 2', text: 'Descripción breve', imageUrl: '', iconName: '', buttonText: '', buttonUrl: '', colSpan: 2, rowSpan: 1 }
+        ]
+      };
+    } else if (type === 'pastors_profile') {
+      newSec.content = {
+        title: 'Pastores Principales',
+        subtitle: 'Conoce a nuestros pastores',
+        pastors: [
+          {
+            name: 'Pastor',
+            role: 'Pastor Principal',
+            description: 'Biografía del pastor...',
+            imageUrl: '',
+            instagramUrl: '',
+            facebookUrl: ''
+          }
         ]
       };
     }
@@ -2160,6 +2175,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   <option value="/modelo">Congreso Modelo (/modelo)</option>
                   <option value="/move">Congreso Move (/move)</option>
                   <option value="/tienda">Tienda Oficial (/tienda)</option>
+                  <option value="/nosotros">Nosotros (/nosotros)</option>
                 </select>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', alignSelf: 'flex-end' }}>
@@ -2272,11 +2288,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                     <button type="button" onClick={() => handleAddSection('cta')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
                       <Plus size={12} /> Banner CTA
                     </button>
-                    <button type="button" onClick={() => handleAddSection('image_text')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', gridColumn: '1 / -1' }}>
-                      <Plus size={12} /> Imagen + Texto de doble columna
+                    <button type="button" onClick={() => handleAddSection('image_text')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Texto e Imagen
                     </button>
-                    <button type="button" onClick={() => handleAddSection('grid')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', gridColumn: '1 / -1' }}>
-                      <Plus size={12} /> Cuadrícula (Grid) Multiuso
+                    <button type="button" onClick={() => handleAddSection('grid')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                      <Plus size={12} /> Cuadrícula Bento
+                    </button>
+                    <button type="button" onClick={() => handleAddSection('pastors_profile')} className="btn-secondary" style={{ padding: '8px 6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', gridColumn: '1 / -1' }}>
+                      <Users size={16} /> Perfil Pastores
                     </button>
                   </div>
                 </div>
@@ -2777,6 +2796,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                         >
                                           Medios
                                         </button>
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input 
+                                          type="text" 
+                                          placeholder="Ícono Lucide (opcional, ej: Users)"
+                                          value={cell.iconName || ''}
+                                          onChange={(e) => {
+                                            const list = [...sec.content.cells];
+                                            list[cIdx].iconName = e.target.value;
+                                            handleUpdateSectionContent('cells', list);
+                                          }}
+                                          style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        />
                                       </div>
                                       <div style={{ display: 'flex', gap: '4px' }}>
                                         <input 
@@ -4012,9 +4044,32 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               
               {/* FECHA LIMITE PREVENTA */}
               <div style={{ gridColumn: '1 / -1', backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
-                <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '8px' }}>
-                  Fecha Límite de Preventa (Hasta las 23:59:59 de este día)
-                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>
+                      Fecha Límite de Preventa (Hasta las 23:59:59 de este día)
+                    </label>
+                    <small style={{ color: 'var(--text-muted)' }}>
+                      Si la fecha actual supera este día, el sistema pasará automáticamente a los <strong>Precios Regulares</strong> en mapas y tarjetas.
+                    </small>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setPricingFields(prev => ({ ...prev, presale_cutoff_date: '2026-08-30' }))}
+                      style={{ padding: '8px 14px', backgroundColor: '#DC2626', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}
+                    >
+                      ⚡ Activar Precios Regulares Ya
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setPricingFields(prev => ({ ...prev, presale_cutoff_date: '2026-09-15' }))}
+                      style={{ padding: '8px 14px', backgroundColor: '#059669', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}
+                    >
+                      🏷️ Re-activar Preventa
+                    </button>
+                  </div>
+                </div>
                 <input 
                   type="date" 
                   name="presale_cutoff_date" 

@@ -120,11 +120,25 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
   }
 
   // Presale Logic
-  const presaleEndDate = new Date(config.autenticas_presale_end || '2026-08-31T23:59:59').getTime();
+  const cutoffStr = config.presale_cutoff_date || (config.autenticas_presale_end ? config.autenticas_presale_end.split('T')[0] : '2026-08-30');
+  const presaleEndDate = new Date(`${cutoffStr}T23:59:59`).getTime();
   const isPresale = new Date().getTime() <= presaleEndDate;
 
-  const generalPrice = isPresale ? (config.autenticas_price_general_presale || '₡7.500') : (config.autenticas_price_general_regular || '₡10.000');
-  const goldPrice = isPresale ? (config.autenticas_price_gold_presale || '₡12.000') : (config.autenticas_price_gold_regular || '₡15.000');
+  const formatPriceDisplay = (priceStr, fallbackVal) => {
+    if (!priceStr) return fallbackVal;
+    if (String(priceStr).startsWith('₡')) return priceStr;
+    const num = parseFloat(String(priceStr).replace(/[^0-9.]/g, ''));
+    if (isNaN(num)) return priceStr;
+    return `₡${num.toLocaleString('es-CR')}`;
+  };
+
+  const generalPrice = isPresale 
+    ? formatPriceDisplay(config.autenticas_price_general_presale, '₡7.500') 
+    : formatPriceDisplay(config.autenticas_price_general_regular, '₡10.000');
+
+  const goldPrice = isPresale 
+    ? formatPriceDisplay(config.autenticas_price_gold_presale, '₡12.000') 
+    : formatPriceDisplay(config.autenticas_price_gold_regular, '₡15.000');
 
   const generalFeatures = config.autenticas_features_general
     ? config.autenticas_features_general.split('\n').filter(f => f.trim())

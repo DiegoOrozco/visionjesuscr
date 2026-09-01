@@ -1483,6 +1483,7 @@ app.post('/api/admin/pricing', verifyAdminToken, (req, res) => {
     
     const tx = db.transaction(() => {
       updateConfig.run('presale_cutoff_date', String(presale_cutoff_date));
+      updateConfig.run('autenticas_presale_end', `${presale_cutoff_date}T23:59`);
       updateConfig.run('vip_presale_price', String(vip_presale_price));
       updateConfig.run('vip_regular_price', String(vip_regular_price));
       updateConfig.run('general_presale_price', String(general_presale_price));
@@ -1493,6 +1494,11 @@ app.post('/api/admin/pricing', verifyAdminToken, (req, res) => {
 
       const activeVip = isPresale ? parseFloat(vip_presale_price) : parseFloat(vip_regular_price);
       const activeGen = isPresale ? parseFloat(general_presale_price) : parseFloat(general_regular_price);
+
+      const priceInfoText = isPresale 
+        ? `General ₡${parseFloat(general_presale_price).toLocaleString('es-CR')} / Gold ₡${parseFloat(vip_presale_price).toLocaleString('es-CR')} (Preventa)`
+        : `General ₡${parseFloat(general_regular_price).toLocaleString('es-CR')} / Gold ₡${parseFloat(vip_regular_price).toLocaleString('es-CR')}`;
+      updateConfig.run('autenticas_price_info', priceInfoText);
 
       db.prepare(`UPDATE zones SET price = ?, regular_price = ? WHERE id LIKE 'vip%'`).run(activeVip, parseFloat(vip_regular_price));
       db.prepare(`UPDATE zones SET price = ?, regular_price = ? WHERE id NOT LIKE 'vip%'`).run(activeGen, parseFloat(general_regular_price));
