@@ -13,6 +13,7 @@ import UnderConstruction from './components/UnderConstruction';
 import ModeloDeJesus from './components/ModeloDeJesus';
 import LegalPolicies from './components/LegalPolicies';
 import NotFound404 from './components/NotFound404';
+import CongresosPage from './components/CongresosPage';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -29,6 +30,7 @@ const getInitialView = () => {
   if (path === '/escanear') return 'scanner';
   if (path === '/autenticas') return 'autenticas-promo';
   if (path === '/modelo') return 'modelo-promo';
+  if (path === '/congresos' || path === '/eventos') return 'congresos';
   if (path === '/politicas') return 'politicas';
   if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
   return 'not-found';
@@ -140,6 +142,8 @@ export default function App() {
       setCurrentView('autenticas-promo');
     } else if (path === '/modelo') {
       setCurrentView('modelo-promo');
+    } else if (path === '/congresos' || path === '/eventos') {
+      setCurrentView('congresos');
     } else if (path === '/politicas') {
       setCurrentView('politicas');
     } else if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
@@ -213,7 +217,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found'].includes(currentView) && (
+      {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found', 'congresos'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
           setCurrentView={setCurrentView} 
@@ -266,6 +270,13 @@ export default function App() {
               window.history.pushState({}, '', '/');
               setCurrentView('landing');
             }}
+          />
+        )}
+
+        {/* VIEW 1C: CONGRESOS Y EVENTOS CATALOG HUB */}
+        {currentView === 'congresos' && (
+          <CongresosPage 
+            config={homepageConfig}
           />
         )}
 
