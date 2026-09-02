@@ -457,8 +457,8 @@ export default function App() {
 
       </main>
 
-      {/* Footer */}
-      {!['landing', 'under-construction', 'scanner', 'politicas', 'modelo-promo'].includes(currentView) && (
+      {/* Autenticas Footer */}
+      {(currentView === 'autenticas-promo' || window.location.pathname === '/autenticas') && (
         <footer style={{
           backgroundColor: 'var(--bg-dark)',
           color: '#FAF8F5',

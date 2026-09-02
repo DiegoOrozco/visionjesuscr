@@ -1,11 +1,13 @@
 import React from 'react';
-import { QrCode, ShieldCheck, Home } from 'lucide-react';
+import { QrCode, ShieldCheck } from 'lucide-react';
 
 export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome, navbarConfig = {} }) {
   const handleNavLanding = () => {
     if (adminUser && adminUser.role === 'scanner') return;
     window.location.href = '/';
   };
+
+  const isAutenticasPage = window.location.pathname === '/autenticas' || currentView === 'autenticas-promo';
 
   const officialNavLinks = [
     { label: 'INICIO', url: '/' },
@@ -40,10 +42,10 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
 
   return (
     <header style={{
-      backgroundColor: currentView === 'landing' ? 'rgba(3,8,18,0.95)' : '#FFFFFF',
-      backdropFilter: currentView === 'landing' ? 'blur(20px)' : 'none',
-      borderBottom: currentView === 'landing' ? '1px solid rgba(255,255,255,0.08)' : '1px solid var(--accent-beige-border)',
-      boxShadow: currentView === 'landing' ? '0 4px 30px rgba(0,0,0,0.3)' : 'var(--shadow-sm)',
+      backgroundColor: isAutenticasPage ? '#FFFFFF' : 'rgba(3,8,18,0.95)',
+      backdropFilter: isAutenticasPage ? 'none' : 'blur(20px)',
+      borderBottom: isAutenticasPage ? '1px solid var(--accent-beige-border)' : '1px solid rgba(255,255,255,0.08)',
+      boxShadow: isAutenticasPage ? 'var(--shadow-sm)' : '0 4px 30px rgba(0,0,0,0.3)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
@@ -61,8 +63,8 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
           style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: (adminUser && adminUser.role === 'scanner') ? 'default' : 'pointer' }}
         >
           <img 
-            src={currentView === 'admin' ? '/logo_oficial_transparente.png' : '/logo.png'} 
-            alt="Logo" 
+            src={isAutenticasPage ? '/logo.png' : '/logo_oficial_transparente.png'} 
+            alt="Visión Jesús Logo" 
             style={{
               height: '52px',
               objectFit: 'contain'
@@ -76,7 +78,15 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
           {(!adminUser || adminUser.role !== 'scanner') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {navLinksToRender.map((link, idx) => {
-                const isActive = (window.location.pathname === link.url) || (link.url === '/congresos' && window.location.pathname === '/autenticas');
+                const isCurrentPath = (window.location.pathname === link.url) || 
+                  (link.url === '/congresos' && window.location.pathname === '/congresos') ||
+                  (link.url === '/' && window.location.pathname === '/');
+
+                const defaultColor = isAutenticasPage 
+                  ? (isCurrentPath ? '#0033FF' : 'var(--accent-coffee)')
+                  : (isCurrentPath ? '#977DFF' : '#EAEDF8');
+
+                const hoverColor = isAutenticasPage ? '#0033FF' : '#977DFF';
                 
                 return (
                   <button
@@ -85,21 +95,21 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
                     style={{
                       background: 'transparent',
                       border: 'none',
-                      color: isActive ? '#0033FF' : (currentView === 'landing' ? '#EAEDF8' : 'var(--accent-coffee)'),
+                      color: defaultColor,
                       fontSize: '0.83rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       padding: '6px 12px',
-                      letterSpacing: '1px',
+                      letterSpacing: '1.5px',
                       textTransform: 'uppercase',
                       transition: 'color 0.2s ease',
                       borderRadius: '8px'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.color = currentView === 'landing' ? '#977DFF' : '#0033FF';
+                      e.currentTarget.style.color = hoverColor;
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = isActive ? '#0033FF' : (currentView === 'landing' ? '#EAEDF8' : 'var(--accent-coffee)');
+                      e.currentTarget.style.color = defaultColor;
                     }}
                   >
                     {link.label}
@@ -118,7 +128,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
                   onClick={() => setCurrentView('scanner')}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px', borderColor: 'var(--accent-gold)' }}
                 >
-                  <QrCode size={18} color="var(--accent-coffee)" />
+                  <QrCode size={18} color={isAutenticasPage ? 'var(--accent-coffee)' : '#977DFF'} />
                   <span>Escáner Puerta</span>
                 </button>
               )}
