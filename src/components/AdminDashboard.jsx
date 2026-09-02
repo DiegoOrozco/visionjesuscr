@@ -2785,17 +2785,36 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                           }}
                                           style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
                                         />
-                                        <button 
-                                          type="button" 
-                                          onClick={() => setMediaSelectCallback(() => (url) => {
-                                            const list = [...sec.content.cells];
-                                            list[cIdx].imageUrl = url;
-                                            handleUpdateSectionContent('cells', list);
-                                          })}
-                                          style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
-                                        >
-                                          Medios
-                                        </button>
+                                        <label style={{ cursor: 'pointer', padding: '4px 10px', fontSize: '0.7rem', backgroundColor: 'var(--accent-coffee)', color: '#FFF', borderRadius: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                                          Subir Foto
+                                          <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            onChange={async (e) => {
+                                              const file = e.target.files[0];
+                                              if (!file) return;
+                                              const formData = new FormData();
+                                              formData.append('image', file);
+                                              try {
+                                                const res = await authFetch(`${API_URL}/api/admin/landing/upload`, {
+                                                  method: 'POST',
+                                                  body: formData
+                                                });
+                                                const data = await res.json();
+                                                if (data.url) {
+                                                  const list = [...sec.content.cells];
+                                                  list[cIdx].imageUrl = data.url;
+                                                  handleUpdateSectionContent('cells', list);
+                                                } else {
+                                                  alert('Error al subir la imagen.');
+                                                }
+                                              } catch (err) {
+                                                alert('Error de red al subir la imagen.');
+                                              }
+                                            }} 
+                                            style={{ display: 'none' }} 
+                                          />
+                                        </label>
                                       </div>
                                       <div style={{ display: 'flex', gap: '4px' }}>
                                         <input 
