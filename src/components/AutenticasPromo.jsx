@@ -151,6 +151,83 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
   return (
     <div className="au-wrapper">
       
+      {/* OFFICIAL VISIÓN JESÚS HEADER */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        padding: '16px 40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: 'rgba(3, 8, 18, 0.95)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        {/* LOGO */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          onClick={() => window.location.href = '/'}
+        >
+          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '58px', objectFit: 'contain' }} />
+        </div>
+
+        {/* MENU LINKS */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
+          <a 
+            href="/" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            INICIO
+          </a>
+
+          <a 
+            href="/nosotros" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            NOSOTROS
+          </a>
+
+          <a 
+            href="/modelo" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            MODELO DE JESÚS
+          </a>
+
+          <a 
+            href="/congresos" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
+            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+          >
+            CONGRESOS
+          </a>
+
+          <a 
+            href="/#contacto-section" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            CONTACTO
+          </a>
+        </nav>
+      </header>
+
       {/* 1. HERO BANNER "AUTÉNTICAS" */}
       <div className="au-hero">
         <video 
