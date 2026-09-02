@@ -137,25 +137,88 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
 
           {/* Static fallback links (when no dynamic links or admin) */}
           {!showDynamic && (!adminUser || adminUser.role !== 'scanner') && (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
               <button 
-                className={`btn-secondary ${currentView === 'landing' ? 'active' : ''}`}
-                onClick={handleNavLanding}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
+                onClick={() => window.location.href = '/'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-coffee)',
+                  fontSize: '0.83rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
               >
-                <Home size={18} />
-                <span>Inicio</span>
+                INICIO
               </button>
-
               <button 
-                className={`btn-secondary ${currentView === 'home' || currentView === 'attendees' || currentView === 'success' ? 'active' : ''}`}
-                onClick={handleNavTickets}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', padding: '8px 16px' }}
+                onClick={() => window.location.href = '/nosotros'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-coffee)',
+                  fontSize: '0.83rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
               >
-                <Ticket size={18} />
-                <span>Congreso Mujeres</span>
+                NOSOTROS
               </button>
-            </>
+              <button 
+                onClick={() => window.location.href = '/modelo'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-coffee)',
+                  fontSize: '0.83rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
+              >
+                MODELO DE JESÚS
+              </button>
+              <button 
+                onClick={() => window.location.href = '/congresos'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-coffee)',
+                  fontSize: '0.83rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
+              >
+                CONGRESOS
+              </button>
+              <button 
+                onClick={() => window.location.href = '/#contacto-section'}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-coffee)',
+                  fontSize: '0.83rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
+              >
+                CONTACTO
+              </button>
+            </div>
           )}
 
           {/* Render admin links ONLY if logged in */}
