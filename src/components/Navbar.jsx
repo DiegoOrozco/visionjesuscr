@@ -1,62 +1,42 @@
 import React from 'react';
-import { QrCode, ShieldCheck, Ticket, Home, Menu, X } from 'lucide-react';
+import { QrCode, ShieldCheck, Home } from 'lucide-react';
 
 export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome, navbarConfig = {} }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  
   const handleNavLanding = () => {
     if (adminUser && adminUser.role === 'scanner') return;
-    window.history.pushState({}, '', '/');
-    if (onGoHome) {
-      onGoHome();
-    } else {
-      setCurrentView('landing');
-    }
+    window.location.href = '/';
   };
 
-  const handleNavTickets = () => {
-    window.history.pushState({}, '', '/autenticas');
-    setCurrentView('autenticas-promo');
-  };
+  const officialNavLinks = [
+    { label: 'INICIO', url: '/' },
+    { label: 'NOSOTROS', url: '/nosotros' },
+    { label: 'MODELO DE JESÚS', url: '/modelo' },
+    { label: 'CONGRESOS', url: '/congresos' },
+    { label: 'CONTACTO', url: '/#contacto-section' }
+  ];
 
-  // Parse dynamic navbar links
+  // Parse dynamic navbar links, ignoring legacy links from old DB state
   let dynamicLinks = [];
   try {
     if (navbarConfig.navbar_links) {
-      dynamicLinks = typeof navbarConfig.navbar_links === 'string' 
+      const parsed = typeof navbarConfig.navbar_links === 'string' 
         ? JSON.parse(navbarConfig.navbar_links) 
         : navbarConfig.navbar_links;
+      if (Array.isArray(parsed) && parsed.length > 0 && !parsed.some(l => l.label === 'Congreso Mujeres' || l.label === 'Conocé la Visión' || l.label === 'Experiencias y Horarios' || l.label === 'Inicio')) {
+        dynamicLinks = parsed;
+      }
     }
   } catch(e) {}
 
-  const handleDynamicLinkClick = (link) => {
-    setMobileMenuOpen(false);
-    if (link.url === '/') {
-      handleNavLanding();
-    } else if (link.url === '/autenticas') {
-      handleNavTickets();
-    } else if (link.url.startsWith('#')) {
-      // Scroll to section
-      const el = document.getElementById(link.url.substring(1));
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-      else {
-        // Go home then scroll
-        handleNavLanding();
-        setTimeout(() => {
-          const el2 = document.getElementById(link.url.substring(1));
-          if (el2) el2.scrollIntoView({ behavior: 'smooth' });
-        }, 500);
-      }
-    } else if (link.url.startsWith('/')) {
-      window.history.pushState({}, '', link.url);
-      setCurrentView(link.url.substring(1) + '-promo');
-    } else {
+  const navLinksToRender = dynamicLinks.length > 0 ? dynamicLinks : officialNavLinks;
+
+  const handleLinkClick = (link) => {
+    if (link.url.startsWith('http')) {
       window.open(link.url, '_blank');
+    } else {
+      window.location.href = link.url;
     }
   };
-
-  // Use dynamic links for public-facing navbar (when not admin/scanner)
-  const showDynamic = dynamicLinks.length > 0 && !adminUser;
 
   return (
     <header style={{
@@ -88,142 +68,50 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
               objectFit: 'contain'
             }}
           />
-
         </div>
 
         {/* Desktop Navigation */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           
-          {/* Dynamic public links */}
-          {showDynamic && (
-            <>
-              {dynamicLinks.map((link, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleDynamicLinkClick(link)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    fontSize: '0.82rem', padding: '8px 16px',
-                    fontWeight: 700,
-                    borderRadius: link.isButton ? '50px' : '8px',
-                    border: link.isButton ? 'none' : '1px solid transparent',
-                    background: link.isButton 
-                      ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' 
-                      : 'transparent',
-                    color: link.isButton ? '#FFFFFF' : (currentView === 'landing' ? 'rgba(255,255,255,0.85)' : 'var(--accent-coffee)'),
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    letterSpacing: '0.3px',
-                    textTransform: 'uppercase'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!link.isButton) {
-                      e.currentTarget.style.color = currentView === 'landing' ? '#FFFFFF' : '#0033FF';
-                      e.currentTarget.style.backgroundColor = currentView === 'landing' ? 'rgba(255,255,255,0.08)' : 'rgba(0,51,255,0.06)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!link.isButton) {
-                      e.currentTarget.style.color = currentView === 'landing' ? 'rgba(255,255,255,0.85)' : 'var(--accent-coffee)';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  {link.label}
-                </button>
-              ))}
-            </>
-          )}
-
-          {/* Static fallback links (when no dynamic links or admin) */}
-          {!showDynamic && (!adminUser || adminUser.role !== 'scanner') && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-              <button 
-                onClick={() => window.location.href = '/'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--accent-coffee)',
-                  fontSize: '0.83rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                INICIO
-              </button>
-              <button 
-                onClick={() => window.location.href = '/nosotros'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--accent-coffee)',
-                  fontSize: '0.83rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                NOSOTROS
-              </button>
-              <button 
-                onClick={() => window.location.href = '/modelo'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--accent-coffee)',
-                  fontSize: '0.83rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                MODELO DE JESÚS
-              </button>
-              <button 
-                onClick={() => window.location.href = '/congresos'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--accent-coffee)',
-                  fontSize: '0.83rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                CONGRESOS
-              </button>
-              <button 
-                onClick={() => window.location.href = '/#contacto-section'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--accent-coffee)',
-                  fontSize: '0.83rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                CONTACTO
-              </button>
+          {(!adminUser || adminUser.role !== 'scanner') && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {navLinksToRender.map((link, idx) => {
+                const isActive = (window.location.pathname === link.url) || (link.url === '/congresos' && window.location.pathname === '/autenticas');
+                
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleLinkClick(link)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: isActive ? '#0033FF' : (currentView === 'landing' ? '#EAEDF8' : 'var(--accent-coffee)'),
+                      fontSize: '0.83rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      padding: '6px 12px',
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase',
+                      transition: 'color 0.2s ease',
+                      borderRadius: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = currentView === 'landing' ? '#977DFF' : '#0033FF';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = isActive ? '#0033FF' : (currentView === 'landing' ? '#EAEDF8' : 'var(--accent-coffee)');
+                    }}
+                  >
+                    {link.label}
+                  </button>
+                );
+              })}
             </div>
           )}
 
           {/* Render admin links ONLY if logged in */}
           {adminUser && (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
               {(adminUser.role === 'admin' || adminUser.role === 'scanner') && (
                 <button 
                   className={`btn-secondary ${currentView === 'scanner' ? 'active' : ''}`}
@@ -255,7 +143,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
               >
                 Salir
               </button>
-            </>
+            </div>
           )}
         </nav>
       </div>
