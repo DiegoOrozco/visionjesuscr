@@ -10,12 +10,15 @@ import DoorScanner from './components/DoorScanner';
 import ChurchLanding from './components/ChurchLanding';
 import AutenticasPromo from './components/AutenticasPromo';
 import UnderConstruction from './components/UnderConstruction';
+import ModeloDeJesus from './components/ModeloDeJesus';
 import LegalPolicies from './components/LegalPolicies';
+import NotFound404 from './components/NotFound404';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getInitialView = () => {
   const path = window.location.pathname;
+  if (path === '/') return 'landing';
   if (path.startsWith('/ticket/')) return 'ticket-view';
   if (path === '/admin' || path === '/login' || path === '/portal-admin') {
     const savedUser = localStorage.getItem('admin_user');
@@ -25,14 +28,15 @@ const getInitialView = () => {
   }
   if (path === '/escanear') return 'scanner';
   if (path === '/autenticas') return 'autenticas-promo';
+  if (path === '/modelo') return 'modelo-promo';
   if (path === '/politicas') return 'politicas';
-  if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
-  return 'landing';
+  if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
+  return 'not-found';
 };
 
 const getInitialConstructionPage = () => {
   const path = window.location.pathname;
-  if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
+  if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
     return path.replace('/', '');
   }
   return '';
@@ -134,13 +138,17 @@ export default function App() {
       setCurrentView('scanner');
     } else if (path === '/autenticas') {
       setCurrentView('autenticas-promo');
+    } else if (path === '/modelo') {
+      setCurrentView('modelo-promo');
     } else if (path === '/politicas') {
       setCurrentView('politicas');
-    } else if (['/sanados', '/modelo', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
+    } else if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
       setConstructionPage(path.replace('/', ''));
       setCurrentView('under-construction');
-    } else {
+    } else if (path === '/') {
       setCurrentView('landing');
+    } else {
+      setCurrentView('not-found');
     }
   }, []);
 
@@ -205,7 +213,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {!['landing', 'under-construction', 'politicas'].includes(currentView) && (
+      {!['landing', 'under-construction', 'politicas', 'modelo-promo'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
           setCurrentView={setCurrentView} 
@@ -248,6 +256,17 @@ export default function App() {
               }}
             />
           </div>
+        )}
+
+        {/* VIEW 1B: MODELO DE JESÚS PROMO PAGE */}
+        {currentView === 'modelo-promo' && (
+          <ModeloDeJesus 
+            config={homepageConfig} 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+            }}
+          />
         )}
 
         {currentView === 'politicas' && (
@@ -406,13 +425,29 @@ export default function App() {
             />
           )
         )}
+
+        {/* VIEW 9: NOT FOUND 404 */}
+        {currentView === 'not-found' && (
+          <NotFound404 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+              fetchLandingSections('/');
+            }}
+            onGoToTickets={() => {
+              window.history.pushState({}, '', '/autenticas');
+              setCurrentView('autenticas-promo');
+              fetchLandingSections('/autenticas');
+            }}
+          />
+        )}
           </>
         )}
 
       </main>
 
       {/* Footer */}
-      {!['landing', 'under-construction', 'scanner', 'politicas'].includes(currentView) && (
+      {!['landing', 'under-construction', 'scanner', 'politicas', 'modelo-promo'].includes(currentView) && (
         <footer style={{
           backgroundColor: 'var(--bg-dark)',
           color: '#FAF8F5',

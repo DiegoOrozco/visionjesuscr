@@ -1,0 +1,5 @@
+DKIM
+txt, resend._domainkey, p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCufhyXP0pGv3q9Ml7pydPgK1AjPA60W0F5yc8evG/igbiw45cLShTKCjdrN6x7RkTVmdmilVxp9+Z1roDcHo3GhrueiQxdj33DNqDOncGb6SFb0iT1mNzaZ/lwmVtJYBMi3UdQcXxNncTqCFKw8/kMkExCZaF7+JpqxBCTMzzh0wIDAQAB
+SPF
+mx, feedback-smtp.us-east-1.amazonses.com, 
+txt, v=spf1 include:amazonses.com ~all

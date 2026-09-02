@@ -186,7 +186,7 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
             ))}
           </div>
 
-          <div className="au-animate-up au-delay-3" style={{ marginTop: '40px' }}>
+          <div className="au-animate-up au-delay-3" style={{ marginTop: '20px' }}>
             <button 
               onClick={() => {
                 document.getElementById('accesos-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -362,6 +362,58 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
         )}
 
       </div>
+      {/* STICKY MOBILE CTA BAR */}
+      <div className="mobile-sticky-cta-bar">
+        <button 
+          onClick={() => {
+            if (onScrollToMap) onScrollToMap('general');
+            else document.getElementById('accesos-section')?.scrollIntoView({ behavior: 'smooth' });
+          }} 
+          className="mobile-sticky-cta-btn"
+        >
+          <Ticket size={20} />
+          <span>Reservar Mi Lugar • Auténticas</span>
+        </button>
+      </div>
+
+      <style>{`
+        .mobile-sticky-cta-bar {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          padding: 12px 16px;
+          background: rgba(15, 23, 42, 0.92);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-top: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+        }
+        @media (max-width: 768px) {
+          .mobile-sticky-cta-bar {
+            display: block;
+          }
+        }
+        .mobile-sticky-cta-btn {
+          width: 100%;
+          padding: 14px;
+          border-radius: 50px;
+          border: none;
+          background: linear-gradient(135deg, #DB2777 0%, #9333EA 100%);
+          color: #FFFFFF;
+          font-weight: 800;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4);
+          cursor: pointer;
+        }
+      `}</style>
+
     </div>
   );
 }

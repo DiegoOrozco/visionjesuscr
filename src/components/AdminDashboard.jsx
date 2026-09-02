@@ -444,6 +444,40 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           }
           return s;
         }));
+      } else if (type === 'section_pastor') {
+        setLocalSections(prev => prev.map(s => {
+          if (s.id === secId) {
+            const list = [...(s.content.pastors || [])];
+            if (list[field]) {
+              list[field] = { ...list[field], imageUrl: url };
+            }
+            return {
+              ...s,
+              content: {
+                ...s.content,
+                pastors: list
+              }
+            };
+          }
+          return s;
+        }));
+      } else if (type === 'section_grid') {
+        setLocalSections(prev => prev.map(s => {
+          if (s.id === secId) {
+            const list = [...(s.content.cells || [])];
+            if (list[field]) {
+              list[field] = { ...list[field], imageUrl: url };
+            }
+            return {
+              ...s,
+              content: {
+                ...s.content,
+                cells: list
+              }
+            };
+          }
+          return s;
+        }));
       }
     }
     setShowMediaLibrary(false);
@@ -3013,25 +3047,55 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                         type="text" 
                                         placeholder="URL de Foto / Imagen"
                                         value={pastor.imageUrl || ''}
-                                        onChange={(e) => {
-                                          const list = [...sec.content.pastors];
-                                          list[pIdx].imageUrl = e.target.value;
-                                          handleUpdateSectionContent('pastors', list);
-                                        }}
-                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
-                                      />
-                                      <button 
-                                        type="button" 
-                                        onClick={() => setMediaSelectCallback(() => (url) => {
-                                          const list = [...sec.content.pastors];
-                                          list[pIdx].imageUrl = url;
-                                          handleUpdateSectionContent('pastors', list);
-                                        })}
-                                        style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
-                                      >
-                                        Medios
-                                      </button>
-                                    </div>
+                                          onChange={(e) => {
+                                            const list = [...sec.content.pastors];
+                                            list[pIdx].imageUrl = e.target.value;
+                                            handleUpdateSectionContent('pastors', list);
+                                          }}
+                                          style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                        />
+                                        <button 
+                                          type="button" 
+                                          onClick={() => {
+                                            const input = document.createElement('input');
+                                            input.type = 'file';
+                                            input.accept = 'image/*';
+                                            input.onchange = async (e) => {
+                                              const file = e.target.files[0];
+                                              if (!file) return;
+                                              const formData = new FormData();
+                                              formData.append('image', file);
+                                              try {
+                                                const res = await authFetch(`${API_URL}/api/admin/landing/upload`, {
+                                                  method: 'POST',
+                                                  body: formData
+                                                });
+                                                const data = await res.json();
+                                                if (data.url) {
+                                                  const list = [...sec.content.pastors];
+                                                  list[pIdx].imageUrl = data.url;
+                                                  handleUpdateSectionContent('pastors', list);
+                                                } else {
+                                                  alert('Error al subir la imagen.');
+                                                }
+                                              } catch (err) {
+                                                alert('Error de red al subir la imagen.');
+                                              }
+                                            };
+                                            input.click();
+                                          }}
+                                          style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: 'var(--accent-coffee)', color: '#FFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}
+                                        >
+                                          📷 Subir
+                                        </button>
+                                        <button 
+                                          type="button" 
+                                          onClick={() => openMediaLibrary(['section_pastor', sec.id, pIdx])}
+                                          style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', color: '#2C1A0E', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}
+                                        >
+                                          🖼️ Medios
+                                        </button>
+                                      </div>
 
                                     <div style={{ display: 'flex', gap: '4px' }}>
                                       <input 

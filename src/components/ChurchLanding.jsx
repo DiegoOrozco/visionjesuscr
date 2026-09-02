@@ -143,8 +143,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               justifyContent: 'flex-end',
               textAlign: 'center',
               overflow: 'hidden',
-              paddingTop: '120px',
-              paddingBottom: '120px',
+              paddingTop: 'clamp(60px, 8vh, 100px)',
+              paddingBottom: 'clamp(40px, 6vh, 80px)',
               boxSizing: 'border-box',
               ...bgStyle
             }}
@@ -174,26 +174,26 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               {heroTitle && (
                 <h1 style={{
-                  fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
+                  fontSize: 'clamp(2rem, 5.5vw, 4.2rem)',
                   fontWeight: 950,
                   lineHeight: 1.05,
                   color: '#FFFFFF',
                   letterSpacing: '-1.5px',
                   textTransform: 'uppercase',
-                  marginBottom: '24px'
+                  marginBottom: '16px'
                 }} className="hero-welcome-text">
                   {heroTitle}
                 </h1>
               )}
               {heroSubtitle && (
                 <p style={{
-                  fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
+                  fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
                   fontWeight: 500,
                   color: '#EAEDF8',
                   opacity: 0.9,
                   maxWidth: '650px',
-                  lineHeight: 1.5,
-                  marginBottom: '40px'
+                  lineHeight: 1.45,
+                  marginBottom: '24px'
                 }}>
                   {heroSubtitle}
                 </p>
@@ -1742,6 +1742,58 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           </div>
         </div>
       )}
+
+      {/* STICKY MOBILE CTA BAR */}
+      <div className="mobile-sticky-cta-bar">
+        <button 
+          onClick={onGoToTickets || (() => {
+            window.history.pushState({}, '', '/autenticas');
+            window.location.reload();
+          })} 
+          className="mobile-sticky-cta-btn"
+        >
+          <Ticket size={20} />
+          <span>Adquirir Entradas • Auténticas 2026</span>
+        </button>
+      </div>
+
+      <style>{`
+        .mobile-sticky-cta-bar {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          padding: 12px 16px;
+          background: rgba(3, 8, 18, 0.92);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-top: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+        }
+        @media (max-width: 768px) {
+          .mobile-sticky-cta-bar {
+            display: block;
+          }
+        }
+        .mobile-sticky-cta-btn {
+          width: 100%;
+          padding: 14px;
+          border-radius: 50px;
+          border: none;
+          background: linear-gradient(135deg, #0033FF 0%, #DB2777 100%);
+          color: #FFFFFF;
+          font-weight: 800;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4);
+          cursor: pointer;
+        }
+      `}</style>
 
     </div>
   );

@@ -230,11 +230,45 @@ async function sendReservationEmail({ toEmail, purchaserName, zoneName, quantity
 
 app.use(helmet({
   contentSecurityPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  xssFilter: true,
+  noSniff: true,
+  frameguard: { action: "deny" }
 }));
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use('/api/', globalLimiter);
+
+// Input Sanitization Helper against XSS & Script Injection
+function sanitizeInput(data) {
+  if (typeof data === 'string') {
+    return data
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/on\w+="[^"]*"/gi, '')
+      .replace(/on\w+='[^']*'/gi, '');
+  }
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    const cleaned = {};
+    for (const key in data) {
+      cleaned[key] = sanitizeInput(data[key]);
+    }
+    return cleaned;
+  }
+  if (Array.isArray(data)) {
+    return data.map(sanitizeInput);
+  }
+  return data;
+}
+
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeInput(req.body);
+  }
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizeInput(req.query);
+  }
+  next();
+});
 
 const uploadsDir = path.join(__dirname, 'data', 'uploads', 'comprobantes');
 if (!fs.existsSync(uploadsDir)) {
@@ -255,15 +289,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Max 10MB limit for security
+  limits: { fileSize: 5 * 1024 * 1024 }, // Strict 5MB max file size limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp|heic|pdf|mp4|webm|mov|ogg/;
+    const forbiddenExts = /php|exe|sh|bat|cmd|js|html|htm|py|pl|cgi|jar|jsp|asp|aspx/;
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
     const mime = file.mimetype;
+    
+    if (forbiddenExts.test(ext)) {
+      return cb(new Error('Tipo de archivo ejecutable o no permitido por seguridad.'));
+    }
+
     if (allowedTypes.test(ext) || allowedTypes.test(mime) || mime.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error('Formato de archivo no válido. Se permiten imágenes, PDFs y videos (MP4, WEBM, MOV).'));
+      cb(new Error('Formato de archivo no válido. Se permiten imágenes (JPG, PNG, WEBP), PDFs y videos.'));
     }
   }
 });
