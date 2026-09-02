@@ -2917,6 +2917,133 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                             </div>
                           )}
 
+                          {/* Pastors Profile Array Editor */}
+                          {sec.type === 'pastors_profile' && (
+                            <div style={{ borderTop: '1px solid var(--accent-beige-border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <h5 style={{ margin: 0, fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '0.8rem' }}>Perfiles de Pastores</h5>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const list = sec.content.pastors || [];
+                                    handleUpdateSectionContent('pastors', [...list, { name: 'Nuevo Pastor', role: 'Pastor Principal', description: '', imageUrl: '', instagramUrl: '', facebookUrl: '' }]);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '2px 6px', fontSize: '0.7rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                  + Agregar Pastor
+                                </button>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {(sec.content.pastors || []).map((pastor, pIdx) => (
+                                  <div key={pIdx} style={{ backgroundColor: '#FFFFFF', padding: '10px', borderRadius: '8px', border: '1px solid #EAEAEA', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>Pastor {pIdx + 1}</span>
+                                      <button 
+                                        type="button"
+                                        onClick={() => {
+                                          const list = sec.content.pastors.filter((_, i) => i !== pIdx);
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ padding: '2px 6px', backgroundColor: 'var(--color-red-light)', color: 'var(--color-red)', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem' }}
+                                      >
+                                        ✕ Eliminar
+                                      </button>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        placeholder="Nombre (ej: Wagner Castro)"
+                                        value={pastor.name || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].name = e.target.value;
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC', fontWeight: 700 }}
+                                      />
+                                      <input 
+                                        type="text" 
+                                        placeholder="Rol (ej: Pastor Principal)"
+                                        value={pastor.role || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].role = e.target.value;
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      />
+                                    </div>
+
+                                    <textarea 
+                                      rows="3"
+                                      placeholder="Biografía / Historia del pastor..."
+                                      value={pastor.description || ''}
+                                      onChange={(e) => {
+                                        const list = [...sec.content.pastors];
+                                        list[pIdx].description = e.target.value;
+                                        handleUpdateSectionContent('pastors', list);
+                                      }}
+                                      style={{ width: '100%', fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC', fontFamily: 'inherit' }}
+                                    />
+
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        placeholder="URL de Foto / Imagen"
+                                        value={pastor.imageUrl || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].imageUrl = e.target.value;
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      />
+                                      <button 
+                                        type="button" 
+                                        onClick={() => setMediaSelectCallback(() => (url) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].imageUrl = url;
+                                          handleUpdateSectionContent('pastors', list);
+                                        })}
+                                        style={{ padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EFE3D3', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}
+                                      >
+                                        Medios
+                                      </button>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        placeholder="URL Instagram (opcional)"
+                                        value={pastor.instagramUrl || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].instagramUrl = e.target.value;
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      />
+                                      <input 
+                                        type="text" 
+                                        placeholder="URL Facebook (opcional)"
+                                        value={pastor.facebookUrl || ''}
+                                        onChange={(e) => {
+                                          const list = [...sec.content.pastors];
+                                          list[pIdx].facebookUrl = e.target.value;
+                                          handleUpdateSectionContent('pastors', list);
+                                        }}
+                                        style={{ flex: 1, fontSize: '0.75rem', padding: '6px', borderRadius: '4px', border: '1px solid #CCC' }}
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                         </div>
 
                         {/* EDIT SECTION STYLES */}
