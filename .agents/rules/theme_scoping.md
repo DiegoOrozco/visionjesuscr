@@ -9,4 +9,5 @@
      - Header background: `rgba(3, 8, 18, 0.95)` / `#030812` with backdrop filter.
      - Logo: `/logo_oficial_transparente.png` (Visión Jesús cross logo).
      - Text color: `#EAEDF8` with `#977DFF` (purple) for hover and active state.
+     - Body & Root Wrapper Background: `#030812` (dark) by default across all routes to prevent beige stripe leakage.
      - Footer: `© Iglesia Visión Jesús. Todos los derechos reservados.`

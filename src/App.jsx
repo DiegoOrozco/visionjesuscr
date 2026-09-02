@@ -216,7 +216,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: (window.location.pathname === '/autenticas' || currentView === 'autenticas-promo') ? 'var(--bg-primary)' : '#030812' }}>
       {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found', 'congresos'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
