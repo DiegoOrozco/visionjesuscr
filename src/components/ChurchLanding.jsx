@@ -85,6 +85,19 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
     return () => clearInterval(interval);
   }, [newsItems.length]);
 
+  // Auto-scroll to hash location if coming from another page (e.g. /#vision-section)
+  useEffect(() => {
+    if (window.location.hash) {
+      const targetId = window.location.hash.replace('#', '');
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+    }
+  }, []);
+
   const handleButtonClick = (btn) => {
     if (btn.url === '/autenticas') {
       onGoToTickets();
@@ -815,9 +828,27 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         {/* MENU LINKS */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
           <a 
-            href="#inicio" 
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-            style={{ color: '#FFFFFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            href="/" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              if (window.location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                window.location.href = '/';
+              }
+            }} 
+            style={{ 
+              color: window.location.pathname === '/' ? '#977DFF' : '#EAEDF8', 
+              fontSize: '0.85rem', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              textDecoration: 'none', 
+              cursor: 'pointer', 
+              transition: 'color 0.2s' 
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/' ? '#977DFF' : '#EAEDF8'}
           >
             INICIO
           </a>
@@ -825,32 +856,78 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             href="/nosotros" 
             onClick={(e) => { 
               e.preventDefault(); 
-              window.location.href = '/nosotros';
+              if (window.location.pathname === '/nosotros') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                window.location.href = '/nosotros';
+              }
             }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.target.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.target.style.color = '#EAEDF8'}
+            style={{ 
+              color: window.location.pathname === '/nosotros' ? '#977DFF' : '#EAEDF8', 
+              fontSize: '0.85rem', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              textDecoration: 'none', 
+              cursor: 'pointer', 
+              transition: 'color 0.2s' 
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/nosotros' ? '#977DFF' : '#EAEDF8'}
           >
             NOSOTROS
           </a>
           <a 
-            href="#vision-section" 
-            onClick={(e) => { e.preventDefault(); document.getElementById('vision-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
-            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            href="/#vision-section" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              if (window.location.pathname === '/') {
+                const el = document.getElementById('vision-section') || document.getElementById('sec_pillars');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else window.scrollTo({ top: 500, behavior: 'smooth' });
+              } else {
+                window.location.href = '/#vision-section';
+              }
+            }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
           >
             CONOCÉ LA VISIÓN
           </a>
           <a 
-            href="#horarios-section" 
-            onClick={(e) => { e.preventDefault(); document.getElementById('horarios-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+            href="/#horarios-section" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              if (window.location.pathname === '/') {
+                const el = document.getElementById('horarios-section') || document.getElementById('sec_schedules');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else window.scrollTo({ top: 1200, behavior: 'smooth' });
+              } else {
+                window.location.href = '/#horarios-section';
+              }
+            }} 
             style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
           >
             PRÉDICAS Y HORARIOS
           </a>
           <a 
-            href="#contacto-section" 
-            onClick={(e) => { e.preventDefault(); document.getElementById('contacto-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+            href="/#contacto-section" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              if (window.location.pathname === '/') {
+                const el = document.getElementById('contacto-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+              } else {
+                window.location.href = '/#contacto-section';
+              }
+            }} 
             style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
           >
             CONTACTO
           </a>

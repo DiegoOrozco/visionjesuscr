@@ -503,6 +503,25 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
           })}
         </div>
       </div>
+
+      {/* FOOTER VISIÓN JESÚS */}
+      <footer style={{
+        backgroundColor: '#04060A',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        color: '#94A3B8',
+        padding: '30px 20px',
+        fontSize: '0.88rem',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <img 
+            src="/logo_oficial_transparente.png" 
+            alt="Visión Jesús Logo" 
+            style={{ height: '40px', objectFit: 'contain', opacity: 0.8 }}
+          />
+          <p style={{ margin: 0, fontSize: '0.85rem' }}>© 2026 Iglesia Visión Jesús • Modelo de Jesús</p>
+        </div>
+      </footer>
     </div>
   );
 }
