@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair } from 'lucide-react';
 import AutenticasPromo from './AutenticasPromo';
+import ModeloDeJesus from './ModeloDeJesus';
+import CongresosPage from './CongresosPage';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -3509,7 +3511,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               }}>
                 
                 {/* Dynamic sections mapped inside preview */}
-                {localSections.length === 0 ? (
+                {builderPagePath === '/autenticas' ? (
+                  <AutenticasPromo config={configFields} />
+                ) : builderPagePath === '/modelo' && localSections.length === 0 ? (
+                  <ModeloDeJesus config={configFields} />
+                ) : builderPagePath === '/congresos' && localSections.length === 0 ? (
+                  <CongresosPage config={configFields} />
+                ) : localSections.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#BAC2DE', textAlign: 'center' }}>
                     <p style={{ fontStyle: 'italic', margin: '0 0 10px 0', color: '#6C7086' }}>Esta página está vacía.</p>
                     <span style={{ fontSize: '0.8rem', color: '#A6ADC8' }}>Mostrará el contenido clásico por defecto o la pantalla "En Construcción" en el sitio público hasta que agregues secciones.</span>
