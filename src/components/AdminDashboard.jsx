@@ -2204,12 +2204,12 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                   }}
                 >
                   <option value="/">Inicio (Página Principal)</option>
+                  <option value="/congresos">Catálogo de Congresos y Eventos (/congresos)</option>
                   <option value="/autenticas">Congreso Auténticas (/autenticas)</option>
                   <option value="/sanados">Congreso Sanados (/sanados)</option>
                   <option value="/modelo">Congreso Modelo (/modelo)</option>
-                  <option value="/move">Congreso Move (/move)</option>
-                  <option value="/tienda">Tienda Oficial (/tienda)</option>
                   <option value="/nosotros">Nosotros (/nosotros)</option>
+                  <option value="/tienda">Tienda Oficial (/tienda)</option>
                 </select>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', alignSelf: 'flex-end' }}>
