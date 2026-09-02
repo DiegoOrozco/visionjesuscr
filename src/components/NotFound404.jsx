@@ -35,7 +35,7 @@ export default function NotFound404({ onGoHome }) {
           style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
           onClick={handleHomeClick}
         >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '62px', objectFit: 'contain' }} />
+          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
         </div>
 
         {/* MENU LINKS */}

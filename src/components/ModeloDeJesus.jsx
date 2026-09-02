@@ -171,7 +171,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
           style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
           onClick={() => window.location.href = '/'}
         >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '58px', objectFit: 'contain' }} />
+          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
         </div>
 
         {/* MENU LINKS */}

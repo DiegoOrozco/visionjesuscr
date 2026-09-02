@@ -55,7 +55,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '72px'
+        height: '88px'
       }}>
         {/* Brand Logo */}
         <div 
@@ -66,7 +66,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
             src={isAutenticasPage ? '/logo.png' : '/logo_oficial_transparente.png'} 
             alt="Visión Jesús Logo" 
             style={{
-              height: '52px',
+              height: '76px',
               objectFit: 'contain'
             }}
           />
