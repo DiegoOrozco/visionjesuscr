@@ -18,22 +18,8 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
       priceInfo: 'Gold: ₡15.000 • General: ₡10.000'
     },
     {
-      id: 'move',
-      title: 'Congreso Juvenil MOVE 2026',
-      subtitle: 'MOVIMIENTO Y PROPÓSITO',
-      status: 'PRÓXIMAMENTE',
-      statusColor: '#977DFF',
-      date: 'Próxima Fecha 2026',
-      location: 'Auditorio Visión Jesús',
-      image: '/logo_oficial_transparente.png',
-      description: 'La experiencia para jóvenes y adolescentes de Visión Jesús. Música en vivo, conferencias dinámicas y un ambiente lleno del poder de Dios.',
-      url: '/move',
-      featured: false,
-      priceInfo: 'Próximamente más detalles'
-    },
-    {
       id: 'sanados',
-      title: 'Conferencia Sanados por su Poder',
+      title: 'SANADOS PARA SANAR',
       subtitle: 'MILAGROS Y RESTAURACIÓN',
       status: 'PRÓXIMAMENTE',
       statusColor: '#3B82F6',
