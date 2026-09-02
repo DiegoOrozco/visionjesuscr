@@ -295,41 +295,62 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   ref={galleryRef}
                   style={{ display: 'flex', transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)', transform: `translateX(-${currentSlide * 100}%)` }}
                 >
-                  {items.map((item, idx) => (
-                    <div key={idx} style={{ minWidth: '100%', boxSizing: 'border-box', padding: '0 10px' }}>
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                        backgroundColor: 'rgba(0, 3, 61, 0.45)',
-                        border: '1px solid rgba(151, 125, 255, 0.25)',
-                        borderRadius: '32px',
-                        overflow: 'hidden',
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                        backdropFilter: 'blur(8px)'
-                      }}>
-                        {item.image && (
-                          <div style={{ height: '360px', position: 'relative' }}>
-                            <img src={item.image.startsWith('http') || item.image.startsWith('/') ? (item.image.startsWith('/') ? `${API_URL}${item.image}` : item.image) : `${API_URL}/${item.image}`} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: '#977DFF', color: '#FFFFFF', padding: '6px 16px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800 }}>
-                              NUEVO
+                  {items.map((item, idx) => {
+                    const targetUrl = item.link || item.url || item.buttonUrl || item.targetUrl || '/autenticas';
+                    return (
+                      <div key={idx} style={{ minWidth: '100%', boxSizing: 'border-box', padding: '0 10px' }}>
+                        <div 
+                          onClick={() => {
+                            if (targetUrl.startsWith('http')) {
+                              window.open(targetUrl, '_blank');
+                            } else {
+                              window.location.href = targetUrl;
+                            }
+                          }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                            backgroundColor: 'rgba(0, 3, 61, 0.45)',
+                            border: '1px solid rgba(151, 125, 255, 0.25)',
+                            borderRadius: '32px',
+                            overflow: 'hidden',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                            backdropFilter: 'blur(8px)',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.borderColor = '#977DFF';
+                            e.currentTarget.style.boxShadow = '0 25px 60px rgba(151, 125, 255, 0.2)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.borderColor = 'rgba(151, 125, 255, 0.25)';
+                            e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.5)';
+                          }}
+                        >
+                          {item.image && (
+                            <div style={{ height: '360px', position: 'relative' }}>
+                              <img src={item.image.startsWith('http') || item.image.startsWith('/') ? (item.image.startsWith('/') ? `${API_URL}${item.image}` : item.image) : `${API_URL}/${item.image}`} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: '#977DFF', color: '#FFFFFF', padding: '6px 16px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800 }}>
+                                {item.badge || 'NUEVO'}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                        <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                          <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase' }}>{item.title}</h3>
-                          <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>{item.description}</p>
-                          {item.buttonText && (
+                          )}
+                          <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase' }}>{item.title}</h3>
+                            <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>{item.description}</p>
                             <button 
-                              onClick={() => item.buttonUrl && (item.buttonUrl.startsWith('http') ? window.open(item.buttonUrl, '_blank') : window.location.href = item.buttonUrl)}
                               style={{ alignSelf: 'flex-start', background: `linear-gradient(135deg, ${accentColor} 0%, #977DFF 100%)`, border: 'none', color: '#FFFFFF', padding: '12px 28px', borderRadius: '50px', fontWeight: 800, cursor: 'pointer' }}
                             >
-                              {item.buttonText}
+                              {item.buttonText || 'Ver Detalles'}
                             </button>
-                          )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {items.length > 1 && (
@@ -1176,12 +1197,11 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                     <div 
                       key={item.id || idx}
                       onClick={() => {
-                        if (item.link) {
-                          if (item.link.startsWith('http')) {
-                            window.open(item.link, '_blank');
-                          } else {
-                            window.location.href = item.link;
-                          }
+                        const target = item.link || item.url || item.buttonUrl || item.targetUrl || '/autenticas';
+                        if (target.startsWith('http')) {
+                          window.open(target, '_blank');
+                        } else {
+                          window.location.href = target;
                         }
                       }}
                       style={{
@@ -1189,7 +1209,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                         border: '1px solid rgba(151, 125, 255, 0.2)',
                         borderRadius: '24px',
                         overflow: 'hidden',
-                        cursor: item.link ? 'pointer' : 'default',
+                        cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         boxShadow: '0 12px 32px rgba(0, 0, 0, 0.5)',
                         transform: 'translateY(0)',
