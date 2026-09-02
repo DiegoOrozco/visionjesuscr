@@ -116,7 +116,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
 
   return (
     <div style={{
-      backgroundColor: '#070A10',
+      backgroundColor: '#030812',
       color: '#FFFFFF',
       minHeight: '100vh',
       fontFamily: "'Outfit', 'Inter', sans-serif",
@@ -135,8 +135,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
           transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .network-card {
-          background: rgba(18, 24, 38, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(0, 3, 61, 0.5);
+          border: 1px solid rgba(151, 125, 255, 0.15);
           border-radius: 24px;
           overflow: hidden;
           transition: all 0.4s ease;
@@ -144,14 +144,14 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         }
         .network-card:hover {
           transform: translateY(-8px);
-          border-color: rgba(220, 38, 38, 0.4);
-          box-shadow: 0 20px 40px rgba(220, 38, 38, 0.15);
+          border-color: rgba(0, 51, 255, 0.5);
+          box-shadow: 0 20px 40px rgba(0, 51, 255, 0.25);
         }
       `}</style>
 
       {/* HEADER OFFICIAL VISIÓN JESÚS */}
       <header style={{
-        backgroundColor: 'rgba(7, 10, 16, 0.9)',
+        backgroundColor: 'rgba(3, 8, 18, 0.95)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         position: 'sticky',
@@ -199,7 +199,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
             <button
               onClick={onGoHome}
               style={{
-                background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+                background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '8px 20px',
@@ -209,7 +209,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                 cursor: 'pointer',
                 letterSpacing: '0.5px',
                 textTransform: 'uppercase',
-                boxShadow: '0 4px 14px rgba(220, 38, 38, 0.4)'
+                boxShadow: '0 4px 14px rgba(0, 51, 255, 0.4)'
               }}
             >
               Visión Jesús
@@ -225,7 +225,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundImage: `linear-gradient(180deg, rgba(7, 10, 16, 0.7) 0%, rgba(7, 10, 16, 0.95) 100%), url(${heroBg})`,
+        backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.75) 0%, rgba(3, 8, 18, 0.98) 100%), url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         textAlign: 'center',
@@ -239,7 +239,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
           transform: 'translate(-50%, -50%)',
           width: '500px',
           height: '500px',
-          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0) 70%)',
+          background: 'radial-gradient(circle, rgba(0, 51, 255, 0.25) 0%, rgba(151, 125, 255, 0) 70%)',
           pointerEvents: 'none',
           zIndex: 0
         }} />
@@ -247,9 +247,9 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         <div style={{ zIndex: 1, maxWidth: '850px', margin: '0 auto' }}>
           <AnimatedSection>
             <span style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              border: '1px solid rgba(220, 38, 38, 0.4)',
-              color: '#FF6B6B',
+              backgroundColor: 'rgba(0, 51, 255, 0.15)',
+              border: '1px solid rgba(151, 125, 255, 0.3)',
+              color: '#977DFF',
               padding: '6px 20px',
               borderRadius: '50px',
               fontSize: '0.85rem',
@@ -297,7 +297,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
             <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '12px' }}>
               Formando Carácter a la Semejanza de Cristo
             </h2>
-            <div style={{ height: '4px', width: '60px', background: '#DC2626', margin: '0 auto 16px', borderRadius: '2px' }} />
+            <div style={{ height: '4px', width: '60px', background: 'linear-gradient(90deg, #0033FF, #977DFF)', margin: '0 auto 16px', borderRadius: '2px' }} />
             <p style={{ color: '#94A3B8', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>
               Acompañamos cada etapa del desarrollo espiritual de nuestras familias a través de grupos integrados.
             </p>
@@ -334,7 +334,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                     <div style={{
                       position: 'absolute',
                       inset: 0,
-                      background: 'linear-gradient(180deg, rgba(7, 10, 16, 0.1) 0%, rgba(18, 24, 38, 0.95) 100%)'
+                      background: 'linear-gradient(180deg, rgba(3, 8, 18, 0.1) 0%, rgba(0, 3, 61, 0.95) 100%)'
                     }} />
 
                     {/* Badge */}
@@ -342,7 +342,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                       position: 'absolute',
                       top: '16px',
                       left: '16px',
-                      backgroundColor: 'rgba(220, 38, 38, 0.85)',
+                      backgroundColor: 'rgba(0, 51, 255, 0.85)',
                       backdropFilter: 'blur(8px)',
                       color: '#FFFFFF',
                       padding: '4px 14px',
@@ -361,10 +361,10 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                         position: 'absolute',
                         bottom: '16px',
                         right: '16px',
-                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        backgroundColor: 'rgba(3, 8, 18, 0.85)',
                         backdropFilter: 'blur(8px)',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        color: '#E2E8F0',
+                        border: '1px solid rgba(151, 125, 255, 0.25)',
+                        color: '#EAEDF8',
                         padding: '4px 12px',
                         borderRadius: '8px',
                         fontSize: '0.8rem',
@@ -422,7 +422,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                               justifyContent: 'center',
                               transition: 'all 0.2s ease'
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = '#E1306C'; e.currentTarget.style.backgroundColor = 'rgba(225,48,108,0.1)'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = '#977DFF'; e.currentTarget.style.backgroundColor = 'rgba(151,125,255,0.15)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
                           >
                             <Instagram size={18} />
@@ -443,7 +443,7 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                               justifyContent: 'center',
                               transition: 'all 0.2s ease'
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = '#1877F2'; e.currentTarget.style.backgroundColor = 'rgba(24,119,242,0.1)'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = '#0033FF'; e.currentTarget.style.backgroundColor = 'rgba(0,51,255,0.15)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
                           >
                             <Facebook size={18} />
@@ -480,9 +480,9 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                            border: '1px solid rgba(220, 38, 38, 0.3)',
-                            color: '#FF6B6B',
+                            backgroundColor: 'rgba(0, 51, 255, 0.15)',
+                            border: '1px solid rgba(151, 125, 255, 0.3)',
+                            color: '#977DFF',
                             padding: '8px 16px',
                             borderRadius: '50px',
                             fontSize: '0.82rem',

@@ -878,59 +878,81 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             NOSOTROS
           </a>
           <a 
-            href="/#vision-section" 
+            href="/modelo" 
             onClick={(e) => { 
               e.preventDefault(); 
-              if (window.location.pathname === '/') {
-                const el = document.getElementById('vision-section') || document.getElementById('sec_pillars');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else window.scrollTo({ top: 500, behavior: 'smooth' });
+              if (window.location.pathname === '/modelo') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
-                window.location.href = '/#vision-section';
+                window.location.href = '/modelo';
               }
             }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            style={{ 
+              color: window.location.pathname === '/modelo' ? '#977DFF' : '#EAEDF8', 
+              fontSize: '0.85rem', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              textDecoration: 'none', 
+              cursor: 'pointer', 
+              transition: 'color 0.2s' 
+            }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/modelo' ? '#977DFF' : '#EAEDF8'}
           >
-            CONOCÉ LA VISIÓN
+            MODELO DE JESÚS
           </a>
           <a 
-            href="/#horarios-section" 
+            href="/autenticas" 
             onClick={(e) => { 
               e.preventDefault(); 
-              if (window.location.pathname === '/') {
-                const el = document.getElementById('horarios-section') || document.getElementById('sec_schedules');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else window.scrollTo({ top: 1200, behavior: 'smooth' });
+              if (window.location.pathname === '/autenticas') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
-                window.location.href = '/#horarios-section';
+                window.location.href = '/autenticas';
               }
             }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            style={{ 
+              color: window.location.pathname === '/autenticas' ? '#977DFF' : '#EAEDF8', 
+              fontSize: '0.85rem', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              textDecoration: 'none', 
+              cursor: 'pointer', 
+              transition: 'color 0.2s' 
+            }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/autenticas' ? '#977DFF' : '#EAEDF8'}
           >
-            PRÉDICAS Y HORARIOS
+            CONGRESOS
           </a>
-          <a 
-            href="/#contacto-section" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              if (window.location.pathname === '/') {
-                const el = document.getElementById('contacto-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          <button 
+            onClick={() => {
+              const contactEl = document.getElementById('contacto-section');
+              if (contactEl) {
+                contactEl.scrollIntoView({ behavior: 'smooth' });
               } else {
-                window.location.href = '/#contacto-section';
+                setModalType('pregunta');
               }
-            }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            }}
+            style={{ 
+              color: '#EAEDF8', 
+              fontSize: '0.85rem', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer', 
+              transition: 'color 0.2s',
+              padding: 0
+            }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
           >
             CONTACTO
-          </a>
+          </button>
           <button 
             onClick={onGoToTickets}
             style={{
