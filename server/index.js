@@ -295,7 +295,15 @@ function logActivity(username, action, details) {
 app.get('/api/landing/sections', (req, res) => {
   try {
     const pagePath = req.query.path || '/';
-    const sections = db.prepare('SELECT * FROM page_sections WHERE page_path = ? ORDER BY sequence_order ASC').all(pagePath);
+    let sections = db.prepare('SELECT * FROM page_sections WHERE page_path = ? ORDER BY sequence_order ASC').all(pagePath);
+    
+    if (sections.length === 0 && (pagePath === '/nosotros' || pagePath === '/acerca-de-la-vision')) {
+      if (typeof db.seedNosotrosSections === 'function') {
+        db.seedNosotrosSections(db);
+        sections = db.prepare("SELECT * FROM page_sections WHERE page_path = ? OR page_path = '/nosotros' ORDER BY sequence_order ASC").all(pagePath);
+      }
+    }
+
     const result = sections.map(s => ({
       ...s,
       content: JSON.parse(s.content),
