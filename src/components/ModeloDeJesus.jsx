@@ -151,71 +151,101 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
 
       {/* HEADER OFFICIAL VISIÓN JESÚS */}
       <header style={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        padding: '16px 40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: 'rgba(3, 8, 18, 0.95)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        padding: '12px 20px'
+        flexWrap: 'wrap',
+        gap: '16px'
       }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '60px'
-        }}>
-          {/* Logo Oficial Visión Jesús */}
-          <div 
-            onClick={onGoHome}
-            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          >
-            <img 
-              src="/logo_oficial_transparente.png" 
-              alt="Visión Jesús Logo Oficial" 
-              style={{ height: '48px', objectFit: 'contain' }}
-            />
-          </div>
-
-          {/* Nav Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button
-              onClick={onGoHome}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'rgba(255,255,255,0.85)',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}
-            >
-              Inicio
-            </button>
-            <button
-              onClick={onGoHome}
-              style={{
-                background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '8px 20px',
-                borderRadius: '50px',
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                boxShadow: '0 4px 14px rgba(0, 51, 255, 0.4)'
-              }}
-            >
-              Visión Jesús
-            </button>
-          </div>
+        {/* LOGO */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          onClick={() => window.location.href = '/'}
+        >
+          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '58px', objectFit: 'contain' }} />
         </div>
+
+        {/* MENU LINKS */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
+          <a 
+            href="/" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            INICIO
+          </a>
+
+          <a 
+            href="/nosotros" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            NOSOTROS
+          </a>
+
+          <a 
+            href="/modelo" 
+            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+          >
+            MODELO DE JESÚS
+          </a>
+
+          <a 
+            href="/autenticas" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/autenticas'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            CONGRESOS
+          </a>
+
+          <a 
+            href="/#contacto-section" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
+            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+          >
+            CONTACTO
+          </a>
+
+          <button 
+            onClick={() => window.location.href = '/autenticas'}
+            style={{
+              background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '10px 24px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            🎟️ CONGRESO 2026
+          </button>
+        </nav>
       </header>
 
       {/* HERO SECTION */}
