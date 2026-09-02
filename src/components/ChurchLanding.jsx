@@ -4,7 +4,7 @@ import * as LucideIcons from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-export default function ChurchLanding({ config = {}, sections = [], onGoToTickets }) {
+export default function ChurchLanding({ config = {}, sections = [], onGoToTickets, adminUser }) {
   const [modalType, setModalType] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', question: '' });
@@ -1005,6 +1005,64 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             <Ticket size={16} />
             <span>CONGRESO 2026</span>
           </button>
+
+          {/* Admin Profile Controls */}
+          {(() => {
+            const currentAdmin = adminUser || (localStorage.getItem('admin_user') ? JSON.parse(localStorage.getItem('admin_user')) : null);
+            if (!currentAdmin) return null;
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
+                {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
+                  <button 
+                    onClick={() => window.location.href = '/escanear'}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      fontSize: '0.8rem', padding: '6px 14px',
+                      fontWeight: 800, borderRadius: '50px',
+                      border: '1px solid #977DFF',
+                      backgroundColor: 'rgba(151, 125, 255, 0.15)',
+                      color: '#977DFF', cursor: 'pointer',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    📱 Escáner Puerta
+                  </button>
+                )}
+
+                {currentAdmin.role !== 'scanner' && (
+                  <button 
+                    onClick={() => window.location.href = '/admin'}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      fontSize: '0.8rem', padding: '6px 14px',
+                      fontWeight: 800, borderRadius: '50px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
+                      color: '#FFFFFF', cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    🛡️ Panel Admin ({currentAdmin.username})
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('admin_user');
+                    window.location.href = '/';
+                  }}
+                  style={{
+                    fontSize: '0.8rem', color: '#FF4D4D', background: 'none',
+                    border: 'none', textDecoration: 'underline', cursor: 'pointer',
+                    fontWeight: 700
+                  }}
+                >
+                  Salir
+                </button>
+              </div>
+            );
+          })()}
         </nav>
       </header>
 
