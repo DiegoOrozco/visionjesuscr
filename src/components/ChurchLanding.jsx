@@ -924,17 +924,17 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             MODELO DE JESÚS
           </a>
           <a 
-            href="/autenticas" 
+            href="/congresos" 
             onClick={(e) => { 
               e.preventDefault(); 
-              if (window.location.pathname === '/autenticas') {
+              if (window.location.pathname === '/congresos') {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
-                window.location.href = '/autenticas';
+                window.location.href = '/congresos';
               }
             }} 
             style={{ 
-              color: window.location.pathname === '/autenticas' ? '#977DFF' : '#EAEDF8', 
+              color: window.location.pathname === '/congresos' ? '#977DFF' : '#EAEDF8', 
               fontSize: '0.85rem', 
               fontWeight: 800, 
               textTransform: 'uppercase', 
@@ -944,7 +944,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               transition: 'color 0.2s' 
             }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/autenticas' ? '#977DFF' : '#EAEDF8'}
+            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/congresos' ? '#977DFF' : '#EAEDF8'}
           >
             CONGRESOS
           </a>

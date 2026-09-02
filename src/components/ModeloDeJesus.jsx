@@ -205,8 +205,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
           </a>
 
           <a 
-            href="/autenticas" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/autenticas'; }} 
+            href="/congresos" 
+            onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
             style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
