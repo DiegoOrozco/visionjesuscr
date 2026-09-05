@@ -154,6 +154,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [builderPagePath, setBuilderPagePath] = useState('/');
   const [builderSuccessMsg, setBuilderSuccessMsg] = useState('');
   const [savingBuilder, setSavingBuilder] = useState(false);
+  const [showAddComponentModal, setShowAddComponentModal] = useState(false);
 
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [mediaTarget, setMediaTarget] = useState(null);
@@ -172,6 +173,122 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [zoneSaving, setZoneSaving] = useState(false);
 
   const initializeDefaultSectionsForPath = (path) => {
+    if (path === '/modelo') {
+      return [
+        {
+          id: 'sec_hero_modelo',
+          type: 'hero',
+          content: {
+            title: 'MODELO DE JESÚS',
+            subtitle: 'MODELO DE DISCIPULADO Y MULTIPLICACIÓN',
+            bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+            buttons: [{ id: '1', label: 'Conocer los 4 Pilares', url: '#pilares', style: 'primary' }]
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_pilares_modelo',
+          type: 'grid_cells',
+          content: {
+            title: 'LOS 4 PILARES DEL MODELO DE JESÚS',
+            cells: [
+              { title: '1. GANAR', text: 'Evangelizar a las personas con el mensaje del Evangelio de Jesucristo.' },
+              { title: '2. CONSOLIDAR', text: 'Cuidar y afirmar la fe de cada nuevo creyente en la familia de Dios.' },
+              { title: '3. DISCIPULAR', text: 'Equipar y capacitar espiritualmente a través de nuestras Escuelas de Liderazgo.' },
+              { title: '4. ENVIAR', text: 'Enviar líderes capacitados a abrir nuevos grupos de amistad y multiplicar la visión.' }
+            ]
+          },
+          styles: { backgroundColor: 'rgba(0, 3, 61, 0.45)', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_pastores_modelo',
+          type: 'pastors',
+          content: {
+            title: 'NUESTROS PASTORES Y LÍDERES',
+            subtitle: 'EQUIPO DE COBERTURA ESPIRITUAL'
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        }
+      ];
+    }
+
+    if (path === '/congresos') {
+      return [
+        {
+          id: 'sec_hero_congresos',
+          type: 'hero',
+          content: {
+            title: 'ADQUIERE ACCESOS A',
+            subtitle: 'NUESTROS EVENTOS Y CONGRESOS',
+            description: 'Descubre nuestras conferencias, congresos y actividades especiales. Selecciona el evento para ver detalles y reservar tu lugar.',
+            bgUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600',
+            buttons: [{ id: '1', label: 'Ver Eventos Disponibles', url: '#eventos-grid', style: 'primary' }]
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_news_congresos',
+          type: 'news',
+          content: {
+            title: 'CATÁLOGO DE EVENTOS',
+            newsItems: [
+              {
+                id: 'autenticas',
+                title: 'Congreso Mujeres Auténticas 2026',
+                subtitle: 'EDICIÓN ESPECIAL • MUJER VALIENTE',
+                badge: 'ENTRADAS DISPONIBLES',
+                link: '/autenticas',
+                description: 'El congreso anual de mujeres que marcará un antes y un después.',
+                image: '/logo.png'
+              },
+              {
+                id: 'sanados',
+                title: 'SANADOS PARA SANAR',
+                subtitle: 'MILAGROS Y RESTAURACIÓN',
+                badge: 'PRÓXIMAMENTE',
+                link: '/sanados',
+                description: 'Un tiempo consagrado para recibir sanidad divina y restauración integral.',
+                image: '/logo_oficial_transparente.png'
+              }
+            ]
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        }
+      ];
+    }
+
+    if (path === '/nosotros') {
+      return [
+        {
+          id: 'sec_hero_nosotros',
+          type: 'hero',
+          content: {
+            title: 'NOSOTROS - VISIÓN JESÚS',
+            subtitle: 'CONOCÉ NUESTRA HISTORIA Y VISIÓN',
+            bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_historia_nosotros',
+          type: 'image_text',
+          content: {
+            title: 'Nuestra Historia',
+            text: 'Somos una iglesia comprometida con la palabra de Dios y la transformación de las vidas...'
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_pastores_nosotros',
+          type: 'pastors',
+          content: {
+            title: 'NUESTROS PASTORES PRINCIPALES'
+          },
+          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        }
+      ];
+    }
+
     if (path === '/autenticas') {
       return [
         {
@@ -195,34 +312,23 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             imagePosition: 'left'
           },
           styles: { backgroundColor: '#FFFFFF', textColor: '#2C1A0E', accentColor: '#2C1A0E' }
-        },
-        {
-          id: 'sec_details_autenticas',
-          type: 'custom_text',
-          content: {
-            title: 'Detalles del Evento',
-            text: `📅 Fecha: ${homepageConfig.autenticas_date_info || 'Por anunciar'}\n📍 Lugar: ${homepageConfig.autenticas_place_info || 'Por anunciar'}\n💰 Inversión: ${homepageConfig.autenticas_price_info || 'Por anunciar'}`
-          },
-          styles: { backgroundColor: '#FAF5EF', textColor: '#2C1A0E', accentColor: '#2C1A0E' }
-        }
-      ];
-    } else if (path === '/sanados' || path === '/modelo' || path === '/move' || path === '/tienda') {
-      const pageName = path.replace('/', '').toUpperCase();
-      return [
-        {
-          id: `sec_hero_${pageName}`,
-          type: 'hero',
-          content: {
-            title: `CONGRESO ${pageName}`,
-            subtitle: 'Página oficial en construcción',
-            bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
-            buttons: []
-          },
-          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#0033FF' }
         }
       ];
     }
-    return [];
+
+    const pageName = path.replace('/', '').toUpperCase() || 'INICIO';
+    return [
+      {
+        id: `sec_hero_${pageName}`,
+        type: 'hero',
+        content: {
+          title: `PÁGINA ${pageName}`,
+          subtitle: 'Bienvenido a Visión Jesús',
+          bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600'
+        },
+        styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+      }
+    ];
   };
 
   const fetchSectionsForPath = async (path) => {
@@ -3734,17 +3840,188 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
             </div>
           )}
+
+      {/* FLOATING STICKY ACTION BAR & COMPONENT DRAWER MODAL */}
+      {activeTab === 'church_web' && (
+        <>
+          <div style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '32px',
+            zIndex: 9999,
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center'
+          }}>
+            <button
+              type="button"
+              onClick={() => setShowAddComponentModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '50px',
+                padding: '14px 28px',
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                boxShadow: '0 10px 30px rgba(0, 51, 255, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                transition: 'all 0.2s ease',
+                letterSpacing: '0.5px'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <Plus size={20} />
+              <span>+ Agregar Componente a {builderPagePath}</span>
+            </button>
+          </div>
+
+          {/* COMPONENT DRAWER MODAL */}
+          {showAddComponentModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(3, 8, 18, 0.85)',
+              backdropFilter: 'blur(10px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}>
+              <div style={{
+                backgroundColor: '#0F172A',
+                border: '1px solid rgba(151, 125, 255, 0.3)',
+                borderRadius: '28px',
+                width: '100%',
+                maxWidth: '900px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                padding: '32px',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+                color: '#FFFFFF'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900, margin: '0 0 4px 0', color: '#977DFF' }}>
+                      🧩 Selecciona un Componente para {builderPagePath}
+                    </h3>
+                    <p style={{ color: '#94A3B8', fontSize: '0.88rem', margin: 0 }}>
+                      Elige la sección visual que deseas agregar al formulario de esta página.
+                    </p>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAddComponentModal(false)}
+                    style={{ background: 'rgba(255, 255, 255, 0.1)', border: 'none', color: '#FFFFFF', width: '36px', height: '36px', borderRadius: '50px', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 700 }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                  gap: '16px'
+                }}>
+                  {[
+                    { type: 'hero', icon: '🖼️', title: 'Portada / Banner Hero', desc: 'Título, subtítulo, imagen de fondo y botones de acción.' },
+                    { type: 'image_text', icon: '📄', title: 'Texto e Imagen / Visión', desc: 'Columna de texto con imagen adaptable y posición configurable.' },
+                    { type: 'pastors', icon: '👥', title: 'Perfil Pastores / Equipo', desc: 'Cuadrícula de tarjetas con fotos de pastores, biografía y redes.' },
+                    { type: 'news', icon: '📰', title: 'Noticias / Eventos', desc: 'Tarjetas de noticias y eventos con badges y enlaces directos.' },
+                    { type: 'grid_cells', icon: '🏛️', title: 'Pilares y Modelo', desc: 'Cuadrícula de pilares o tarjetas con títulos y descripciones.' },
+                    { type: 'schedules', icon: '🕒', title: 'Prédicas y Horarios', desc: 'Cronograma de reuniones presenciales y transmisiones virtuales.' },
+                    { type: 'gallery', icon: '🖼️', title: 'Galería de Fotos', desc: 'Carrusel promocional de fotos del evento o la iglesia.' },
+                    { type: 'faq', icon: '❓', title: 'Preguntas Frecuentes', desc: 'Acordeón de preguntas y respuestas informativas.' },
+                    { type: 'maps', icon: '🗺️', title: 'Ubicación y Mapas', desc: 'Dirección física y botones de navegación Waze y Google Maps.' },
+                    { type: 'custom_text', icon: '💬', title: 'Texto Libre / Anuncio', desc: 'Bloque de texto personalizado con formato flexible.' }
+                  ].map((comp) => (
+                    <div 
+                      key={comp.type}
+                      onClick={() => {
+                        let newSecContent = {};
+                        if (comp.type === 'hero') {
+                          newSecContent = { title: 'NUEVO BANNER DE PORTADA', subtitle: 'Subtítulo promocional', bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600' };
+                        } else if (comp.type === 'image_text') {
+                          newSecContent = { title: 'Título de la Sección', text: 'Escribe aquí la descripción o historia...', bgUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000', imagePosition: 'left' };
+                        } else if (comp.type === 'pastors') {
+                          newSecContent = { title: 'NUESTROS PASTORES Y LÍDERES', subtitle: 'EQUIPO PASTORAL' };
+                        } else if (comp.type === 'news') {
+                          newSecContent = { title: 'NOTICIAS Y EVENTOS', newsItems: [{ title: 'Nuevo Evento', description: 'Detalle del evento...', badge: 'NUEVO', link: '/autenticas' }] };
+                        } else if (comp.type === 'grid_cells') {
+                          newSecContent = { title: 'NUESTROS PILARES', cells: [{ title: 'Pilar 1', text: 'Descripción del pilar 1' }, { title: 'Pilar 2', text: 'Descripción del pilar 2' }] };
+                        } else if (comp.type === 'schedules') {
+                          newSecContent = { title: 'PRÉDICAS Y HORARIOS', schedules: [{ id: '1', text: 'SÁBADOS 6:30PM', isVirtual: false }] };
+                        } else if (comp.type === 'gallery') {
+                          newSecContent = { title: 'GALERÍA DE FOTOS', images: ['https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000'] };
+                        } else if (comp.type === 'faq') {
+                          newSecContent = { title: 'PREGUNTAS FRECUENTES', faqs: [{ q: '¿Dónde están ubicados?', a: 'San José, Costa Rica.' }] };
+                        } else if (comp.type === 'maps') {
+                          newSecContent = { title: 'CÓMO LLEGAR', address: 'San José, Desamparados, Costa Rica', wazeUrl: 'https://waze.com', mapsUrl: 'https://maps.google.com' };
+                        } else {
+                          newSecContent = { title: 'Título Informativo', text: 'Contenido en texto libre...' };
+                        }
+
+                        const newSec = {
+                          id: `sec_${comp.type}_${Date.now()}`,
+                          type: comp.type,
+                          content: newSecContent,
+                          styles: { backgroundColor: '#030812', textColor: '#FFFFFF', accentColor: '#977DFF' }
+                        };
+
+                        const updated = [...localSections, newSec];
+                        setLocalSections(updated);
+                        setSelectedSectionId(newSec.id);
+                        setShowAddComponentModal(false);
+                      }}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(151, 125, 255, 0.15)';
+                        e.currentTarget.style.borderColor = '#977DFF';
+                        e.currentTarget.style.transform = 'translateY(-3px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <span style={{ fontSize: '1.8rem', marginBottom: '4px' }}>{comp.icon}</span>
+                      <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#FFFFFF' }}>{comp.title}</h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#94A3B8', lineHeight: 1.4 }}>{comp.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
         </div>
       )}
 
-      {/* TAB: AUTÉNTICAS CONGRESO CONFIGURATION */}
-      {(activeTab === 'autenticas' || (activeTab === 'church_web' && builderPagePath === '/autenticas')) && (adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
-        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+      {/* TAB: UNIVERSAL PAGE CONFIGURATION FORM FOR ALL ROUTES */}
+      {(activeTab === 'autenticas' || activeTab === 'church_web') && (adminUser.role === 'admin' || adminUser.role === 'editor_autenticas') && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px', marginTop: '24px' }}>
           <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
-            Configuración de la Sección Auténticas
+            Configuración de la Página ({builderPagePath})
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
-            Personaliza el banner de cabecera, la descripción promocional, la tarjeta de información y la galería de fotos (carrusel) del Congreso Auténticas.
+            Personaliza directamente el banner de cabecera, títulos, descripción promocional, imágenes de fondo, fechas, ubicación y mapas de la ruta activa.
           </p>
 
           {autenticasSuccessMsg && (
@@ -3753,325 +4030,171 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             </div>
           )}
 
-          <form onSubmit={handleSaveAutenticasSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              
-              {/* TITLE */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título del Banner (Ej: AUTÉNTICAS)</label>
-                <input 
-                  type="text" 
-                  name="autenticas_title" 
-                  value={configFields.autenticas_title} 
-                  onChange={handleConfigChange} 
-                  placeholder="Ej: AUTÉNTICAS"
-                />
-              </div>
+          {(() => {
+            const activeKeyPrefix = builderPagePath === '/' ? 'hero' : builderPagePath.replace('/', '').toLowerCase();
+            const titleFieldName = `${activeKeyPrefix}_title`;
+            const subtitleFieldName = `${activeKeyPrefix}_subtitle`;
+            const descFieldName = `${activeKeyPrefix}_description`;
+            const bgFieldName = `${activeKeyPrefix}_hero_bg`;
+            const dateFieldName = `${activeKeyPrefix}_date_info`;
+            const placeFieldName = `${activeKeyPrefix}_place_info`;
+            const wazeFieldName = `${activeKeyPrefix}_waze`;
+            const mapsFieldName = `${activeKeyPrefix}_maps`;
 
-              {/* SUBTITLE */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo del Banner (Ej: CONGRESO DE MUJERES)</label>
-                <input 
-                  type="text" 
-                  name="autenticas_subtitle" 
-                  value={configFields.autenticas_subtitle} 
-                  onChange={handleConfigChange} 
-                  placeholder="Ej: CONGRESO DE MUJERES"
-                />
-              </div>
-
-              {/* DESCRIPTION */}
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Descripción del Congreso</label>
-                <textarea 
-                  name="autenticas_description" 
-                  rows="3" 
-                  value={configFields.autenticas_description} 
-                  onChange={handleConfigChange} 
-                  style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}
-                />
-              </div>
-
-              {/* HERO BACKGROUND IMAGE */}
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo (Cabecera Auténticas)</label>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input 
-                    type="text" 
-                    name="autenticas_hero_bg" 
-                    value={configFields.autenticas_hero_bg} 
-                    onChange={handleConfigChange} 
-                    placeholder="URL de la imagen o sube un archivo" 
-                    style={{ flex: 1 }}
-                  />
-                  <label style={{
-                    backgroundColor: 'var(--accent-coffee)',
-                    color: '#FFFFFF',
-                    padding: '12px 20px',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontWeight: 800,
-                    fontSize: '0.88rem'
-                  }}>
-                    {uploadingAutenticasHero ? 'Subiendo...' : 'Subir Fondo'}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleAutenticasHeroUpload} 
-                      style={{ display: 'none' }} 
-                      disabled={uploadingAutenticasHero}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              {/* DATE INFO */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha del Evento (Texto libre)</label>
-                <input 
-                  type="text" 
-                  name="autenticas_date_info" 
-                  value={configFields.autenticas_date_info} 
-                  onChange={handleConfigChange} 
-                  placeholder="Ej: Sábado 15 de Noviembre - 5:00 PM"
-                />
-              </div>
-
-              {/* PLACE INFO */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Lugar del Evento (Texto libre)</label>
-                <input 
-                  type="text" 
-                  name="autenticas_place_info" 
-                  value={configFields.autenticas_place_info} 
-                  onChange={handleConfigChange} 
-                  placeholder="Ej: Auditorio Principal - Desamparados"
-                />
-              </div>
-
-              {/* MAPS URLs */}
-              <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Waze (Cómo Llegar)</label>
-                  <input 
-                    type="text" 
-                    name="autenticas_waze_url" 
-                    value={configFields.autenticas_waze_url} 
-                    onChange={handleConfigChange} 
-                    placeholder="Ej: https://waze.com/ul?ll=..."
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Google Maps (Cómo Llegar)</label>
-                  <input 
-                    type="text" 
-                    name="autenticas_maps_url" 
-                    value={configFields.autenticas_maps_url} 
-                    onChange={handleConfigChange} 
-                    placeholder="Ej: https://goo.gl/maps/..."
-                  />
-                </div>
-              </div>
-
-              {/* PRICE INFO */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Inversión / Precios (Texto libre)</label>
-                <input 
-                  type="text" 
-                  name="autenticas_price_info" 
-                  value={configFields.autenticas_price_info} 
-                  onChange={handleConfigChange} 
-                  placeholder="Ej: General ₡7.500 / Gold ₡12.000"
-                />
-              </div>
-
-              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
-                <h4 style={{ color: 'var(--accent-gold)', margin: '0 0 14px 0' }}>Fechas y Precios Avanzados</h4>
+            return (
+              <form onSubmit={handleSaveAutenticasSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  
+                  {/* TITLE */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha Objetivo del Reloj</label>
-                    <input type="datetime-local" name="autenticas_date_countdown" value={configFields.autenticas_date_countdown} onChange={handleConfigChange} />
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Título del Banner (Ej: {builderPagePath === '/modelo' ? 'MODELO DE JESÚS' : 'AUTÉNTICAS'})</label>
+                    <input 
+                      type="text" 
+                      name={titleFieldName} 
+                      value={configFields[titleFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="Escribe el título principal..."
+                    />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha de Cierre de Preventa</label>
-                    <input type="datetime-local" name="autenticas_presale_end" value={configFields.autenticas_presale_end} onChange={handleConfigChange} />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>General: Precio Preventa</label>
-                    <input type="text" name="autenticas_price_general_presale" value={configFields.autenticas_price_general_presale} onChange={handleConfigChange} placeholder="Ej: ₡7.500" />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>General: Precio Oficial</label>
-                    <input type="text" name="autenticas_price_general_regular" value={configFields.autenticas_price_general_regular} onChange={handleConfigChange} placeholder="Ej: ₡10.000" />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Gold: Precio Preventa</label>
-                    <input type="text" name="autenticas_price_gold_presale" value={configFields.autenticas_price_gold_presale} onChange={handleConfigChange} placeholder="Ej: ₡12.000" />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Gold: Precio Oficial</label>
-                    <input type="text" name="autenticas_price_gold_regular" value={configFields.autenticas_price_gold_regular} onChange={handleConfigChange} placeholder="Ej: ₡15.000" />
-                  </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Características: Acceso General (Una por línea)</label>
-                    <textarea name="autenticas_features_general" value={configFields.autenticas_features_general} onChange={handleConfigChange} rows="3" placeholder="Ej:&#10;Viernes 18: Ingreso a las 7:00pm&#10;Sábado 19: Ingreso a las 5:00pm" />
-                  </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Características: Acceso Gold (Una por línea)</label>
-                    <textarea name="autenticas_features_gold" value={configFields.autenticas_features_gold} onChange={handleConfigChange} rows="4" placeholder="Ej:&#10;Viernes 18: Ingreso a las 7:00pm&#10;Sábado 19: Mañana de sanidad a las 9:00am&#10;Taller Entre nosotras" />
-                  </div>
-                </div>
-              </div>
 
-              {/* SPEAKERS MANAGEMENT */}
-              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Invitadas Especiales</h4>
+                  {/* SUBTITLE */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo del Banner</label>
+                    <input 
+                      type="text" 
+                      name={subtitleFieldName} 
+                      value={configFields[subtitleFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="Escribe el subtítulo promocional..."
+                    />
+                  </div>
+
+                  {/* DESCRIPTION */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Descripción de la Sección / Página</label>
+                    <textarea 
+                      name={descFieldName} 
+                      rows="3" 
+                      value={configFields[descFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      style={{ width: '100%', borderRadius: '10px', border: '1px solid #CCC', padding: '10px' }}
+                      placeholder="Escribe la descripción o historia..."
+                    />
+                  </div>
+
+                  {/* HERO BACKGROUND IMAGE */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Imagen de Fondo (Cabecera)</label>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input 
+                        type="text" 
+                        name={bgFieldName} 
+                        value={configFields[bgFieldName] || ''} 
+                        onChange={handleConfigChange} 
+                        placeholder="URL de la imagen o sube un archivo" 
+                        style={{ flex: 1 }}
+                      />
+                      <label style={{
+                        backgroundColor: 'var(--accent-coffee)',
+                        color: '#FFFFFF',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontWeight: 800,
+                        fontSize: '0.88rem'
+                      }}>
+                        {uploadingAutenticasHero ? 'Subiendo...' : 'Subir Fondo'}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            // Custom uploader targeting bgFieldName
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            setUploadingAutenticasHero(true);
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            authFetch(`${API_URL}/api/admin/upload-hero`, { method: 'POST', body: formData })
+                              .then(r => r.json())
+                              .then(data => {
+                                setUploadingAutenticasHero(false);
+                                if (data.success) {
+                                  setConfigFields(prev => ({ ...prev, [bgFieldName]: data.imageUrl }));
+                                }
+                              })
+                              .catch(() => setUploadingAutenticasHero(false));
+                          }} 
+                          style={{ display: 'none' }} 
+                          disabled={uploadingAutenticasHero}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* DATE INFO */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Fecha / Horario (Texto libre)</label>
+                    <input 
+                      type="text" 
+                      name={dateFieldName} 
+                      value={configFields[dateFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="Ej: Sábado 15 de Noviembre - 5:00 PM"
+                    />
+                  </div>
+
+                  {/* PLACE INFO */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Lugar / Ubicación (Texto libre)</label>
+                    <input 
+                      type="text" 
+                      name={placeFieldName} 
+                      value={configFields[placeFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="Ej: Auditorio Principal - Desamparados"
+                    />
+                  </div>
+
+                  {/* WAZE LINK */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Waze (Cómo Llegar)</label>
+                    <input 
+                      type="text" 
+                      name={wazeFieldName} 
+                      value={configFields[wazeFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="https://waze.com/ul/..."
+                    />
+                  </div>
+
+                  {/* GOOGLE MAPS LINK */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Enlace de Google Maps (Cómo Llegar)</label>
+                    <input 
+                      type="text" 
+                      name={mapsFieldName} 
+                      value={configFields[mapsFieldName] || ''} 
+                      onChange={handleConfigChange} 
+                      placeholder="https://maps.app.goo.gl/..."
+                    />
+                  </div>
+
+                </div>
+
+                <div style={{ marginTop: '28px', textAlign: 'right' }}>
                   <button 
-                    type="button" 
-                    onClick={() => setLocalAutenticasSpeakers([...localAutenticasSpeakers, { name: '', title: '', img: '' }])}
-                    className="btn-secondary"
+                    type="submit" 
+                    disabled={savingBuilder}
+                    className="btn-primary" 
+                    style={{ padding: '12px 32px', borderRadius: '50px', fontSize: '0.95rem', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' }}
                   >
-                    + Agregar Invitada
+                    {savingBuilder ? 'Guardando Cambios...' : `Guardar Datos de ${builderPagePath}`}
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {localAutenticasSpeakers.map((speaker, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '16px', background: '#F9F9F9', padding: '16px', borderRadius: '12px', alignItems: 'flex-start', border: '1px solid #EEE' }}>
-                      <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#E0E0E0', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                        {speaker.img ? (
-                          <img src={speaker.img.startsWith('http') ? speaker.img : `${API_URL}${speaker.img}`} alt="speaker" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '0.7rem' }}>Sin Foto</div>
-                        )}
-                        <label style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.6)', color: '#FFF', fontSize: '0.6rem', textAlign: 'center', cursor: 'pointer', padding: '2px 0' }}>
-                          {uploadingSpeakerImage === idx ? '...' : 'Subir'}
-                          <input type="file" accept="image/*" onChange={(e) => handleSpeakerImageUpload(e, idx)} style={{ display: 'none' }} disabled={uploadingSpeakerImage === idx} />
-                        </label>
-                      </div>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <input 
-                          type="text" 
-                          placeholder="Nombre (Ej: Pr. Rebeca López)" 
-                          value={speaker.name} 
-                          onChange={(e) => {
-                            const arr = [...localAutenticasSpeakers];
-                            arr[idx].name = e.target.value;
-                            setLocalAutenticasSpeakers(arr);
-                          }}
-                          style={{ width: '100%' }}
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="Cargo/Título (Ej: Pastora Principal)" 
-                          value={speaker.title} 
-                          onChange={(e) => {
-                            const arr = [...localAutenticasSpeakers];
-                            arr[idx].title = e.target.value;
-                            setLocalAutenticasSpeakers(arr);
-                          }}
-                          style={{ width: '100%' }}
-                        />
-                      </div>
-                      <button 
-                        type="button" 
-                        onClick={() => setLocalAutenticasSpeakers(localAutenticasSpeakers.filter((_, i) => i !== idx))}
-                        style={{ background: 'transparent', color: 'var(--color-red)', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '8px' }}
-                      >
-                        X
-                      </button>
-                    </div>
-                  ))}
-                  {localAutenticasSpeakers.length === 0 && <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay invitadas configuradas. Haz clic en "Agregar Invitada".</p>}
-                </div>
-              </div>
+              </form>
+            );
+          })()}
 
-              {/* GALLERY MANAGEMENT */}
-              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #EEE', paddingTop: '20px', marginTop: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <h4 style={{ color: 'var(--accent-gold)', margin: 0 }}>Galería de Fotos (Carrusel / Carrete)</h4>
-                  <label style={{
-                    backgroundColor: 'var(--accent-coffee)',
-                    color: '#FFFFFF',
-                    padding: '8px 16px',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontWeight: 800,
-                    fontSize: '0.82rem'
-                  }}>
-                    {uploadingGalleryImage ? 'Agregando...' : 'Agregar Foto'}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleAutenticasGalleryUpload} 
-                      style={{ display: 'none' }} 
-                      disabled={uploadingGalleryImage}
-                    />
-                  </label>
-                </div>
-
-                {localAutenticasGallery.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #CCC', borderRadius: '12px' }}>
-                    No hay imágenes en la galería de Auténticas. Agrega fotos para activar el carrusel.
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '14px' }}>
-                    {localAutenticasGallery.map((imgUrl, idx) => (
-                      <div key={idx} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #DDD', height: '100px' }}>
-                        <img 
-                          src={imgUrl.startsWith('http') ? imgUrl : `${API_URL}${imgUrl}`} 
-                          alt={`Foto galeria ${idx}`} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveGalleryImage(imgUrl)}
-                          style={{
-                            position: 'absolute',
-                            top: '4px',
-                            right: '4px',
-                            backgroundColor: 'rgba(220, 38, 38, 0.9)',
-                            color: '#FFF',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '24px',
-                            height: '24px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 800
-                          }}
-                        >
-                          X
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-            </div>
-
-            <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
-              {saveLoading ? 'Guardando...' : 'Guardar Configuración Congreso Auténticas'}
-            </button>
-          </form>
-
-          <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px dashed #E0E0E0' }}>
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)', marginBottom: '16px' }}>Vista Previa en Vivo</h3>
-            <div style={{ borderRadius: '24px', overflow: 'hidden', border: '4px solid #333', maxHeight: '800px', overflowY: 'auto', backgroundColor: '#FFF' }}>
-              <AutenticasPromo 
-                config={{ 
-                  ...configFields, 
-                  autenticas_speakers: JSON.stringify(localAutenticasSpeakers),
-                  autenticas_gallery: JSON.stringify(localAutenticasGallery)
-                }} 
-                onScrollToMap={() => alert('Esto desplazará hacia el mapa de entradas.')} 
-              />
-            </div>
-          </div>
         </div>
       )}
       {/* TAB: SANADOS CONFIGURATION */}

@@ -131,6 +131,10 @@ function initDb() {
   try { db.exec(`ALTER TABLE attendees ADD COLUMN church_network TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE attendees ADD COLUMN invited_by TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE attendees ADD COLUMN attended_encounter TEXT`); } catch (e) {}
+  try { db.exec(`ALTER TABLE reservations ADD COLUMN payment_method TEXT DEFAULT 'sinpe'`); } catch (e) {}
+  try { db.exec(`ALTER TABLE reservations ADD COLUMN paypal_order_id TEXT`); } catch (e) {}
+  try { db.exec(`ALTER TABLE reservations ADD COLUMN paypal_capture_id TEXT`); } catch (e) {}
+  try { db.exec(`ALTER TABLE reservations ADD COLUMN amount_usd REAL`); } catch (e) {}
 
   // Determine pricing tier (Preventa: VIP=12000, Gen=7500 | Regular: VIP=15000, Gen=10000)
   let isPresale = true;

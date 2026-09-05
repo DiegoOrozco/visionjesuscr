@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2, FileText, Image as ImageIcon, Heart, Send, User, UserCheck, UploadCloud, Ticket, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, FileText, Image as ImageIcon, Heart, Send, User, UserCheck, UploadCloud, Ticket, Clock, CreditCard, Landmark } from 'lucide-react';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], sessionId = '', expiresAt = null, onBack, onSuccess }) {
   // Purchaser info
   const [purchaserName, setPurchaserName] = useState('');
   const [purchaserEmail, setPurchaserEmail] = useState('');
   const [purchaserPhone, setPurchaserPhone] = useState('');
+
+  // Payment Method: 'paypal' or 'sinpe'
+  const [paymentMethod, setPaymentMethod] = useState('paypal');
+  const [paypalConfig, setPaypalConfig] = useState({ clientId: '', exchangeRate: 515 });
+  const [paypalOrderMeta, setPaypalOrderMeta] = useState(null);
 
   // Track if user manually modified purchaser fields
   const [purchaserNameEdited, setPurchaserNameEdited] = useState(false);
@@ -18,6 +24,25 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
     return diff > 0 ? diff : 300;
   });
   const [timerExpired, setTimerExpired] = useState(false);
+
+  useEffect(() => {
+    const fetchPaypalConfig = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${baseUrl}/api/paypal/config`);
+        const data = await res.json();
+        if (data.success && data.clientId) {
+          setPaypalConfig({
+            clientId: data.clientId,
+            exchangeRate: data.exchangeRate || 515
+          });
+        }
+      } catch (e) {
+        console.error('Error cargando configuración de PayPal:', e);
+      }
+    };
+    fetchPaypalConfig();
+  }, []);
 
   useEffect(() => {
     if (!expiresAt) return;
@@ -84,7 +109,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
   const [errorMsg, setErrorMsg] = useState('');
 
   const formatCRC = (val) => `₡${Number(val).toLocaleString('es-CR')}`;
-  const totalPrice = formatCRC(quantity * zone.price);
+  const totalCrcAmount = quantity * zone.price;
+  const totalPrice = formatCRC(totalCrcAmount);
+  const totalUsdAmount = (totalCrcAmount / (paypalConfig.exchangeRate || 515)).toFixed(2);
 
   const handleAttendeeChange = (index, field, value) => {
     const updated = [...attendees];
@@ -115,38 +142,120 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-
+  const validateAttendeeForm = () => {
     const phoneRegex = /^[0-9]{8}$/;
+    if (!purchaserName.trim() || !purchaserEmail.trim() || !purchaserPhone.trim()) {
+      setErrorMsg('Por favor completa los datos de la persona responsable del pago.');
+      return false;
+    }
     if (!phoneRegex.test(purchaserPhone.trim())) {
       setErrorMsg('El número de teléfono del responsable del pago debe contener exactamente 8 dígitos numéricos.');
-      return;
+      return false;
     }
 
     for (let i = 0; i < attendees.length; i++) {
       const att = attendees[i];
       if (!att.full_name.trim() || !att.phone.trim() || !att.age || !att.residence.trim()) {
         setErrorMsg(`Por favor completa todos los campos obligatorios de la Persona #${i + 1} (Nombre, Edad, Teléfono y ¿Dónde vive?).`);
-        return;
+        return false;
       }
       if (!phoneRegex.test(att.phone.trim())) {
         setErrorMsg(`El número de teléfono de la Persona #${i + 1} debe contener exactamente 8 dígitos numéricos.`);
-        return;
+        return false;
       }
       if (parseInt(att.age, 10) <= 0) {
         setErrorMsg(`Por favor ingresa una edad válida y positiva para la Persona #${i + 1}.`);
-        return;
+        return false;
       }
     }
+    return true;
+  };
+
+  const handlePayPalCreateOrder = async () => {
+    setErrorMsg('');
+    if (!validateAttendeeForm()) {
+      throw new Error(errorMsg || 'Por favor completa todos los datos obligatorios del formulario.');
+    }
+
+    setLoading(true);
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/paypal/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zone_id: zone.id,
+          purchaser_name: purchaserName,
+          purchaser_email: purchaserEmail,
+          purchaser_phone: purchaserPhone,
+          attendees,
+          session_id: sessionId
+        })
+      });
+
+      const data = await res.json();
+      if (!data.success || !data.orderId) {
+        setErrorMsg(data.message || 'Error al generar la orden en PayPal.');
+        setLoading(false);
+        throw new Error(data.message || 'Error al generar orden en PayPal.');
+      }
+
+      setPaypalOrderMeta(data);
+      setLoading(false);
+      return data.orderId;
+    } catch (err) {
+      setLoading(false);
+      console.error('Error creando orden en PayPal:', err);
+      throw err;
+    }
+  };
+
+  const handlePayPalApprove = async (data) => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/paypal/capture-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: data.orderID,
+          reservationId: paypalOrderMeta?.reservationId
+        })
+      });
+
+      const captureRes = await res.json();
+      if (captureRes.success) {
+        onSuccess(captureRes.reservation);
+      } else {
+        setErrorMsg(captureRes.message || 'Ocurrió un problema al procesar el pago con PayPal.');
+      }
+    } catch (err) {
+      console.error('Error al capturar orden PayPal:', err);
+      setErrorMsg('Error de comunicación con el servidor al confirmar el pago de PayPal.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (paymentMethod === 'paypal') {
+      // Handled by PayPal Buttons
+      return;
+    }
+
+    if (!validateAttendeeForm()) return;
 
     if (!file) {
-      setErrorMsg('Es necesario adjuntar la foto o PDF del comprobante de pago para procesar la reserva.');
+      setErrorMsg('Es necesario adjuntar la foto o PDF del comprobante de pago para procesar la reserva por SINPE Móvil.');
       return;
     }
 
     setLoading(true);
+
 
     try {
       const formData = new FormData();
@@ -587,94 +696,189 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
             </div>
           </div>
 
-          {/* SECTION 3: COMPROBANTE DE PAGO */}
+          {/* SECTION 3: MÉTODO DE PAGO */}
           <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UploadCloud size={22} color="var(--accent-coffee)" />
-              Adjuntar Comprobante de Pago *
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-coffee)' }}>
+              <CreditCard size={22} color="var(--accent-coffee)" />
+              Selecciona tu Método de Pago *
             </h3>
-            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.6 }}>
-              Transfiere o deposita por medio de sinpe movil al número <strong style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)' }}>60121225</strong> la cantidad total de <strong>{totalPrice}</strong> y sube la foto o captura del comprobante.
-            </p>
 
-            <div style={{
-              border: '2px dashed var(--accent-beige-border)',
-              borderRadius: '16px',
-              padding: '24px',
-              textAlign: 'center',
-              backgroundColor: '#FAF8F5',
-              cursor: 'pointer',
-              position: 'relative'
-            }}>
-              <input 
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              {/* PAYPAL OPTION */}
+              <div 
+                onClick={() => setPaymentMethod('paypal')}
                 style={{
-                  position: 'absolute',
-                  inset: 0,
-                  opacity: 0,
-                  width: '100%',
-                  height: '100%',
-                  cursor: 'pointer'
+                  border: `2px solid ${paymentMethod === 'paypal' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
+                  backgroundColor: paymentMethod === 'paypal' ? '#FFF8F2' : '#FFFFFF',
+                  borderRadius: '16px',
+                  padding: '18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
-              />
-              
-              {filePreview ? (
-                <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <img 
-                    src={filePreview} 
-                    alt="Vista previa del comprobante" 
-                    style={{ 
-                      width: '100%', 
-                      maxWidth: '100%', 
-                      maxHeight: '220px', 
-                      objectFit: 'contain', 
-                      borderRadius: '12px', 
-                      boxShadow: 'var(--shadow-sm)', 
-                      marginBottom: '10px' 
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <CreditCard size={24} color="var(--accent-coffee)" />
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
+                    PayPal / Tarjeta
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                  Paga con Tarjeta de Débito, Crédito o Cuenta PayPal. 
+                  <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>⚡ Entradas QR y Aprobación Instantánea</strong>
+                </p>
+              </div>
+
+              {/* SINPE OPTION */}
+              <div 
+                onClick={() => setPaymentMethod('sinpe')}
+                style={{
+                  border: `2px solid ${paymentMethod === 'sinpe' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
+                  backgroundColor: paymentMethod === 'sinpe' ? '#FFF8F2' : '#FFFFFF',
+                  borderRadius: '16px',
+                  padding: '18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <Landmark size={24} color="var(--accent-coffee)" />
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
+                    SINPE Móvil
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                  Transferencia en Colones al 60121225. 
+                  <span style={{ display: 'block', marginTop: '4px' }}>Sube el comprobante para revisión manual.</span>
+                </p>
+              </div>
+            </div>
+
+            {/* PAYPAL CONTENT */}
+            {paymentMethod === 'paypal' ? (
+              <div style={{
+                backgroundColor: '#FAF8F5',
+                border: '2px solid var(--accent-beige-border)',
+                borderRadius: '20px',
+                padding: '24px',
+                textAlign: 'center'
+              }}>
+                <div style={{ marginBottom: '18px' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
+                    Total a pagar: {totalPrice} (~${totalUsdAmount} USD)
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Tipo de cambio: 1 USD = ₡{paypalConfig.exchangeRate || 515} CRC
+                  </div>
+                </div>
+
+                {paypalConfig.clientId ? (
+                  <PayPalScriptProvider options={{ "client-id": paypalConfig.clientId, currency: "USD" }}>
+                    <PayPalButtons
+                      style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
+                      disabled={loading}
+                      createOrder={handlePayPalCreateOrder}
+                      onApprove={handlePayPalApprove}
+                      onError={(err) => {
+                        console.error('Error en PayPal Buttons:', err);
+                        setErrorMsg('Ocurrió un error al cargar o procesar PayPal.');
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                ) : (
+                  <div style={{ padding: '20px', color: 'var(--accent-coffee)', fontWeight: 600 }}>
+                    Cargando procesador de pago seguro de PayPal...
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* SINPE CONTENT */
+              <div>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.6 }}>
+                  Transfiere o deposita por medio de sinpe movil al número <strong style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)' }}>60121225</strong> la cantidad total de <strong>{totalPrice}</strong> y sube la foto o captura del comprobante.
+                </p>
+
+                <div style={{
+                  border: '2px dashed var(--accent-beige-border)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  backgroundColor: '#FAF8F5',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  marginBottom: '24px'
+                }}>
+                  <input 
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: 0,
+                      width: '100%',
+                      height: '100%',
+                      cursor: 'pointer'
                     }}
                   />
-                  <div style={{ fontWeight: 600, color: 'var(--color-green)' }}>
-                    Archivo seleccionado: {file.name}
-                  </div>
+                  
+                  {filePreview ? (
+                    <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                      <img 
+                        src={filePreview} 
+                        alt="Vista previa del comprobante" 
+                        style={{ 
+                          width: '100%', 
+                          maxWidth: '100%', 
+                          maxHeight: '220px', 
+                          objectFit: 'contain', 
+                          borderRadius: '12px', 
+                          boxShadow: 'var(--shadow-sm)', 
+                          marginBottom: '10px' 
+                        }}
+                      />
+                      <div style={{ fontWeight: 600, color: 'var(--color-green)' }}>
+                        Archivo seleccionado: {file.name}
+                      </div>
+                    </div>
+                  ) : file ? (
+                    <div>
+                      <FileText size={40} color="var(--accent-coffee)" />
+                      <div style={{ fontWeight: 600, color: 'var(--color-green)', marginTop: '8px' }}>
+                        Archivo PDF adjunto: {file.name}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <ImageIcon size={40} color="var(--accent-gold)" style={{ marginBottom: '8px' }} />
+                      <div style={{ fontWeight: 600, color: 'var(--accent-coffee)' }}>
+                        Haz clic aquí o arrastra tu comprobante de pago
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        Soporta imágenes (JPG, PNG, WEBP) o documentos PDF
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ) : file ? (
-                <div>
-                  <FileText size={40} color="var(--accent-coffee)" />
-                  <div style={{ fontWeight: 600, color: 'var(--color-green)', marginTop: '8px' }}>
-                    Archivo PDF adjunto: {file.name}
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <ImageIcon size={40} color="var(--accent-gold)" style={{ marginBottom: '8px' }} />
-                  <div style={{ fontWeight: 600, color: 'var(--accent-coffee)' }}>
-                    Haz clic aquí o arrastra tu comprobante de pago
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Soporta imágenes (JPG, PNG, WEBP) o documentos PDF
-                  </div>
-                </div>
-              )}
-            </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '16px', fontSize: '1.1rem', borderRadius: '14px' }}
+                >
+                  {loading ? (
+                    <span>Procesando Reserva ({quantity} {quantity === 1 ? 'Boleto' : 'Boletos'})...</span>
+                  ) : (
+                    <>
+                      <Send size={20} />
+                      <span>Enviar Comprobante SINPE ({totalPrice})</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary"
-            style={{ width: '100%', padding: '16px', fontSize: '1.1rem', borderRadius: '14px' }}
-          >
-            {loading ? (
-              <span>Procesando Reserva ({quantity} {quantity === 1 ? 'Boleto' : 'Boletos'})...</span>
-            ) : (
-              <>
-                <Send size={20} />
-                <span>Enviar Registro y Generar Código QR ({totalPrice})</span>
-              </>
-            )}
-          </button>
         </form>
       </div>
     </div>
