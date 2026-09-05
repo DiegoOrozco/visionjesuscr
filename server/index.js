@@ -806,9 +806,12 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
       ? (isPresale ? vipPresale : vipRegular) 
       : (isPresale ? genPresale : genRegular);
 
-    const totalCrc = quantity * activePrice;
+    const baseCrc = quantity * activePrice;
+    const serviceFeeCrc = Math.round(baseCrc * 0.13);
+    const totalCrc = baseCrc + serviceFeeCrc;
     const exchangeRate = parseFloat(process.env.PAYPAL_EXCHANGE_RATE || '515');
     const totalUsd = (totalCrc / exchangeRate).toFixed(2);
+
 
     const reservationId = uuidv4();
     let qrCodeHash;

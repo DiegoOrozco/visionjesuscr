@@ -115,9 +115,16 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
   const [errorMsg, setErrorMsg] = useState('');
 
   const formatCRC = (val) => `₡${Number(val).toLocaleString('es-CR')}`;
-  const totalCrcAmount = quantity * zone.price;
-  const totalPrice = formatCRC(totalCrcAmount);
-  const totalUsdAmount = (totalCrcAmount / (paypalConfig.exchangeRate || 515)).toFixed(2);
+  const baseCrcAmount = quantity * zone.price;
+  const totalPrice = formatCRC(baseCrcAmount);
+
+  // PayPal 13% Service Fee calculation
+  const paypalFeeCrcAmount = Math.round(baseCrcAmount * 0.13);
+  const paypalTotalCrcAmount = baseCrcAmount + paypalFeeCrcAmount;
+  const paypalFeePrice = formatCRC(paypalFeeCrcAmount);
+  const paypalTotalPrice = formatCRC(paypalTotalCrcAmount);
+  const paypalTotalUsdAmount = (paypalTotalCrcAmount / (paypalConfig.exchangeRate || 515)).toFixed(2);
+
 
   const handleAttendeeChange = (index, field, value) => {
     const updated = [...attendees];
@@ -769,13 +776,17 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 textAlign: 'center'
               }}>
                 <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-coffee)' }}>
-                    Total a pagar: {totalPrice} (~${totalUsdAmount} USD)
+                  <div style={{ fontSize: '0.92rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                    Subtotal entradas: <strong>{totalPrice}</strong> + Cargo por servicio (13%): <strong>{paypalFeePrice}</strong>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>
+                    Total a pagar: {paypalTotalPrice} (~${paypalTotalUsdAmount} USD)
                   </div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Tipo de cambio: 1 USD = ₡{paypalConfig.exchangeRate || 515} CRC
+                    Tipo de cambio de referencia: 1 USD = ₡{paypalConfig.exchangeRate || 515} CRC
                   </div>
                 </div>
+
 
                 {paypalConfig.clientId ? (
                   <PayPalScriptProvider 
