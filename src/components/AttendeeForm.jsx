@@ -772,7 +772,14 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 </div>
 
                 {paypalConfig.clientId ? (
-                  <PayPalScriptProvider options={{ "client-id": paypalConfig.clientId, currency: "USD" }}>
+                  <PayPalScriptProvider 
+                    key={paypalConfig.clientId} 
+                    options={{ 
+                      "client-id": paypalConfig.clientId, 
+                      currency: "USD",
+                      components: "buttons"
+                    }}
+                  >
                     <PayPalButtons
                       style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
                       disabled={loading}
@@ -780,7 +787,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                       onApprove={handlePayPalApprove}
                       onError={(err) => {
                         console.error('Error en PayPal Buttons:', err);
-                        setErrorMsg('Ocurrió un error al cargar o procesar PayPal.');
+                        setErrorMsg('Ocurrió un error al cargar o procesar PayPal. Revisa la consola o intenta refrescar.');
                       }}
                     />
                   </PayPalScriptProvider>
@@ -789,6 +796,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                     Cargando procesador de pago seguro de PayPal...
                   </div>
                 )}
+
               </div>
             ) : (
               /* SINPE CONTENT */
