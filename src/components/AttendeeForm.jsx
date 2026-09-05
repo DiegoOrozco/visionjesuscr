@@ -27,22 +27,28 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
   useEffect(() => {
     const fetchPaypalConfig = async () => {
+      const viteClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || '';
       try {
         const baseUrl = import.meta.env.VITE_API_URL || '';
         const res = await fetch(`${baseUrl}/api/paypal/config`);
         const data = await res.json();
-        if (data.success && data.clientId) {
+        const activeClientId = (data.success && data.clientId) ? data.clientId : viteClientId;
+        if (activeClientId) {
           setPaypalConfig({
-            clientId: data.clientId,
+            clientId: activeClientId,
             exchangeRate: data.exchangeRate || 515
           });
         }
       } catch (e) {
-        console.error('Error cargando configuración de PayPal:', e);
+        console.error('Error cargando configuración de PayPal desde API:', e);
+        if (viteClientId) {
+          setPaypalConfig(prev => ({ ...prev, clientId: viteClientId }));
+        }
       }
     };
     fetchPaypalConfig();
   }, []);
+
 
   useEffect(() => {
     if (!expiresAt) return;
