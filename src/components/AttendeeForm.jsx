@@ -737,7 +737,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 </div>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                   Paga con Tarjeta de Débito, Crédito o Cuenta PayPal. 
-                  <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>⚡ Entradas QR y Aprobación Instantánea</strong>
+                  <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>Entradas QR y Aprobación Instantánea</strong>
+
                 </p>
               </div>
 
