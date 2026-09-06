@@ -136,6 +136,20 @@ function initDb() {
   try { db.exec(`ALTER TABLE reservations ADD COLUMN paypal_capture_id TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE reservations ADD COLUMN amount_usd REAL`); } catch (e) {}
 
+  // Cleanup abandoned PAYPAL_PENDING draft reservations if any exist from pre-refactor
+  try {
+    const pendingPaypals = db.prepare("SELECT id, zone_id, quantity FROM reservations WHERE payment_method = 'paypal' AND status = 'pendiente'").all();
+    for (const p of pendingPaypals) {
+      db.prepare("UPDATE seat_queues SET is_assigned = 0, reservation_id = NULL WHERE reservation_id = ?").run(p.id);
+      db.prepare("DELETE FROM attendees WHERE reservation_id = ?").run(p.id);
+      db.prepare("UPDATE zones SET available_capacity = available_capacity + ? WHERE id = ?").run(p.quantity, p.zone_id);
+      db.prepare("DELETE FROM reservations WHERE id = ?").run(p.id);
+    }
+  } catch (e) {
+    console.error('Error cleaning pending paypal drafts:', e);
+  }
+
+
   // Determine pricing tier (Preventa: VIP=12000, Gen=7500 | Regular: VIP=15000, Gen=10000)
   let isPresale = true;
   let vipPrice = 12000.00;

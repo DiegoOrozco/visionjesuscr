@@ -757,10 +757,10 @@ app.get('/api/paypal/config', (req, res) => {
   });
 });
 
-// 2c. Create PayPal Order
+// 2c. Create PayPal Order (Sin insertar reservación en BD aún)
 app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
   try {
-    const { zone_id, purchaser_name, purchaser_email, purchaser_phone, attendees: rawAttendees, session_id } = req.body;
+    const { zone_id, purchaser_name, purchaser_email, purchaser_phone, attendees: rawAttendees } = req.body;
     let attendees = [];
     
     if (typeof rawAttendees === 'string') {
@@ -787,7 +787,7 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
       });
     }
 
-    // Calculate CRC total
+    // Calculate CRC total + 13% service fee
     const configRows = db.prepare('SELECT key, value FROM homepage_config').all();
     const config = {};
     configRows.forEach(r => config[r.key] = r.value);
@@ -812,6 +812,111 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
     const exchangeRate = parseFloat(process.env.PAYPAL_EXCHANGE_RATE || '515');
     const totalUsd = (totalCrc / exchangeRate).toFixed(2);
 
+    // Call PayPal Orders API to create the order
+    const accessToken = await getPayPalAccessToken();
+    const orderResponse = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            description: `Conferencia Visión Jesús - ${zone.name} (${quantity} entrada/s)`,
+            amount: {
+              currency_code: 'USD',
+              value: totalUsd
+            }
+          }
+        ]
+      })
+    });
+
+    const orderData = await orderResponse.json();
+    if (!orderResponse.ok || !orderData.id) {
+      throw new Error(orderData.message || 'Error al comunicarse con la API de PayPal.');
+    }
+
+    res.json({
+      success: true,
+      orderId: orderData.id,
+      totalAmount: totalCrc,
+      amountUsd: totalUsd,
+      exchangeRate
+    });
+
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error al generar la orden de PayPal.' });
+  }
+});
+
+// 2d. Capture PayPal Order & Insert Approved Reservation into Database
+app.post('/api/paypal/capture-order', async (req, res) => {
+  try {
+    const { orderId, zone_id, purchaser_name, purchaser_email, purchaser_phone, attendees: rawAttendees, session_id } = req.body;
+    if (!orderId || !zone_id || !purchaser_name || !purchaser_email || !purchaser_phone) {
+      return res.status(400).json({ success: false, message: 'Faltan datos requeridos para procesar la reservación.' });
+    }
+
+    let attendees = [];
+    if (typeof rawAttendees === 'string') {
+      attendees = JSON.parse(rawAttendees);
+    } else if (Array.isArray(rawAttendees)) {
+      attendees = rawAttendees;
+    }
+
+    const quantity = attendees.length;
+
+    // Capture payment with PayPal REST API first
+    const accessToken = await getPayPalAccessToken();
+    const captureResponse = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders/${orderId}/capture`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    const captureData = await captureResponse.json();
+    if (!captureResponse.ok || captureData.status !== 'COMPLETED') {
+      const detail = captureData.details && captureData.details[0] ? captureData.details[0].description : captureData.message;
+      return res.status(400).json({ success: false, message: detail || 'El pago no pudo ser completado por PayPal.' });
+    }
+
+    const captureId = captureData.purchase_units[0]?.payments?.captures[0]?.id || orderId;
+
+    // Payment COMPLETED! Now calculate prices and insert reservation into DB
+    const zone = db.prepare('SELECT * FROM zones WHERE id = ?').get(zone_id);
+    if (!zone) {
+      return res.status(404).json({ success: false, message: 'Zona no encontrada.' });
+    }
+
+    const configRows = db.prepare('SELECT key, value FROM homepage_config').all();
+    const config = {};
+    configRows.forEach(r => config[r.key] = r.value);
+
+    const cutoffDateStr = config.presale_cutoff_date || '2026-08-15';
+    const cutoffDate = new Date(`${cutoffDateStr}T23:59:59`);
+    const isPresale = new Date() <= cutoffDate;
+
+    const vipPresale = parseFloat(config.vip_presale_price || '12000');
+    const vipRegular = parseFloat(config.vip_regular_price || '15000');
+    const genPresale = parseFloat(config.general_presale_price || '7500');
+    const genRegular = parseFloat(config.general_regular_price || '10000');
+
+    const isVip = zone_id.startsWith('vip');
+    const activePrice = isVip 
+      ? (isPresale ? vipPresale : vipRegular) 
+      : (isPresale ? genPresale : genRegular);
+
+    const baseCrc = quantity * activePrice;
+    const serviceFeeCrc = Math.round(baseCrc * 0.13);
+    const totalCrc = baseCrc + serviceFeeCrc;
+    const exchangeRate = parseFloat(process.env.PAYPAL_EXCHANGE_RATE || '515');
+    const totalUsd = (totalCrc / exchangeRate).toFixed(2);
 
     const reservationId = uuidv4();
     let qrCodeHash;
@@ -822,7 +927,6 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
       if (!existing) isUnique = true;
     }
 
-    // Reserve seats & insert pending reservation
     const reservationTx = db.transaction(() => {
       const availableSeats = db.prepare(`
         SELECT id, ticket_number, ticket_code
@@ -840,9 +944,9 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
         INSERT INTO reservations (
           id, zone_id, purchaser_name, purchaser_email, purchaser_phone,
           quantity, total_amount, comprobante_url, status, qr_code_hash,
-          payment_method, amount_usd
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PAYPAL_PENDING', 'pendiente', ?, 'paypal', ?)
-      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalCrc, qrCodeHash, parseFloat(totalUsd));
+          payment_method, paypal_order_id, paypal_capture_id, amount_usd, approved_at, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PAYPAL_APPROVED', 'aprobado', ?, 'paypal', ?, ?, ?, CURRENT_TIMESTAMP, 'Aprobado automáticamente vía PayPal / Tarjeta')
+      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalCrc, qrCodeHash, orderId, captureId, parseFloat(totalUsd));
 
       const updateQueueStmt = db.prepare('UPDATE seat_queues SET is_assigned = 1, reservation_id = ? WHERE id = ?');
       const insertAttendeeStmt = db.prepare(`
@@ -885,110 +989,22 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
 
     const result = reservationTx();
 
-    // Call PayPal Orders API
-    const accessToken = await getPayPalAccessToken();
-    const orderResponse = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [
-          {
-            reference_id: reservationId,
-            description: `Conferencia Visión Jesús - ${zone.name} (${quantity} entrada/s)`,
-            amount: {
-              currency_code: 'USD',
-              value: totalUsd
-            }
-          }
-        ]
-      })
-    });
-
-    const orderData = await orderResponse.json();
-    if (!orderResponse.ok || !orderData.id) {
-      throw new Error(orderData.message || 'Error al comunicarse con la API de PayPal.');
-    }
-
-    // Save paypal_order_id to DB
-    db.prepare('UPDATE reservations SET paypal_order_id = ? WHERE id = ?').run(orderData.id, reservationId);
-
-    res.json({
-      success: true,
-      orderId: orderData.id,
-      reservationId,
-      totalAmount: totalCrc,
-      amountUsd: totalUsd,
-      exchangeRate
-    });
-
-  } catch (error) {
-    console.error('Error creating PayPal order:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al generar la orden de PayPal.' });
-  }
-});
-
-// 2d. Capture PayPal Order & Auto Approve Reservation
-app.post('/api/paypal/capture-order', async (req, res) => {
-  try {
-    const { orderId, reservationId } = req.body;
-    if (!orderId || !reservationId) {
-      return res.status(400).json({ success: false, message: 'Faltan parámetros requeridos.' });
-    }
-
-    const reservation = db.prepare('SELECT * FROM reservations WHERE id = ?').get(reservationId);
-    if (!reservation) {
-      return res.status(404).json({ success: false, message: 'Reservación no encontrada.' });
-    }
-
-    const accessToken = await getPayPalAccessToken();
-    const captureResponse = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders/${orderId}/capture`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    const captureData = await captureResponse.json();
-    if (!captureResponse.ok || captureData.status !== 'COMPLETED') {
-      const detail = captureData.details && captureData.details[0] ? captureData.details[0].description : captureData.message;
-      return res.status(400).json({ success: false, message: detail || 'El pago no pudo ser completado por PayPal.' });
-    }
-
-    const captureId = captureData.purchase_units[0]?.payments?.captures[0]?.id || orderId;
-
-    // Approve reservation automatically
-    db.prepare(`
-      UPDATE reservations
-      SET status = 'aprobado', approved_at = CURRENT_TIMESTAMP, paypal_capture_id = ?, notes = 'Aprobado automáticamente vía PayPal'
-      WHERE id = ?
-    `).run(captureId, reservationId);
-
-    // Get zone and assigned tickets
-    const zone = db.prepare('SELECT name FROM zones WHERE id = ?').get(reservation.zone_id);
-    const attendeeRows = db.prepare('SELECT assigned_ticket_code FROM attendees WHERE reservation_id = ?').all(reservationId);
-    const assignedTickets = attendeeRows.map(a => a.assigned_ticket_code);
-
     logActivity(
       'sistema',
       'pago_paypal_exitoso',
-      `Pago de PayPal $${reservation.amount_usd} USD (₡${reservation.total_amount}) capturado exitosamente para ${reservation.purchaser_name}. ID Reserva: ${reservationId}`
+      `Pago de PayPal $${totalUsd} USD (₡${totalCrc}) capturado exitosamente para ${purchaser_name}. ID Reserva: ${result.reservationId}`
     );
 
     // Send email with QR code automatically
     const origin = req.headers.origin || 'https://www.visionjesuscr.com';
     sendReservationEmail({
-      toEmail: reservation.purchaser_email,
-      purchaserName: reservation.purchaser_name,
+      toEmail: purchaser_email,
+      purchaserName: purchaser_name,
       zoneName: zone ? zone.name : '',
-      quantity: reservation.quantity,
-      assignedTickets,
-      qrCodeHash: reservation.qr_code_hash,
-      totalAmount: reservation.total_amount,
+      quantity: quantity,
+      assignedTickets: result.assignedTickets,
+      qrCodeHash: result.qrCodeHash,
+      totalAmount: totalCrc,
       origin
     }).catch(err => console.error('Error enviando email tras pago de PayPal:', err));
 
@@ -996,13 +1012,13 @@ app.post('/api/paypal/capture-order', async (req, res) => {
       success: true,
       message: '¡Pago recibido exitosamente! Tu entrada ha sido aprobada automáticamente.',
       reservation: {
-        id: reservation.id,
-        qr_code_hash: reservation.qr_code_hash,
-        assigned_tickets: assignedTickets,
-        total_amount: reservation.total_amount,
-        quantity: reservation.quantity,
-        purchaser_name: reservation.purchaser_name,
-        purchaser_phone: reservation.purchaser_phone,
+        id: result.reservationId,
+        qr_code_hash: result.qrCodeHash,
+        assigned_tickets: result.assignedTickets,
+        total_amount: totalCrc,
+        quantity: quantity,
+        purchaser_name,
+        purchaser_phone,
         status: 'aprobado'
       }
     });
@@ -1012,6 +1028,7 @@ app.post('/api/paypal/capture-order', async (req, res) => {
     res.status(500).json({ success: false, message: error.message || 'Error al capturar el pago en PayPal.' });
   }
 });
+
 
 
 // 3. Get Ticket Details by QR Hash

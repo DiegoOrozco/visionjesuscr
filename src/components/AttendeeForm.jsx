@@ -233,7 +233,12 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: data.orderID,
-          reservationId: paypalOrderMeta?.reservationId
+          zone_id: zone.id,
+          purchaser_name: purchaserName,
+          purchaser_email: purchaserEmail,
+          purchaser_phone: purchaserPhone,
+          attendees,
+          session_id: sessionId
         })
       });
 
@@ -250,6 +255,7 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
       setLoading(false);
     }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

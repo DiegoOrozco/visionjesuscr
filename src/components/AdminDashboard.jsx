@@ -2151,7 +2151,23 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                               <UserCheck size={14} /> Ver Respuestas ({resv.attendees ? resv.attendees.length : 0})
                             </button>
 
-                            {resv.comprobante_url && (
+                            {resv.payment_method === 'paypal' ? (
+                              <div style={{
+                                backgroundColor: '#EFF6FF',
+                                color: '#1D4ED8',
+                                border: '1px solid #BFDBFE',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                width: 'fit-content'
+                              }}>
+                                💳 Pago con Tarjeta / PayPal {resv.amount_usd ? `($${resv.amount_usd} USD)` : ''}
+                              </div>
+                            ) : resv.comprobante_url ? (
                               <button
                                 onClick={() => setSelectedReceipt(resv)}
                                 style={{
@@ -2167,9 +2183,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                                   gap: '4px'
                                 }}
                               >
-                                <Eye size={14} /> Ver Comprobante
+                                <Eye size={14} /> Ver Comprobante SINPE
                               </button>
+                            ) : (
+                              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                🏦 SINPE Móvil
+                              </span>
                             )}
+
 
                             {(resv.status === 'aprobado' || resv.status === 'usado') && resv.qr_code_hash && (
                               <a
