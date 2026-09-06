@@ -40,3 +40,7 @@ uploads/
 *.sw?
 .env
 
+# WhatsApp Module Logs and Venv
+modulo_whatsapp/logs/
+modulo_whatsapp/venv/
+

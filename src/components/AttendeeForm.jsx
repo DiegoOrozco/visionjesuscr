@@ -805,8 +805,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                       onApprove={handlePayPalApprove}
                       onError={(err) => {
                         console.error('Error en PayPal Buttons:', err);
-                        setErrorMsg('Ocurrió un error al cargar o procesar PayPal. Revisa la consola o intenta refrescar.');
+                        setErrorMsg(prev => prev || (err && typeof err.message === 'string' && err.message ? err.message : 'Por favor verifica haber completado todos los datos obligatorios del formulario antes de pagar.'));
                       }}
+
                     />
                   </PayPalScriptProvider>
                 ) : (
