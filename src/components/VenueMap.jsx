@@ -674,10 +674,25 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
           {/* Seat Layout Render */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', overflowX: 'auto' }}>
             {(() => {
+              const isGen = selectedZone && (
+                (selectedZone.data?.ticket_type || selectedZone.data?.ticketType || '').toLowerCase() === 'general' ||
+                (selectedZone.label || selectedZone.data?.name || selectedZone.data?.label || '').toUpperCase().includes('GENERAL') ||
+                (selectedZone.data?.id || '').toLowerCase().includes('general') ||
+                (selectedZone.data?.id || '').toLowerCase().includes('lateral') ||
+                ['general_central', 'central_atras', 'lateral_izquierda', 'lateral_derecha'].includes(selectedZone.data?.id)
+              );
+
+              const isRowVisible = (rLabel, idx) => {
+                if (!isGen) return true;
+                if (idx > 5) return false;
+                if (rLabel && /FILA\s+[G-Z]/i.test(String(rLabel).trim().toUpperCase())) return false;
+                return true;
+              };
+
               // 1. Check if dynamic layout_config exists on zone
               const dynRows = selectedZone.data?.layout_config?.rows;
               if (dynRows && Array.isArray(dynRows) && dynRows.length > 0) {
-                return dynRows.map((r, rIdx) => {
+                return dynRows.filter((r, rIdx) => isRowVisible(r.rowLabel, rIdx)).map((r, rIdx) => {
                   if (r.isReserved) {
                     return (
                       <div key={r.rowLabel} style={{
@@ -799,7 +814,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                     </div>
                   ));
                 } else {
-                  return seatLayouts[selectedZone.data.id].map((r, rIdx) => (
+                  return seatLayouts[selectedZone.data.id].filter((r, rIdx) => isRowVisible(r.rowLabel, rIdx)).map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
                         {r.rowLabel}
@@ -849,8 +864,11 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 }
               }
 
-              // General fallback (Uniform 10 rows: Fila A to J)
-              return ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"].map((rLabel, rIdx) => {
+              // General fallback (Uniform rows: Fila A to F for General, A to J for others)
+              const allRows = ["Fila A", "Fila B", "Fila C", "Fila D", "Fila E", "Fila F", "Fila G", "Fila H", "Fila I", "Fila J"];
+              const rowsToRender = isGen ? allRows.slice(0, 6) : allRows;
+
+              return rowsToRender.map((rLabel, rIdx) => {
                 const cols = selectedZone.data.id === 'central_atras' ? 15 : 10;
                 return (
                   <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
