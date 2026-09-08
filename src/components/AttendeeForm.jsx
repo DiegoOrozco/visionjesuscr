@@ -8,10 +8,12 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
   const [purchaserEmail, setPurchaserEmail] = useState('');
   const [purchaserPhone, setPurchaserPhone] = useState('');
 
-  // Payment Method: 'paypal' or 'sinpe'
-  const [paymentMethod, setPaymentMethod] = useState('paypal');
+  // Payment Method: 'paypal' or 'sinpe' (Establecido en 'sinpe' temporalmente)
+  const showPayPalOption = false; // Cambiar a true cuando se vuelva a activar PayPal
+  const [paymentMethod, setPaymentMethod] = useState('sinpe');
   const [paypalConfig, setPaypalConfig] = useState({ clientId: '', exchangeRate: 515 });
   const [paypalOrderMeta, setPaypalOrderMeta] = useState(null);
+
 
   // Track if user manually modified purchaser fields
   const [purchaserNameEdited, setPurchaserNameEdited] = useState(false);
@@ -723,30 +725,32 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              {/* PAYPAL OPTION */}
-              <div 
-                onClick={() => setPaymentMethod('paypal')}
-                style={{
-                  border: `2px solid ${paymentMethod === 'paypal' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
-                  backgroundColor: paymentMethod === 'paypal' ? '#FFF8F2' : '#FFFFFF',
-                  borderRadius: '16px',
-                  padding: '18px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <CreditCard size={24} color="var(--accent-coffee)" />
-                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
-                    PayPal / Tarjeta
-                  </span>
+              {/* PAYPAL OPTION (Oculto temporalmente) */}
+              {showPayPalOption && (
+                <div 
+                  onClick={() => setPaymentMethod('paypal')}
+                  style={{
+                    border: `2px solid ${paymentMethod === 'paypal' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
+                    backgroundColor: paymentMethod === 'paypal' ? '#FFF8F2' : '#FFFFFF',
+                    borderRadius: '16px',
+                    padding: '18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                    <CreditCard size={24} color="var(--accent-coffee)" />
+                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
+                      PayPal / Tarjeta
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                    Paga con Tarjeta de Débito, Crédito o Cuenta PayPal. 
+                    <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>Entradas QR y Aprobación Instantánea</strong>
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                  Paga con Tarjeta de Débito, Crédito o Cuenta PayPal. 
-                  <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>Entradas QR y Aprobación Instantánea</strong>
+              )}
 
-                </p>
-              </div>
 
               {/* SINPE OPTION */}
               <div 
