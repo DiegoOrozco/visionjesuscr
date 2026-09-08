@@ -824,10 +824,10 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            description: `Conferencia Visión Jesús - ${zone.name} (${quantity} entrada/s)`,
+            description: `Conferencia Vision Jesus - ${zone.name.replace(/[^a-zA-Z0-9 ]/g, '')} (${quantity} entrada/s)`,
             amount: {
               currency_code: 'USD',
-              value: totalUsd
+              value: String(totalUsd)
             }
           }
         ]
@@ -836,8 +836,11 @@ app.post('/api/paypal/create-order', reservationLimiter, async (req, res) => {
 
     const orderData = await orderResponse.json();
     if (!orderResponse.ok || !orderData.id) {
-      throw new Error(orderData.message || 'Error al comunicarse con la API de PayPal.');
+      console.error('Error detallado de PayPal API:', JSON.stringify(orderData, null, 2));
+      const errorDetail = (orderData.details && orderData.details[0]) ? orderData.details[0].description : orderData.message;
+      throw new Error(errorDetail || 'Error al comunicarse con la API de PayPal.');
     }
+
 
     res.json({
       success: true,
