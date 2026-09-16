@@ -655,7 +655,11 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
               // 1. Check if dynamic layout_config exists on zone
               const dynRows = selectedZone.data?.layout_config?.rows;
               if (dynRows && Array.isArray(dynRows) && dynRows.length > 0) {
-                return dynRows.filter((r, rIdx) => isRowVisible(r.rowLabel, rIdx)).map((r, rIdx) => {
+                return dynRows
+                  .map((r, origIdx) => ({ ...r, origIdx }))
+                  .filter((r) => isRowVisible(r.rowLabel, r.origIdx))
+                  .map((r) => {
+                    const rIdx = r.origIdx;
                   if (r.isReserved) {
                     return (
                       <div key={r.rowLabel} style={{
@@ -729,7 +733,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
               // Fallback to static seatLayouts
               if (seatLayouts[selectedZone.data.id]) {
                 if (selectedZone.data.id === 'vip_central') {
-                  return seatLayouts.vip_central.activeRows.map((r, rIdx) => (
+                  return seatLayouts.vip_central.map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
                         {r.rowLabel}
