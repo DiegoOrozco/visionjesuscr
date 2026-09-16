@@ -876,6 +876,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         setZoneSuccessMsg(data.message);
         setEditingZoneId(null);
         fetchZoneAnalytics();
+        if (onSaveConfig) onSaveConfig();
       } else {
         alert(data.message || 'Error al guardar la configuración.');
       }

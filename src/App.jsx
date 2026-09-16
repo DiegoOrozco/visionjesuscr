@@ -398,6 +398,7 @@ export default function App() {
             sections={landingSections}
             onSaveSections={fetchLandingSections}
             onSaveConfig={(updated) => {
+              fetchZones();
               if (updated) {
                 setHomepageConfig(prev => ({ ...prev, ...updated }));
               } else {
