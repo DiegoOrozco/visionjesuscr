@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, ChevronLeft, ChevronRight, ShoppingCart, Star, Navigation, Ticket, Map } from 'lucide-react';
+import SponsorsTicker from './SponsorsTicker';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -364,6 +365,10 @@ export default function AutenticasPromo({ config, onScrollToMap }) {
         )}
 
       </div>
+
+      {/* SPONSORS TICKER BAR */}
+      <SponsorsTicker title="PATROCINADORES OFICIALES" />
+
       {/* STICKY MOBILE CTA BAR */}
       <div className="mobile-sticky-cta-bar">
         <button 
