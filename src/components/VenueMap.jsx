@@ -214,7 +214,6 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     };
     const prefix = prefixMap[zoneId] || 'TKT';
 
-    // Infer true 0-indexed row position from rowLabel (e.g., "Fila 1" -> 0, "Fila 2" -> 1, "Fila A" -> 0)
     let trueRowIndex = typeof rowIndex === 'number' ? rowIndex : 0;
     if (rowLabel) {
       const match = String(rowLabel).match(/\d+/);
@@ -239,6 +238,14 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     return occupiedSeats.some(occ => {
       if (!occ) return false;
       const s = String(occ).trim();
+
+      // If backend reports VIP-CTR-010 to VIP-CTR-018 as auto-occupied due to legacy Fila 1 & 2 protocol block,
+      // override for Fila 2 if Fila 2 is active and not explicitly reserved by attendee seatCode.
+      if (zoneId === 'vip_central' && trueRowIndex === 1 && s.startsWith('VIP-CTR-')) {
+        // Only mark occupied if the actual seatCode matching Fila 2 is present in occupiedSeats
+        return s === seatCode;
+      }
+
       return s === seatCode || s === queueCode;
     });
   };
