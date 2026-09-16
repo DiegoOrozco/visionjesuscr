@@ -214,15 +214,24 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     };
     const prefix = prefixMap[zoneId] || 'TKT';
 
+    // Infer true 0-indexed row position from rowLabel (e.g., "Fila 1" -> 0, "Fila 2" -> 1, "Fila A" -> 0)
+    let trueRowIndex = rowIndex;
+    if (rowLabel) {
+      const match = String(rowLabel).match(/\d+/);
+      if (match) {
+        trueRowIndex = parseInt(match[0], 10) - 1;
+      }
+    }
+
     let queueIndex = 1;
     if (zoneId === 'vip_central') {
-      queueIndex = (rowIndex * 9) + seatNum;
+      queueIndex = (trueRowIndex * 9) + seatNum;
     } else if (zoneId === 'vip_izquierda' || zoneId === 'vip_derecha') {
-      queueIndex = (rowIndex * 8) + seatNum;
+      queueIndex = (trueRowIndex * 8) + seatNum;
     } else if (zoneId === 'central_atras') {
-      queueIndex = (rowIndex * 15) + seatNum;
+      queueIndex = (trueRowIndex * 15) + seatNum;
     } else {
-      queueIndex = (rowIndex * 10) + seatNum;
+      queueIndex = (trueRowIndex * 10) + seatNum;
     }
 
     const queueCode = `${prefix}-${String(queueIndex).padStart(3, '0')}`;
