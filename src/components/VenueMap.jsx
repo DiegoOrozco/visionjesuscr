@@ -41,19 +41,18 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
       { rowLabel: "Fila 9", seatsCount: 8 },
       { rowLabel: "Fila 10", seatsCount: 8 }
     ],
-    vip_central: {
-      reservedRows: ["Fila 1 (RESERVADO)", "Fila 2 (RESERVADO)"],
-      activeRows: [
-        { rowLabel: "Fila 3", seatsCount: 9 },
-        { rowLabel: "Fila 4", seatsCount: 9 },
-        { rowLabel: "Fila 5", seatsCount: 9 },
-        { rowLabel: "Fila 6", seatsCount: 9 },
-        { rowLabel: "Fila 7", seatsCount: 9 },
-        { rowLabel: "Fila 8", seatsCount: 9 },
-        { rowLabel: "Fila 9", seatsCount: 9 },
-        { rowLabel: "Fila 10", seatsCount: 9 }
-      ]
-    },
+    vip_central: [
+      { rowLabel: "Fila 1", seatsCount: 9 },
+      { rowLabel: "Fila 2", seatsCount: 9 },
+      { rowLabel: "Fila 3", seatsCount: 9 },
+      { rowLabel: "Fila 4", seatsCount: 9 },
+      { rowLabel: "Fila 5", seatsCount: 9 },
+      { rowLabel: "Fila 6", seatsCount: 9 },
+      { rowLabel: "Fila 7", seatsCount: 9 },
+      { rowLabel: "Fila 8", seatsCount: 9 },
+      { rowLabel: "Fila 9", seatsCount: 9 },
+      { rowLabel: "Fila 10", seatsCount: 9 }
+    ],
     vip_derecha: [
       { rowLabel: "Fila 1", seatsCount: 8 },
       { rowLabel: "Fila 2", seatsCount: 8 },
@@ -139,7 +138,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     let rowIndex = 0;
 
     if (zId === 'vip_central') {
-      const activeRow = seatLayouts.vip_central.activeRows.find((r, idx) => {
+      const activeRow = seatLayouts.vip_central.find((r, idx) => {
         if (r.rowLabel === rLabel) { rowIndex = idx; return true; }
         return false;
       });
@@ -217,9 +216,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
 
     let queueIndex = 1;
     if (zoneId === 'vip_central') {
-      // row index in React represents Fila 3 to 10 (which is index 0 to 7)
-      // We must add the 18 reserved seats of Row 1 & Row 2 (9 per row)
-      queueIndex = ((rowIndex + 2) * 9) + seatNum;
+      queueIndex = (rowIndex * 9) + seatNum;
     } else if (zoneId === 'vip_izquierda' || zoneId === 'vip_derecha') {
       queueIndex = (rowIndex * 8) + seatNum;
     } else if (zoneId === 'central_atras') {
@@ -302,10 +299,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     const words = cfg.label.split(' ');
     const isMultiWord = words.length > 1;
 
-    // Center coordinates for active VIP Central area (y: 215 to 320 -> center is 267.5)
-    const centerY = cfg.data.id === 'vip_central' 
-      ? 267.5 
-      : cfg.y + cfg.height / 2;
+    const centerY = cfg.y + cfg.height / 2;
 
     const centerX = cfg.x + cfg.width / 2;
 
@@ -535,22 +529,6 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                     style={{ transition: 'all 0.25s ease' }}
                   />
 
-                  {/* BLACK RESERVED AREA IN VIP CENTRAL */}
-                  {cfg.data.id === 'vip_central' && (
-                    <g>
-                      <rect 
-                        x="270" y="140" width="360" height="75" rx="10" 
-                        fill="#000000" stroke="#333333" strokeWidth="2"
-                      />
-                      <text x="450" y="172" fill="#4ADE80" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="2">
-                        RESERVADO
-                      </text>
-                      <text x="450" y="195" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">
-                        INVITADOS ESPECIALES / PASTORES
-                      </text>
-                    </g>
-                  )}
-
                   {/* Render dynamic SVG Labels cleanly using <tspan> to wrap text */}
                   {renderSvgLabels(cfg)}
                 </g>
@@ -618,31 +596,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
             </div>
           </div>
 
-          {/* Reserved Rows Banner for VIP Central */}
-          {selectedZone.data.id === 'vip_central' && (
-            <div style={{
-              backgroundColor: '#000000',
-              color: '#FFFFFF',
-              borderRadius: '12px',
-              padding: '14px 20px',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Star size={22} color="#4ADE80" />
-                <div>
-                  <div style={{ fontWeight: 800, color: '#4ADE80', fontSize: '0.95rem' }}>
-                    FILAS 1 Y 2 RESERVADAS (INVITADOS ESPECIALES / PASTORES)
-                  </div>
-                  <div style={{ fontSize: '0.82rem', opacity: 0.85 }}>
-                    Las 2 primeras filas están bloqueadas. Puedes seleccionar asientos en las Filas 3 a la 10 (9 asientos por fila).
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Selected seats pills preview */}
           {selectedSeats.length > 0 && (
