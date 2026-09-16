@@ -215,7 +215,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     const prefix = prefixMap[zoneId] || 'TKT';
 
     // Infer true 0-indexed row position from rowLabel (e.g., "Fila 1" -> 0, "Fila 2" -> 1, "Fila A" -> 0)
-    let trueRowIndex = rowIndex;
+    let trueRowIndex = typeof rowIndex === 'number' ? rowIndex : 0;
     if (rowLabel) {
       const match = String(rowLabel).match(/\d+/);
       if (match) {

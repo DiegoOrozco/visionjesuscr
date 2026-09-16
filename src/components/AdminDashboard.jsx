@@ -825,7 +825,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         ? (rowLetters[i] || `Fila ${i + 1}`) 
         : `Fila ${i + 1}`;
       
-      const isReserved = editingZoneId === 'vip_central' && i < 2;
+      const isReserved = editingZoneId === 'vip_central' && i === 0;
       newRows.push({
         rowLabel: label,
         seatsCount: nSeats,
