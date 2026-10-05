@@ -8,8 +8,8 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
   const [purchaserEmail, setPurchaserEmail] = useState('');
   const [purchaserPhone, setPurchaserPhone] = useState('');
 
-  // Payment Method: 'paypal' or 'sinpe' (Establecido en 'sinpe' temporalmente)
-  const showPayPalOption = false; // Cambiar a true cuando se vuelva a activar PayPal
+  // Payment Method: 'paypal' or 'sinpe'
+  const showPayPalOption = true; // Opción de PayPal habilitada
   const [paymentMethod, setPaymentMethod] = useState('sinpe');
   const [paypalConfig, setPaypalConfig] = useState({ clientId: '', exchangeRate: 515 });
   const [paypalOrderMeta, setPaypalOrderMeta] = useState(null);
