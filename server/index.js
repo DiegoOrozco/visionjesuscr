@@ -2218,6 +2218,18 @@ app.post('/api/group-contact', (req, res) => {
     if (!name || !phone) {
       return res.status(400).json({ success: false, message: 'Nombre y teléfono son obligatorios.' });
     }
+    const stmt = db.prepare(`
+      INSERT INTO group_contact_requests (group_id, group_name, name, phone, email, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(groupId || null, groupName || 'General', name, phone, email || '', notes || '');
+    res.json({ success: true, message: 'Solicitud enviada con éxito.', id: result.lastInsertRowid });
+  } catch (e) {
+    console.error('Error saving group contact request:', e);
+    res.status(500).json({ success: false, message: 'Error interno guardando la solicitud.' });
+  }
+});
+
 // Admin endpoints for Friendship Groups & Contact Requests
 app.get('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
   try {
