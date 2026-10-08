@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { CheckCircle, Copy, Download, ExternalLink, MessageCircle, Share2, Sparkles, Ticket } from 'lucide-react';
+import { CheckCircle, Copy, Download, ExternalLink, MessageCircle, Share2, Sparkles, Ticket, Check, Smartphone } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import html2canvas from 'html2canvas';
 
@@ -17,7 +17,7 @@ export default function TicketSuccess({ reservation, onReset }) {
         width: 260,
         margin: 2,
         color: {
-          dark: '#2C1A0E',
+          dark: '#0A0A0E',
           light: '#FFFFFF'
         }
       }, (error) => {
@@ -26,9 +26,10 @@ export default function TicketSuccess({ reservation, onReset }) {
     }
 
     confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 }
+      particleCount: 90,
+      spread: 75,
+      origin: { y: 0.55 },
+      colors: ['#0071E3', '#60A5FA', '#F59E0B', '#10B981', '#FFFFFF']
     });
   }, [reservation]);
 
@@ -79,13 +80,13 @@ export default function TicketSuccess({ reservation, onReset }) {
       html2canvas(ticketCardRef.current, {
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        scale: 3 // Higher resolution
+        backgroundColor: '#0A0A10',
+        scale: 3 // Ultra-sharp Retina resolution
       }).then(canvas => {
         const imageUri = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         const firstTicket = reservation.assigned_tickets[0] || 'Boleto';
-        link.download = `Boleto-${firstTicket.replace(/\s+/g, '-')}.png`;
+        link.download = `Pase-Digital-${firstTicket.replace(/\s+/g, '-')}.png`;
         link.href = imageUri;
         link.click();
       }).catch(err => {
@@ -95,139 +96,365 @@ export default function TicketSuccess({ reservation, onReset }) {
     }
   };
 
+  const formattedSeatList = reservation.assigned_tickets.map(t => 
+    t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
+      ? t.split(' - ').slice(1).join(' - ') 
+      : t
+  ).join(' • ');
+
   return (
-    <div style={{ maxWidth: '650px', margin: '0 auto', padding: '30px 0' }}>
-      <div className="card-glass" style={{ textAlign: 'center', borderRadius: '24px', padding: '36px 24px' }}>
-        
+    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--apple-font)' }}>
+      
+      {/* Top Header Feedback */}
+      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
         <div style={{
-          width: '70px',
-          height: '70px',
+          width: '72px',
+          height: '72px',
           borderRadius: '50%',
-          backgroundColor: 'var(--color-green-light)',
-          color: 'var(--color-green)',
+          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.05) 70%)',
+          border: '1px solid rgba(16, 185, 129, 0.4)',
+          color: '#34D399',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 16px'
+          margin: '0 auto 18px',
+          boxShadow: '0 0 35px rgba(16, 185, 129, 0.25)'
         }}>
-          <CheckCircle size={44} />
+          <CheckCircle size={38} strokeWidth={2.3} />
         </div>
 
-        <span className="badge badge-pending" style={{ marginBottom: '10px', display: 'inline-block' }}>
-          Comprobante en Proceso de Verificación
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '6px 14px',
+          borderRadius: '999px',
+          fontSize: '0.8rem',
+          fontWeight: 600,
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+          background: 'rgba(245, 158, 11, 0.12)',
+          border: '1px solid rgba(245, 158, 11, 0.3)',
+          color: '#FBBF24',
+          marginBottom: '14px'
+        }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#FBBF24', display: 'inline-block' }}></span>
+          Comprobante en Verificación
         </span>
 
-        <h2 style={{ fontSize: '2rem', color: 'var(--accent-coffee)', marginBottom: '8px' }}>
-          ¡Reserva Registrada Exitosamente!
-        </h2>
+        <h1 style={{
+          fontSize: 'clamp(1.8rem, 3.5vw, 2.3rem)',
+          fontWeight: 800,
+          letterSpacing: '-0.03em',
+          color: '#F5F5F7',
+          lineHeight: 1.15,
+          marginBottom: '10px'
+        }}>
+          ¡Reserva Confirmada!
+        </h1>
 
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px' }}>
-          Tus boletos han sido apartados. Una vez que el administrador valide tu comprobante de pago, el código QR estará habilitado para el ingreso al evento.
+        <p style={{
+          color: 'var(--apple-text-secondary)',
+          fontSize: '0.96rem',
+          lineHeight: 1.5,
+          maxWidth: '520px',
+          margin: '0 auto'
+        }}>
+          Tus lugares han sido apartados. Una vez validado tu pago, este pase digital estará activo para escanear en la entrada.
         </p>
+      </div>
 
-        {/* QR Box */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div 
-            ref={ticketCardRef}
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '4px solid #C5A880',
-              borderRadius: '24px',
-              padding: '30px 24px',
-              display: 'inline-block',
-              boxShadow: 'var(--shadow-md)',
-              width: '100%',
-              maxWidth: '360px',
-              textAlign: 'center',
-              boxSizing: 'border-box'
-            }}
-          >
-            <canvas ref={canvasRef} style={{ display: 'block', margin: '0 auto', borderRadius: '12px' }} />
-            
-            <div style={{ marginTop: '16px' }}>
-              <div style={{ fontSize: '0.9rem', color: '#8C7456', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>
-                {reservation.zone_name}
+      {/* APPLE WALLET DIGITAL PASS */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+        <div 
+          ref={ticketCardRef}
+          style={{
+            width: '100%',
+            maxWidth: '380px',
+            background: 'linear-gradient(180deg, #181824 0%, #0E0E16 60%, #08080E 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.14)',
+            borderRadius: '26px',
+            boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.05)',
+            padding: '24px 22px',
+            boxSizing: 'border-box',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Subtle Ambient Apple Glow inside Card */}
+          <div style={{
+            position: 'absolute',
+            top: '-50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '260px',
+            height: '140px',
+            background: 'radial-gradient(ellipse, rgba(0, 113, 227, 0.22) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }} />
+
+          {/* Pass Top Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            paddingBottom: '14px',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0071E3, #2563EB)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF'
+              }}>
+                <Ticket size={16} />
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2C1A0E', lineHeight: 1.2 }}>
-                {reservation.assigned_tickets.map(t => 
-                  t.includes(' - ') && !t.startsWith('Fila') && !t.startsWith('Asiento') 
-                    ? t.split(' - ').slice(1).join(' - ') 
-                    : t
-              ).join(' • ')}
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.08em', color: '#F5F5F7', textTransform: 'uppercase' }}>
+                VISIÓN JESÚS PASS
+              </span>
             </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 600, marginTop: '2px' }}>
-              {reservation.zone_name} ({reservation.quantity} {reservation.quantity === 1 ? 'Persona' : 'Personas'})
+
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#A1A1A6',
+              letterSpacing: '0.04em'
+            }}>
+              2026
+            </span>
+          </div>
+
+          {/* Event Title on Pass */}
+          <div style={{ margin: '16px 0 18px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--apple-blue)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+              Congreso Anual de Mujeres
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#6B7280', marginTop: '14px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
-              CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{reservation.qr_code_hash.substring(0, 6).toUpperCase()}</strong>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              AUTÉNTICAS 2026
             </div>
           </div>
+
+          {/* QR Code Pure Canvas Container */}
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '20px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+            position: 'relative',
+            zIndex: 1,
+            margin: '0 auto 18px',
+            maxWidth: '280px'
+          }}>
+            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', height: 'auto', borderRadius: '10px' }} />
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#6B7280', letterSpacing: '0.08em', marginTop: '8px', textTransform: 'uppercase' }}>
+              Presentar este código al ingresar
+            </span>
+          </div>
+
+          {/* Zone & Seats Badge */}
+          <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', marginBottom: '4px' }}>
+              {reservation.zone_name}
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+              {formattedSeatList}
+            </div>
+            <div style={{ fontSize: '0.82rem', color: '#A1A1A6', marginTop: '4px', fontWeight: 500 }}>
+              {reservation.quantity} {reservation.quantity === 1 ? 'Lugar Reservado' : 'Lugares Reservados'}
+            </div>
+          </div>
+
+          {/* Perforated Divider Line */}
+          <div style={{
+            position: 'relative',
+            margin: '14px -22px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              position: 'absolute',
+              left: '-9px'
+            }} />
+            <div style={{
+              flex: 1,
+              borderTop: '1px dashed rgba(255, 255, 255, 0.16)',
+              margin: '0 16px'
+            }} />
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              position: 'absolute',
+              right: '-9px'
+            }} />
+          </div>
+
+          {/* Pass Metadata Footer */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '12px',
+            paddingTop: '6px',
+            fontSize: '0.82rem',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div>
+              <span style={{ display: 'block', fontSize: '0.68rem', color: '#6E6E73', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                TITULAR
+              </span>
+              <strong style={{ color: '#F5F5F7', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', whiteSpace: 'nowrap' }}>
+                {reservation.purchaser_name}
+              </strong>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ display: 'block', fontSize: '0.68rem', color: '#6E6E73', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                CÓDIGO CONTROL
+              </span>
+              <strong style={{ color: 'var(--apple-blue)', fontFamily: 'monospace', fontSize: '0.92rem', fontWeight: 800 }}>
+                {reservation.qr_code_hash.substring(0, 6).toUpperCase()}
+              </strong>
+            </div>
+          </div>
+
         </div>
       </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-          <button
-            onClick={handleSendWhatsApp}
-            className="btn-primary"
-            style={{ backgroundColor: '#25D366', textDecoration: 'none', padding: '14px', border: 'none', cursor: 'pointer' }}
-          >
-            <MessageCircle size={20} />
-            <span>Enviar por WhatsApp</span>
-          </button>
+      {/* ACTION BUTTONS (Apple Pill Physics) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '12px',
+        marginBottom: '20px'
+      }}>
+        <button
+          onClick={handleSendWhatsApp}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            padding: '14px 20px',
+            borderRadius: '999px',
+            backgroundColor: '#25D366',
+            color: '#052E16',
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(37, 211, 102, 0.28)',
+            transition: 'all 0.2s var(--apple-ease)'
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <MessageCircle size={20} strokeWidth={2.4} />
+          <span>Enviar por WhatsApp</span>
+        </button>
 
-          <button
-            onClick={handleDownloadQR}
-            className="btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px' }}
-          >
-            <Download size={18} />
-            <span>Guardar Imagen QR</span>
-          </button>
-        </div>
+        <button
+          onClick={handleDownloadQR}
+          className="apple-btn apple-btn-secondary"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            padding: '14px 20px',
+            fontSize: '0.95rem'
+          }}
+        >
+          <Download size={18} strokeWidth={2.2} />
+          <span>Guardar Pase Digital</span>
+        </button>
+      </div>
 
-        {/* Persistent URL Box */}
-        <div style={{
-          backgroundColor: '#FAF8F5',
-          border: '1px solid var(--accent-beige-border)',
-          borderRadius: '12px',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '24px',
-          fontSize: '0.88rem'
-        }}>
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
-            Enlace persistente: {ticketUrl}
+      {/* Persistent URL Pill */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.04)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        padding: '12px 18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginBottom: '24px'
+      }}>
+        <div style={{ overflow: 'hidden', minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: '0.72rem', color: '#6E6E73', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            Enlace permanente del pase
           </span>
-          <button
-            onClick={handleCopyLink}
-            style={{
-              backgroundColor: 'var(--accent-coffee)',
-              color: '#FFF',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-              marginLeft: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            {copied ? '¡Copiado!' : 'Copiar Enlace'}
-          </button>
+          <span style={{ display: 'block', fontSize: '0.85rem', color: '#D2D2D7', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {ticketUrl}
+          </span>
         </div>
 
         <button
-          onClick={onReset}
-          className="btn-secondary"
-          style={{ width: '100%', padding: '12px' }}
+          onClick={handleCopyLink}
+          style={{
+            background: copied ? '#10B981' : 'rgba(255, 255, 255, 0.12)',
+            color: '#FFFFFF',
+            border: '1px solid rgba(255, 255, 255, 0.16)',
+            padding: '8px 16px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.2s ease'
+          }}
         >
-          Hacer otra reservación
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+          <span>{copied ? '¡Copiado!' : 'Copiar'}</span>
         </button>
-
       </div>
+
+      {/* Return CTA */}
+      <div style={{ textAlign: 'center' }}>
+        <button
+          onClick={onReset}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--apple-blue)',
+            fontSize: '0.92rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            padding: '10px 18px',
+            transition: 'opacity 0.2s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
+          ← Realizar otra reservación
+        </button>
+      </div>
+
     </div>
   );
 }

@@ -356,78 +356,109 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '8px',
           backgroundColor: 'transparent',
-          color: 'var(--accent-coffee)',
+          border: 'none',
+          color: 'var(--apple-text-secondary)',
           fontWeight: 600,
-          marginBottom: '16px',
-          cursor: 'pointer'
+          fontSize: '0.9rem',
+          marginBottom: '18px',
+          cursor: 'pointer',
+          padding: '6px 0',
+          transition: 'color 0.2s'
         }}
+        onMouseEnter={e => e.currentTarget.style.color = '#F5F5F7'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--apple-text-secondary)'}
       >
-        <ArrowLeft size={18} /> Volver a la selección de zona
+        <ArrowLeft size={16} /> Volver a selección de zona
       </button>
 
-      {/* 5-MINUTE COUNTDOWN BANNER */}
+      {/* 5-MINUTE COUNTDOWN BANNER (Apple Capsule) */}
       <div style={{
-        backgroundColor: remainingSeconds <= 60 ? '#FEE2E2' : '#FEF3C7',
-        color: remainingSeconds <= 60 ? '#991B1B' : '#92400E',
-        border: `2px solid ${remainingSeconds <= 60 ? '#F87171' : '#F59E0B'}`,
-        borderRadius: '16px',
+        backgroundColor: remainingSeconds <= 60 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+        color: remainingSeconds <= 60 ? '#F87171' : '#FBBF24',
+        border: `1px solid ${remainingSeconds <= 60 ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+        borderRadius: '20px',
         padding: '14px 20px',
-        marginBottom: '20px',
+        marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        fontWeight: 700,
-        fontSize: '0.92rem',
-        boxShadow: 'var(--shadow-sm)',
-        transition: 'all 0.3s ease',
+        fontWeight: 600,
+        fontSize: '0.9rem',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         flexWrap: 'wrap',
-        gap: '12px'
+        gap: '12px',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Clock size={22} />
-          <div>
-            {remainingSeconds <= 60 ? (
-              <span>¡Queda menos de 1 minuto! Completa los datos antes de que se liberen los asientos.</span>
-            ) : (
-              <span>Tus asientos están apartados a tu nombre. Completa los datos para finalizar.</span>
-            )}
-          </div>
+          <Clock size={20} />
+          <span>
+            {remainingSeconds <= 60 
+              ? '¡Menos de 1 minuto! Completa los datos antes de que se liberen tus asientos.' 
+              : 'Tus asientos están apartados temporalmente. Completa los datos para confirmar.'}
+          </span>
         </div>
         <div style={{
-          backgroundColor: remainingSeconds <= 60 ? '#DC2626' : 'var(--accent-coffee)',
+          backgroundColor: remainingSeconds <= 60 ? '#DC2626' : 'rgba(255, 255, 255, 0.12)',
           color: '#FFFFFF',
-          padding: '6px 14px',
-          borderRadius: '20px',
+          padding: '4px 14px',
+          borderRadius: '999px',
           fontFamily: 'monospace',
-          fontSize: '1.25rem',
-          fontWeight: 900,
-          letterSpacing: '1px'
+          fontSize: '1.15rem',
+          fontWeight: 800
         }}>
           {formatTime(remainingSeconds)}
         </div>
       </div>
 
-      <div className="card-glass" style={{ borderRadius: '24px' }}>
+      <div className="apple-checkout-card">
         
-        {/* Banner Header with Official Event Logo */}
+        {/* Banner Header with Apple Aesthetics */}
         <div style={{
-          backgroundColor: '#FFF8F2',
-          border: '1px solid var(--accent-beige-border)',
-          borderRadius: '18px',
-          padding: '24px',
+          backgroundColor: '#14141E',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '20px',
+          padding: '28px 20px',
           textAlign: 'center',
-          marginBottom: '24px'
+          marginBottom: '28px',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '-40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '300px',
+            height: '120px',
+            background: 'radial-gradient(ellipse, rgba(0, 113, 227, 0.2) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
 
-          <h2 style={{ fontSize: '1.9rem', marginTop: '4px', color: 'var(--accent-coffee)', fontFamily: 'var(--font-heading)' }}>
-            CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026
+          <span className="apple-kicker" style={{ marginBottom: '10px' }}>
+            REGISTRO DE ACCESOS
+          </span>
+
+          <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: '1.8rem', marginTop: '4px', marginBottom: '8px' }}>
+            CONGRESO ANUAL DE MUJERES AUTÉNTICAS
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontStyle: 'italic', marginTop: '6px' }}>
+          <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.92rem', fontStyle: 'italic', maxWidth: '580px', margin: '0 auto 14px' }}>
             "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas."
           </p>
-          <div style={{ marginTop: '12px', fontSize: '0.9rem', color: 'var(--accent-coffee)', fontWeight: 700 }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 16px',
+            borderRadius: '999px',
+            background: 'rgba(0, 113, 227, 0.12)',
+            border: '1px solid rgba(0, 113, 227, 0.3)',
+            fontSize: '0.88rem',
+            color: '#60A5FA',
+            fontWeight: 700
+          }}>
             Reservando {quantity} {quantity === 1 ? 'entrada' : 'entradas'} en {zone.name} — Total: {totalPrice}
           </div>
         </div>
@@ -450,9 +481,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
           
           {/* SECTION 1: ATTENDEE CARDS */}
           <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '1.3rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-coffee)' }}>
-              <UserCheck size={22} color="var(--accent-coffee)" />
-              Información de cada Asistente ({quantity})
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#F5F5F7' }}>
+              <UserCheck size={22} color="var(--apple-blue)" />
+              <span>Información de los Asistentes ({quantity})</span>
             </h3>
 
             {attendees.map((att, index) => {
@@ -461,21 +492,32 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
               return (
                 <div key={index} style={{
-                  backgroundColor: '#FAF8F5',
-                  border: '2px solid var(--accent-beige-border)',
+                  backgroundColor: '#14141E',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '20px',
                   padding: '24px',
-                  marginBottom: '24px',
-                  boxShadow: 'var(--shadow-sm)'
+                  marginBottom: '20px',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '10px' }}>
-                    <div style={{ fontWeight: 800, color: 'var(--accent-coffee)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <User size={18} /> Persona #{index + 1}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px' }}>
+                    <div style={{ fontWeight: 800, color: '#F5F5F7', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <User size={18} color="var(--apple-blue)" /> Persona #{index + 1}
                     </div>
 
                     {seatBadge && (
-                      <span className="badge" style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFF', fontSize: '0.85rem' }}>
-                        <Ticket size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                      <span style={{
+                        backgroundColor: 'rgba(0, 113, 227, 0.15)',
+                        color: '#60A5FA',
+                        border: '1px solid rgba(0, 113, 227, 0.3)',
+                        padding: '4px 12px',
+                        borderRadius: '999px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <Ticket size={13} />
                         {seatBadge}
                       </span>
                     )}
@@ -485,12 +527,11 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                     
                     {/* 1. Nombre Completo */}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '6px' }}>
-                        Nombre Completo *
-                      </label>
+                      <label className="apple-label">Nombre Completo *</label>
                       <input 
                         type="text" 
-                        placeholder="Tu respuesta"
+                        className="apple-input"
+                        placeholder="Nombre y dos apellidos"
                         value={att.full_name}
                         onChange={(e) => handleAttendeeChange(index, 'full_name', e.target.value)}
                         required
@@ -499,13 +540,12 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
                     {/* 2. Edad */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '6px' }}>
-                        Edad *
-                      </label>
+                      <label className="apple-label">Edad *</label>
                       <input 
                         type="number" 
                         min="1"
-                        placeholder="Tu respuesta"
+                        className="apple-input"
+                        placeholder="Ej. 28"
                         value={att.age}
                         onChange={(e) => {
                           const val = parseInt(e.target.value, 10);
@@ -517,12 +557,11 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
                     {/* 3. Número de Teléfono */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '6px' }}>
-                        Número de teléfono *
-                      </label>
+                      <label className="apple-label">Número de Teléfono (WhatsApp) *</label>
                       <input 
                         type="tel" 
-                        placeholder="Tu respuesta (WhatsApp)"
+                        className="apple-input"
+                        placeholder="Ej. 8888 8888"
                         value={att.phone}
                         onChange={(e) => handleAttendeeChange(index, 'phone', e.target.value)}
                         required
@@ -531,12 +570,11 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
                     {/* 4. ¿Dónde vive? */}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '6px' }}>
-                        ¿Dónde vive? *
-                      </label>
+                      <label className="apple-label">Lugar de Residencia *</label>
                       <input 
                         type="text" 
-                        placeholder="Tu respuesta (ej. Heredia, San José, etc.)"
+                        className="apple-input"
+                        placeholder="Provincia, Cantón o Distrito"
                         value={att.residence}
                         onChange={(e) => handleAttendeeChange(index, 'residence', e.target.value)}
                         required
@@ -545,78 +583,82 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
                     {/* 6. ¿Te congregas en Visión Jesús? */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '8px' }}>
-                        ¿Te congregas en Visión Jesús? *
-                      </label>
+                      <label className="apple-label">¿Te congregas en Visión Jesús? *</label>
                       <div style={{ display: 'flex', gap: '10px' }}>
-                        {['Sí', 'No'].map(ans => (
-                          <label key={ans} style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            backgroundColor: att.is_vision_jesus === ans ? 'var(--accent-coffee)' : '#FFFFFF',
-                            color: att.is_vision_jesus === ans ? '#FFFFFF' : 'var(--accent-coffee)',
-                            border: '1px solid var(--accent-beige-border)',
-                            padding: '10px',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontWeight: 700
-                          }}>
-                            <input 
-                              type="radio"
-                              name={`is_vision_${index}`}
-                              value={ans}
-                              checked={att.is_vision_jesus === ans}
-                              onChange={(e) => handleAttendeeChange(index, 'is_vision_jesus', e.target.value)}
-                              style={{ display: 'none' }}
-                            />
-                            {ans}
-                          </label>
-                        ))}
+                        {['Sí', 'No'].map(ans => {
+                          const isSelected = att.is_vision_jesus === ans;
+                          return (
+                            <label key={ans} style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.05)',
+                              color: isSelected ? '#FFFFFF' : '#A1A1A6',
+                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
+                              padding: '10px',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                              transition: 'all 0.2s var(--apple-ease)'
+                            }}>
+                              <input 
+                                type="radio"
+                                name={`is_vision_${index}`}
+                                value={ans}
+                                checked={isSelected}
+                                onChange={(e) => handleAttendeeChange(index, 'is_vision_jesus', e.target.value)}
+                                style={{ display: 'none' }}
+                              />
+                              {ans}
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* 7. ¿A cuál Red asistes? */}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '8px' }}>
-                        ¿A cuál Red asistes? *
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                        {['Red FuXión', 'Red Move', 'Red Diamante', 'Red de emprendedores', 'Ninguna'].map(net => (
-                          <label key={net} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: att.church_network === net ? 'var(--accent-coffee)' : '#FFFFFF',
-                            color: att.church_network === net ? '#FFFFFF' : 'var(--accent-coffee)',
-                            border: '1px solid var(--accent-beige-border)',
-                            padding: '10px 14px',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontSize: '0.88rem',
-                            fontWeight: 600
-                          }}>
-                            <input 
-                              type="radio"
-                              name={`network_${index}`}
-                              value={net}
-                              checked={att.church_network === net}
-                              onChange={(e) => handleAttendeeChange(index, 'church_network', e.target.value)}
-                              style={{ display: 'none' }}
-                            />
-                            <span>{att.church_network === net ? '●' : '○'} {net}</span>
-                          </label>
-                        ))}
+                      <label className="apple-label">¿A cuál Red asistes? *</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                        {['Red FuXión', 'Red Move', 'Red Diamante', 'Red de emprendedores', 'Ninguna'].map(net => {
+                          const isSelected = att.church_network === net;
+                          return (
+                            <label key={net} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.04)',
+                              color: isSelected ? '#FFFFFF' : '#D2D2D7',
+                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
+                              padding: '10px 14px',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              fontSize: '0.84rem',
+                              fontWeight: 600,
+                              transition: 'all 0.2s var(--apple-ease)'
+                            }}>
+                              <input 
+                                type="radio"
+                                name={`network_${index}`}
+                                value={net}
+                                checked={isSelected}
+                                onChange={(e) => handleAttendeeChange(index, 'church_network', e.target.value)}
+                                style={{ display: 'none' }}
+                              />
+                              <span>{isSelected ? '●' : '○'} {net}</span>
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* 8. ¿Quién te invitó? */}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '6px' }}>
-                        ¿Quién te invitó? *
-                      </label>
+                      <label className="apple-label">¿Quién te invitó? *</label>
                       <input 
                         type="text" 
-                        placeholder="Tu respuesta"
+                        className="apple-input"
+                        placeholder="Nombre de la persona o medio"
                         value={att.invited_by}
                         onChange={(e) => handleAttendeeChange(index, 'invited_by', e.target.value)}
                         required
@@ -625,33 +667,36 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
                     {/* 9. ¿Fuiste a Encuentro de mujeres en Visión Jesús? */}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '8px' }}>
-                        ¿Fuiste a Encuentro de mujeres en Visión Jesús? *
-                      </label>
+                      <label className="apple-label">¿Fuiste a Encuentro de mujeres en Visión Jesús? *</label>
                       <div style={{ display: 'flex', gap: '10px' }}>
-                        {['Sí', 'No'].map(ans => (
-                          <label key={ans} style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            backgroundColor: att.attended_encounter === ans ? 'var(--accent-coffee)' : '#FFFFFF',
-                            color: att.attended_encounter === ans ? '#FFFFFF' : 'var(--accent-coffee)',
-                            border: '1px solid var(--accent-beige-border)',
-                            padding: '10px',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontWeight: 700
-                          }}>
-                            <input 
-                              type="radio"
-                              name={`encounter_${index}`}
-                              value={ans}
-                              checked={att.attended_encounter === ans}
-                              onChange={(e) => handleAttendeeChange(index, 'attended_encounter', e.target.value)}
-                              style={{ display: 'none' }}
-                            />
-                            {ans}
-                          </label>
-                        ))}
+                        {['Sí', 'No'].map(ans => {
+                          const isSelected = att.attended_encounter === ans;
+                          return (
+                            <label key={ans} style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.05)',
+                              color: isSelected ? '#FFFFFF' : '#A1A1A6',
+                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
+                              padding: '10px',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                              transition: 'all 0.2s var(--apple-ease)'
+                            }}>
+                              <input 
+                                type="radio"
+                                name={`encounter_${index}`}
+                                value={ans}
+                                checked={isSelected}
+                                onChange={(e) => handleAttendeeChange(index, 'attended_encounter', e.target.value)}
+                                style={{ display: 'none' }}
+                              />
+                              {ans}
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -663,18 +708,25 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
           {/* SECTION 2: PURCHASER CONTACT DETAILS */}
           <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <User size={22} color="var(--accent-coffee)" />
-              Datos de la Persona Responsable del Pago
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#F5F5F7' }}>
+              <User size={22} color="var(--apple-blue)" />
+              <span>Persona Responsable de la Reserva</span>
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            <div style={{
+              backgroundColor: '#14141E',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '20px',
+              padding: '24px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '16px'
+            }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                  Nombre del Comprador *
-                </label>
+                <label className="apple-label">Nombre del Comprador *</label>
                 <input 
                   type="text" 
+                  className="apple-input"
                   placeholder="Tu nombre completo"
                   value={purchaserName}
                   onChange={(e) => {
@@ -686,11 +738,10 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                  Correo Electrónico *
-                </label>
+                <label className="apple-label">Correo Electrónico *</label>
                 <input 
                   type="email" 
+                  className="apple-input"
                   placeholder="ejemplo@correo.com"
                   value={purchaserEmail}
                   onChange={(e) => setPurchaserEmail(e.target.value)}
@@ -699,12 +750,11 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                  Teléfono WhatsApp *
-                </label>
+                <label className="apple-label">Teléfono WhatsApp *</label>
                 <input 
                   type="tel" 
-                  placeholder="Ej. +506 8888 9999"
+                  className="apple-input"
+                  placeholder="8888 8888"
                   value={purchaserPhone}
                   onChange={(e) => {
                     const clean = e.target.value.replace(/\D/g, '').slice(0, 8);
@@ -719,60 +769,62 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
 
           {/* SECTION 3: MÉTODO DE PAGO */}
           <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-coffee)' }}>
-              <CreditCard size={22} color="var(--accent-coffee)" />
-              Selecciona tu Método de Pago *
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#F5F5F7' }}>
+              <CreditCard size={22} color="var(--apple-blue)" />
+              <span>Selecciona Método de Pago *</span>
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              {/* PAYPAL OPTION (Oculto temporalmente) */}
+              
+              {/* PAYPAL OPTION */}
               {showPayPalOption && (
                 <div 
                   onClick={() => setPaymentMethod('paypal')}
                   style={{
-                    border: `2px solid ${paymentMethod === 'paypal' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
-                    backgroundColor: paymentMethod === 'paypal' ? '#FFF8F2' : '#FFFFFF',
-                    borderRadius: '16px',
-                    padding: '18px',
+                    border: `1px solid ${paymentMethod === 'paypal' ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
+                    backgroundColor: paymentMethod === 'paypal' ? 'rgba(0, 113, 227, 0.08)' : '#14141E',
+                    boxShadow: paymentMethod === 'paypal' ? '0 0 25px rgba(0, 113, 227, 0.2)' : 'none',
+                    borderRadius: '20px',
+                    padding: '20px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s var(--apple-ease)'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <CreditCard size={24} color="var(--accent-coffee)" />
-                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
+                    <CreditCard size={22} color="var(--apple-blue)" />
+                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#F5F5F7' }}>
                       PayPal / Tarjeta
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                    Paga con Tarjeta de Débito, Crédito o Cuenta PayPal. 
-                    <strong style={{ display: 'block', color: 'var(--color-green)', marginTop: '4px' }}>Entradas QR y Aprobación Instantánea</strong>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                    Paga con Tarjeta o saldo PayPal. 
+                    <strong style={{ display: 'block', color: '#34D399', marginTop: '4px' }}>Aprobación y QR instantáneo</strong>
                   </p>
                 </div>
               )}
-
 
               {/* SINPE OPTION */}
               <div 
                 onClick={() => setPaymentMethod('sinpe')}
                 style={{
-                  border: `2px solid ${paymentMethod === 'sinpe' ? 'var(--accent-coffee)' : 'var(--accent-beige-border)'}`,
-                  backgroundColor: paymentMethod === 'sinpe' ? '#FFF8F2' : '#FFFFFF',
-                  borderRadius: '16px',
-                  padding: '18px',
+                  border: `1px solid ${paymentMethod === 'sinpe' ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
+                  backgroundColor: paymentMethod === 'sinpe' ? 'rgba(0, 113, 227, 0.08)' : '#14141E',
+                  boxShadow: paymentMethod === 'sinpe' ? '0 0 25px rgba(0, 113, 227, 0.2)' : 'none',
+                  borderRadius: '20px',
+                  padding: '20px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s var(--apple-ease)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <Landmark size={24} color="var(--accent-coffee)" />
-                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--accent-coffee)' }}>
+                  <Landmark size={22} color="var(--apple-blue)" />
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#F5F5F7' }}>
                     SINPE Móvil
                   </span>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                  Transferencia en Colones al 60121225. 
-                  <span style={{ display: 'block', marginTop: '4px' }}>Sube el comprobante para revisión manual.</span>
+                <p style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                  Transferencia bancaria al 60121225. 
+                  <span style={{ display: 'block', marginTop: '4px' }}>Adjunta tu comprobante para validación.</span>
                 </p>
               </div>
             </div>
@@ -780,24 +832,23 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
             {/* PAYPAL CONTENT */}
             {paymentMethod === 'paypal' ? (
               <div style={{
-                backgroundColor: '#FAF8F5',
-                border: '2px solid var(--accent-beige-border)',
+                backgroundColor: '#14141E',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '20px',
                 padding: '24px',
                 textAlign: 'center'
               }}>
                 <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '0.92rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                    Subtotal entradas: <strong>{totalPrice}</strong> + Cargo por servicio (13%): <strong>{paypalFeePrice}</strong>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--apple-text-secondary)', marginBottom: '4px' }}>
+                    Subtotal entradas: <strong>{totalPrice}</strong> + Servicio (13%): <strong>{paypalFeePrice}</strong>
                   </div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F5F5F7' }}>
                     Total a pagar: {paypalTotalPrice} (~${paypalTotalUsdAmount} USD)
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Tipo de cambio de referencia: 1 USD = ₡{paypalConfig.exchangeRate || 515} CRC
+                  <div style={{ fontSize: '0.8rem', color: 'var(--apple-text-secondary)', marginTop: '4px' }}>
+                    Tipo de cambio: 1 USD = ₡{paypalConfig.exchangeRate || 515} CRC
                   </div>
                 </div>
-
 
                 {paypalConfig.clientId ? (
                   <PayPalScriptProvider 
@@ -809,40 +860,39 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                     }}
                   >
                     <PayPalButtons
-                      style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
+                      style={{ layout: "vertical", color: "gold", shape: "pill", label: "pay" }}
                       disabled={loading}
                       createOrder={handlePayPalCreateOrder}
                       onApprove={handlePayPalApprove}
                       onError={(err) => {
                         console.error('Error en PayPal Buttons:', err);
-                        setErrorMsg(prev => prev || (err && typeof err.message === 'string' && err.message ? err.message : 'Por favor verifica haber completado todos los datos obligatorios del formulario antes de pagar.'));
+                        setErrorMsg(prev => prev || (err && typeof err.message === 'string' && err.message ? err.message : 'Por favor completa todos los datos obligatorios antes de pagar.'));
                       }}
-
                     />
                   </PayPalScriptProvider>
                 ) : (
-                  <div style={{ padding: '20px', color: 'var(--accent-coffee)', fontWeight: 600 }}>
+                  <div style={{ padding: '20px', color: 'var(--apple-text-secondary)', fontWeight: 600 }}>
                     Cargando procesador de pago seguro de PayPal...
                   </div>
                 )}
-
               </div>
             ) : (
               /* SINPE CONTENT */
               <div>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.6 }}>
-                  Transfiere o deposita por medio de sinpe movil al número <strong style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)' }}>60121225</strong> la cantidad total de <strong>{totalPrice}</strong> y sube la foto o captura del comprobante.
+                <p style={{ fontSize: '0.92rem', color: 'var(--apple-text-secondary)', marginBottom: '16px', lineHeight: 1.6 }}>
+                  Transfiere por SINPE Móvil al número <strong style={{ fontSize: '1.15rem', color: '#60A5FA' }}>60121225</strong> la cantidad total de <strong style={{ color: '#34D399' }}>{totalPrice}</strong> y sube el comprobante.
                 </p>
 
                 <div style={{
-                  border: '2px dashed var(--accent-beige-border)',
-                  borderRadius: '16px',
-                  padding: '24px',
+                  border: '2px dashed rgba(255, 255, 255, 0.16)',
+                  borderRadius: '20px',
+                  padding: '28px 20px',
                   textAlign: 'center',
-                  backgroundColor: '#FAF8F5',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   cursor: 'pointer',
                   position: 'relative',
-                  marginBottom: '24px'
+                  marginBottom: '24px',
+                  transition: 'all 0.2s ease'
                 }}>
                   <input 
                     type="file"
@@ -868,30 +918,30 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                           maxWidth: '100%', 
                           maxHeight: '220px', 
                           objectFit: 'contain', 
-                          borderRadius: '12px', 
-                          boxShadow: 'var(--shadow-sm)', 
+                          borderRadius: '14px', 
+                          boxShadow: '0 8px 25px rgba(0,0,0,0.5)', 
                           marginBottom: '10px' 
                         }}
                       />
-                      <div style={{ fontWeight: 600, color: 'var(--color-green)' }}>
+                      <div style={{ fontWeight: 600, color: '#34D399', fontSize: '0.9rem' }}>
                         Archivo seleccionado: {file.name}
                       </div>
                     </div>
                   ) : file ? (
                     <div>
-                      <FileText size={40} color="var(--accent-coffee)" />
-                      <div style={{ fontWeight: 600, color: 'var(--color-green)', marginTop: '8px' }}>
+                      <FileText size={40} color="#60A5FA" />
+                      <div style={{ fontWeight: 600, color: '#34D399', marginTop: '8px' }}>
                         Archivo PDF adjunto: {file.name}
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <ImageIcon size={40} color="var(--accent-gold)" style={{ marginBottom: '8px' }} />
-                      <div style={{ fontWeight: 600, color: 'var(--accent-coffee)' }}>
-                        Haz clic aquí o arrastra tu comprobante de pago
+                      <ImageIcon size={40} color="var(--apple-blue)" style={{ marginBottom: '10px' }} />
+                      <div style={{ fontWeight: 700, color: '#F5F5F7', fontSize: '1rem' }}>
+                        Toca aquí para seleccionar tu comprobante de pago
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        Soporta imágenes (JPG, PNG, WEBP) o documentos PDF
+                      <div style={{ fontSize: '0.8rem', color: 'var(--apple-text-secondary)', marginTop: '4px' }}>
+                        Imágenes (JPG, PNG, WEBP) o documento PDF
                       </div>
                     </div>
                   )}
@@ -900,14 +950,23 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary"
-                  style={{ width: '100%', padding: '16px', fontSize: '1.1rem', borderRadius: '14px' }}
+                  className="apple-btn apple-btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    fontSize: '1.05rem',
+                    borderRadius: '999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px'
+                  }}
                 >
                   {loading ? (
                     <span>Procesando Reserva ({quantity} {quantity === 1 ? 'Boleto' : 'Boletos'})...</span>
                   ) : (
                     <>
-                      <Send size={20} />
+                      <Send size={18} strokeWidth={2.4} />
                       <span>Enviar Comprobante SINPE ({totalPrice})</span>
                     </>
                   )}

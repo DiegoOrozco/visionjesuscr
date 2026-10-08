@@ -309,8 +309,8 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
   const renderSvgLabels = (cfg) => {
     const isSelected = selectedZone && selectedZone.data.id === cfg.data.id;
     const isHovered = !selectedZone && hoveredZoneId === cfg.data.id;
-    const textColor = isHovered || isSelected ? '#FFFFFF' : '#1F2937';
-    const priceColor = isHovered || isSelected ? '#FAF8F5' : '#4B5563';
+    const textColor = isHovered || isSelected ? '#FFFFFF' : '#E5E7EB';
+    const priceColor = isHovered || isSelected ? 'rgba(255,255,255,0.9)' : '#9CA3AF';
 
     const words = cfg.label.split(' ');
     const isMultiWord = words.length > 1;
@@ -375,13 +375,50 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
     );
   };
 
+  const renderSeatBtn = (seatNum, seatCode, isOccupied, isSelected) => (
+    <button
+      key={seatNum}
+      disabled={isOccupied}
+      onClick={() => toggleSeatSelection(seatCode, isOccupied)}
+      title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar ${seatCode}`}
+      style={{
+        width: '42px',
+        height: '42px',
+        borderRadius: '11px',
+        border: isOccupied 
+          ? '1px solid rgba(255, 255, 255, 0.04)' 
+          : isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.12)',
+        backgroundColor: isOccupied 
+          ? 'rgba(255, 255, 255, 0.03)' 
+          : isSelected ? selectedZone.hoverColor : 'rgba(255, 255, 255, 0.07)',
+        color: isOccupied 
+          ? 'rgba(255, 255, 255, 0.2)' 
+          : isSelected ? '#FFFFFF' : '#F5F5F7',
+        fontWeight: 800,
+        fontSize: '0.85rem',
+        boxShadow: isSelected ? `0 0 16px ${selectedZone.hoverColor}` : 'none',
+        transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+        transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
+        cursor: isOccupied ? 'not-allowed' : 'pointer',
+        opacity: isOccupied ? 0.45 : 1
+      }}
+    >
+      {isOccupied ? '—' : seatNum}
+    </button>
+  );
+
   return (
     <div style={{
-      backgroundColor: '#FFFFFF',
-      borderRadius: '24px',
-      padding: '24px',
-      boxShadow: 'var(--shadow-lg)',
-      border: '1px solid var(--accent-beige-border)'
+      width: '100%',
+      maxWidth: '960px',
+      margin: '0 auto',
+      backgroundColor: '#0E0E14',
+      borderRadius: '28px',
+      padding: '28px 24px',
+      boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      fontFamily: 'var(--apple-font)',
+      color: '#F5F5F7'
     }}>
       
       {/* Header */}
@@ -389,15 +426,15 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '16px',
+        marginBottom: '20px',
         flexWrap: 'wrap',
         gap: '12px'
       }}>
         <div>
-          <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-coffee)', color: '#FFF' }}>
+          <span className="apple-kicker" style={{ marginBottom: '6px' }}>
             CONGRESO AUTÉNTICAS 2026
           </span>
-          <h2 style={{ fontSize: '1.75rem', marginTop: '6px', color: 'var(--accent-coffee)' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', marginTop: '4px', color: '#F5F5F7' }}>
             Auditorio Visión Jesús
           </h2>
         </div>
@@ -405,14 +442,14 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
         {selectedZone ? (
           <button 
             onClick={handleResetZoom}
-            className="btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-secondary)', fontWeight: 700 }}
+            className="apple-btn apple-btn-secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', fontSize: '0.85rem' }}
           >
-            <RotateCcw size={18} />
-            <span>REGRESAR AL MAPA PRINCIPAL</span>
+            <RotateCcw size={16} />
+            <span>Regresar al Mapa</span>
           </button>
         ) : (
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.88rem', color: 'var(--apple-text-secondary)', fontWeight: 500 }}>
             Toca una zona para seleccionar asientos por fila
           </div>
         )}
@@ -421,30 +458,31 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
       {/* Active Hover Banner */}
       {!selectedZone && (
         <div style={{
-          minHeight: '46px',
-          backgroundColor: activeHoverConfig ? activeHoverConfig.hoverColor : '#F5EBE1',
-          color: activeHoverConfig ? '#FFFFFF' : 'var(--accent-coffee)',
-          borderRadius: '16px',
-          padding: '10px 20px',
+          minHeight: '44px',
+          backgroundColor: activeHoverConfig ? activeHoverConfig.hoverColor : 'rgba(255, 255, 255, 0.04)',
+          color: activeHoverConfig ? '#FFFFFF' : 'var(--apple-text-secondary)',
+          border: '1px solid ' + (activeHoverConfig ? activeHoverConfig.hoverColor : 'rgba(255, 255, 255, 0.08)'),
+          borderRadius: '999px',
+          padding: '8px 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '10px',
-          fontWeight: 700,
-          fontSize: '1rem',
+          fontWeight: 600,
+          fontSize: '0.9rem',
           marginBottom: '20px',
-          transition: 'all 0.25s ease',
-          boxShadow: activeHoverConfig ? '0 10px 25px rgba(0,0,0,0.2)' : 'none'
+          transition: 'all 0.25s var(--apple-ease)',
+          boxShadow: activeHoverConfig ? '0 10px 25px rgba(0,0,0,0.3)' : 'none'
         }}>
           {activeHoverConfig ? (
             <>
-              <MousePointerClick size={20} />
+              <MousePointerClick size={18} />
               <span>
-                {activeHoverConfig.data.name} — {formatCRC(activeHoverConfig.data.price)} por boleto ({activeHoverConfig.data.available_capacity} cupos) — ¡HAZ CLIC PARA VER ASIENTOS!
+                {activeHoverConfig.data.name} — {formatCRC(activeHoverConfig.data.price)} ({activeHoverConfig.data.available_capacity} cupos) — Haz clic para ver asientos
               </span>
             </>
           ) : (
-            <span>Pasa el cursor sobre las zonas del auditorio</span>
+            <span>Explora el auditorio pasando el cursor o tocando las zonas</span>
           )}
         </div>
       )}
@@ -458,10 +496,10 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
           maxWidth: '900px',
           margin: '0 auto',
           borderRadius: '20px',
-          backgroundColor: '#FAF8F5',
-          border: '2px solid var(--accent-beige-border)',
+          backgroundColor: '#07070B',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           overflow: 'hidden',
-          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.03)'
+          boxShadow: 'inset 0 0 30px rgba(0,0,0,0.6)'
         }}
       >
         
@@ -485,17 +523,17 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 y="25" 
                 width="460" 
                 height="80" 
-                rx="10" 
-                fill="#000000" 
-                stroke="#333333" 
-                strokeWidth="2"
+                rx="14" 
+                fill="#161622" 
+                stroke="rgba(255, 255, 255, 0.18)" 
+                strokeWidth="1.5"
               />
               <text 
                 x="450" 
                 y="73" 
-                fill="#FFFFFF" 
-                fontSize="28" 
-                fontWeight="900" 
+                fill="#F5F5F7" 
+                fontSize="26" 
+                fontWeight="800" 
                 textAnchor="middle" 
                 letterSpacing="4"
               >
@@ -538,10 +576,10 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                     y={cfg.y}
                     width={cfg.width}
                     height={cfg.height}
-                    rx={cfg.rx}
-                    fill={isSelected || isHovered || shouldHighlight ? cfg.hoverColor : '#D1D5DB'}
-                    stroke={isSelected || isHovered ? '#2C1A0E' : (shouldHighlight ? '#111' : '#FFFFFF')}
-                    strokeWidth={isSelected || isHovered ? "4" : (shouldHighlight ? "4" : "3")}
+                    rx={14}
+                    fill={isSelected || isHovered || shouldHighlight ? cfg.hoverColor : 'rgba(255, 255, 255, 0.08)'}
+                    stroke={isSelected || isHovered ? '#FFFFFF' : (shouldHighlight ? cfg.hoverColor : 'rgba(255, 255, 255, 0.14)')}
+                    strokeWidth={isSelected || isHovered ? "3" : "1.5"}
                     style={{ transition: 'all 0.25s ease' }}
                   />
 
@@ -558,32 +596,47 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
       {selectedZone && (
         <div style={{
           marginTop: '24px',
-          backgroundColor: '#FAF8F5',
-          border: '2px solid ' + selectedZone.hoverColor,
-          borderRadius: '20px',
-          padding: '24px',
-          animation: 'fadeInUp 0.3s ease-out'
+          backgroundColor: '#12121A',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          borderRadius: '24px',
+          padding: '28px 24px',
+          animation: 'fadeInUp 0.3s ease-out',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '18px',
-            borderBottom: '1px solid var(--accent-beige-border)',
-            paddingBottom: '12px'
+            marginBottom: '20px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            paddingBottom: '16px',
+            flexWrap: 'wrap',
+            gap: '12px'
           }}>
             <div>
-              <span className="badge" style={{ backgroundColor: selectedZone.hoverColor, color: '#FFF' }}>
-                ZONA SELECCIONADA
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 12px',
+                borderRadius: '999px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                backgroundColor: selectedZone.hoverColor,
+                color: '#FFFFFF'
+              }}>
+                Zona Seleccionada
               </span>
-              <h3 style={{ fontSize: '1.5rem', color: 'var(--accent-coffee)', marginTop: '4px' }}>
-                {selectedZone.label} ({formatCRC(selectedZone.data.price)} / boleto)
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#F5F5F7', marginTop: '6px', letterSpacing: '-0.02em' }}>
+                {selectedZone.label} <span style={{ color: 'var(--apple-text-secondary)', fontSize: '1rem', fontWeight: 500 }}>({formatCRC(selectedZone.data.price)} / boleto)</span>
               </h3>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Monto a Pagar:</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-green)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--apple-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Total Estimado:</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#34D399', letterSpacing: '-0.02em' }}>
                 {formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}
               </div>
             </div>
@@ -592,48 +645,55 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
           {/* Seat Legend */}
           <div style={{
             display: 'flex',
-            gap: '16px',
-            marginBottom: '16px',
-            fontSize: '0.85rem',
+            gap: '20px',
+            marginBottom: '20px',
+            fontSize: '0.82rem',
             fontWeight: 600,
-            alignItems: 'center'
+            alignItems: 'center',
+            color: 'var(--apple-text-secondary)',
+            flexWrap: 'wrap'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '16px', height: '16px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #D1D5DB' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.18)' }} />
               <span>Disponible</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '16px', height: '16px', borderRadius: '4px', backgroundColor: selectedZone.hoverColor }} />
-              <span>Seleccionado</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: selectedZone.hoverColor, border: '1px solid #FFFFFF' }} />
+              <span style={{ color: '#F5F5F7' }}>Seleccionado</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '16px', height: '16px', borderRadius: '4px', backgroundColor: '#4B5563', border: '1px solid #374151' }} />
-              <span>Ocupado / Reservado</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)' }} />
+              <span>Ocupado</span>
             </div>
           </div>
-
-
 
           {/* Selected seats pills preview */}
           {selectedSeats.length > 0 && (
             <div style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--accent-beige-border)',
-              borderRadius: '12px',
-              padding: '10px 16px',
-              marginBottom: '16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '16px',
+              padding: '12px 18px',
+              marginBottom: '20px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               flexWrap: 'wrap'
             }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-coffee)' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F5F7' }}>
                 Asientos Marcados ({selectedSeats.length}):
               </span>
               {selectedSeats.map(s => {
                 const displayCode = s.includes(' - ') ? s.split(' - ').slice(1).join(' - ') : s;
                 return (
-                  <span key={s} className="badge" style={{ backgroundColor: selectedZone.hoverColor, color: '#FFF' }}>
+                  <span key={s} style={{
+                    backgroundColor: selectedZone.hoverColor,
+                    color: '#FFFFFF',
+                    padding: '4px 12px',
+                    borderRadius: '999px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700
+                  }}>
                     {displayCode}
                   </span>
                 );
@@ -689,7 +749,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
 
                   return (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -698,38 +758,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                           const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
                           const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
                           const isSelected = selectedSeats.includes(seatCode);
-
-                          return (
-                            <button
-                              key={seatNum}
-                              disabled={isOccupied}
-                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
-                              style={{
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '10px',
-                                border: isOccupied 
-                                  ? '1px solid #374151' 
-                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                                backgroundColor: isOccupied 
-                                  ? '#4B5563' 
-                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                                color: isOccupied 
-                                  ? '#9CA3AF' 
-                                  : isSelected ? '#FFFFFF' : '#1F2937',
-                                fontWeight: 900,
-                                fontSize: '0.85rem',
-                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: isOccupied ? 'not-allowed' : 'pointer',
-                                opacity: isOccupied ? 0.7 : 1
-                              }}
-                            >
-                              {isOccupied ? 'X' : seatNum}
-                            </button>
-                          );
+                          return renderSeatBtn(seatNum, seatCode, isOccupied, isSelected);
                         })}
                       </div>
                     </div>
@@ -742,7 +771,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 if (selectedZone.data.id === 'vip_central') {
                   return seatLayouts.vip_central.map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -751,38 +780,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                           const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
                           const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
                           const isSelected = selectedSeats.includes(seatCode);
-
-                          return (
-                            <button
-                              key={seatNum}
-                              disabled={isOccupied}
-                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
-                              style={{
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '10px',
-                                border: isOccupied 
-                                  ? '1px solid #374151' 
-                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                                backgroundColor: isOccupied 
-                                  ? '#4B5563' 
-                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                                color: isOccupied 
-                                  ? '#9CA3AF' 
-                                  : isSelected ? '#FFFFFF' : '#1F2937',
-                                fontWeight: 900,
-                                fontSize: '0.85rem',
-                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: isOccupied ? 'not-allowed' : 'pointer',
-                                opacity: isOccupied ? 0.7 : 1
-                              }}
-                            >
-                              {isOccupied ? 'X' : seatNum}
-                            </button>
-                          );
+                          return renderSeatBtn(seatNum, seatCode, isOccupied, isSelected);
                         })}
                       </div>
                     </div>
@@ -790,7 +788,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 } else {
                   return seatLayouts[selectedZone.data.id].filter((r, rIdx) => isRowVisible(r.rowLabel, rIdx)).map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -799,38 +797,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                           const seatCode = `${selectedZone.data.id} - ${r.rowLabel} - Asiento #${seatNum}`;
                           const isOccupied = checkSeatOccupied(selectedZone.data.id, r.rowLabel, rIdx, i);
                           const isSelected = selectedSeats.includes(seatCode);
-
-                          return (
-                            <button
-                              key={seatNum}
-                              disabled={isOccupied}
-                              onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                              title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${r.rowLabel} Asiento #${seatNum}`}
-                              style={{
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '10px',
-                                border: isOccupied 
-                                  ? '1px solid #374151' 
-                                  : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                                backgroundColor: isOccupied 
-                                  ? '#4B5563' 
-                                  : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                                color: isOccupied 
-                                  ? '#9CA3AF' 
-                                  : isSelected ? '#FFFFFF' : '#1F2937',
-                                fontWeight: 900,
-                                fontSize: '0.85rem',
-                                boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: isOccupied ? 'not-allowed' : 'pointer',
-                                opacity: isOccupied ? 0.7 : 1
-                              }}
-                            >
-                              {isOccupied ? 'X' : seatNum}
-                            </button>
-                          );
+                          return renderSeatBtn(seatNum, seatCode, isOccupied, isSelected);
                         })}
                       </div>
                     </div>
@@ -846,7 +813,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 const cols = selectedZone.data.id === 'central_atras' ? 15 : 10;
                 return (
                   <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ width: '60px', fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-coffee)' }}>
+                    <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
                       {rLabel}
                     </span>
                     <div style={{ display: 'flex', gap: '6px' }}>
@@ -855,38 +822,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                         const seatCode = `${selectedZone.data.id} - ${rLabel} - Asiento #${seatNum}`;
                         const isOccupied = checkSeatOccupied(selectedZone.data.id, rLabel, rIdx, i);
                         const isSelected = selectedSeats.includes(seatCode);
-
-                        return (
-                          <button
-                            key={seatNum}
-                            disabled={isOccupied}
-                            onClick={() => toggleSeatSelection(seatCode, isOccupied)}
-                            title={isOccupied ? 'Asiento Ocupado / Reservado' : `Seleccionar Fila ${rLabel} Asiento #${seatNum}`}
-                            style={{
-                              width: '44px',
-                              height: '44px',
-                              borderRadius: '10px',
-                              border: isOccupied 
-                                ? '1px solid #374151' 
-                                : isSelected ? '3px solid #2C1A0E' : '1px solid #D1D5DB',
-                              backgroundColor: isOccupied 
-                                ? '#4B5563' 
-                                : isSelected ? selectedZone.hoverColor : '#FFFFFF',
-                              color: isOccupied 
-                                ? '#9CA3AF' 
-                                : isSelected ? '#FFFFFF' : '#1F2937',
-                              fontWeight: 900,
-                              fontSize: '0.85rem',
-                              boxShadow: isSelected ? '0 6px 16px rgba(0,0,0,0.3)' : 'none',
-                              transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                              transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                              cursor: isOccupied ? 'not-allowed' : 'pointer',
-                              opacity: isOccupied ? 0.7 : 1
-                            }}
-                          >
-                            {isOccupied ? 'X' : seatNum}
-                          </button>
-                        );
+                        return renderSeatBtn(seatNum, seatCode, isOccupied, isSelected);
                       })}
                     </div>
                   </div>
@@ -895,74 +831,90 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
             })()}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
             <button
               onClick={handleConfirmSelectedSeats}
               disabled={holdingSeats}
-              className="btn-primary"
               style={{
                 flex: 1,
-                padding: '16px',
-                fontSize: '1.1rem',
+                padding: '16px 24px',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                color: '#FFFFFF',
                 backgroundColor: selectedZone.hoverColor,
-                borderRadius: '12px',
-                opacity: holdingSeats ? 0.7 : 1
+                borderRadius: '999px',
+                border: 'none',
+                cursor: holdingSeats ? 'wait' : 'pointer',
+                opacity: holdingSeats ? 0.7 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                boxShadow: `0 10px 30px ${selectedZone.hoverColor}66`,
+                transition: 'all 0.2s var(--apple-ease)'
               }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <Check size={20} />
+              <Check size={20} strokeWidth={2.5} />
               <span>
-                {holdingSeats ? 'Verificando disponibilidad...' : `Reservar (${selectedSeats.length > 0 ? selectedSeats.length : 1} ${selectedSeats.length === 1 ? 'Boleto' : 'Boletos'}) — Total: ${formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}`}
+                {holdingSeats ? 'Verificando disponibilidad...' : `Continuar (${selectedSeats.length > 0 ? selectedSeats.length : 1} ${selectedSeats.length === 1 ? 'Boleto' : 'Boletos'}) — Total: ${formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}`}
               </span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Zone list cards */}
+      {/* Zone list cards (Apple Bento Grid) */}
       {!selectedZone && (
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '12px',
-          marginTop: '24px'
+          gap: '14px',
+          marginTop: '28px'
         }}>
-          {zoneList.map((cfg) => (
-            <div
-              key={cfg.data.id}
-              onMouseEnter={() => setHoveredZoneId(cfg.data.id)}
-              onMouseLeave={() => setHoveredZoneId(null)}
-              onClick={() => handleZoneClick(cfg)}
-              style={{
-                backgroundColor: hoveredZoneId === cfg.data.id ? cfg.hoverColor : '#FFFFFF',
-                color: hoveredZoneId === cfg.data.id ? '#FFFFFF' : 'var(--accent-coffee)',
-                border: `2px solid ${hoveredZoneId === cfg.data.id ? '#2C1A0E' : 'var(--accent-beige-border)'}`,
-                borderRadius: '14px',
-                padding: '12px 14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                minHeight: '80px'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <h3 style={{ 
-                  fontSize: '0.88rem', 
-                  margin: 0, 
-                  color: hoveredZoneId === cfg.data.id ? '#FFFFFF' : 'var(--accent-coffee)',
-                  fontWeight: 900,
-                  lineHeight: 1.2
-                }}>
-                  {cfg.label}
-                </h3>
-                <span style={{ fontSize: '0.95rem', fontWeight: 900 }}>{formatCRC(cfg.data.price)}</span>
+          {zoneList.map((cfg) => {
+            const isHovered = hoveredZoneId === cfg.data.id;
+            return (
+              <div
+                key={cfg.data.id}
+                onMouseEnter={() => setHoveredZoneId(cfg.data.id)}
+                onMouseLeave={() => setHoveredZoneId(null)}
+                onClick={() => handleZoneClick(cfg)}
+                style={{
+                  backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.08)' : '#14141E',
+                  color: '#F5F5F7',
+                  border: `1px solid ${isHovered ? cfg.hoverColor : 'rgba(255, 255, 255, 0.08)'}`,
+                  borderRadius: '20px',
+                  padding: '16px 18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s var(--apple-ease)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  minHeight: '88px',
+                  boxShadow: isHovered ? `0 14px 35px rgba(0,0,0,0.5), 0 0 20px ${cfg.hoverColor}33` : 'none',
+                  transform: isHovered ? 'translateY(-2px)' : 'none'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h3 style={{ 
+                    fontSize: '0.92rem', 
+                    margin: 0, 
+                    color: isHovered ? cfg.hoverColor : '#F5F5F7',
+                    fontWeight: 800,
+                    lineHeight: 1.2
+                  }}>
+                    {cfg.label}
+                  </h3>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF' }}>{formatCRC(cfg.data.price)}</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', marginTop: '6px', color: 'var(--apple-text-secondary)' }}>
+                  {cfg.sublabel} • {cfg.data.available_capacity} cupos
+                </div>
               </div>
-              <div style={{ fontSize: '0.78rem', marginTop: '4px', opacity: 0.9 }}>
-                {cfg.sublabel} • {cfg.data.available_capacity} cupos
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

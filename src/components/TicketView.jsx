@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { Calendar, CheckCircle, Clock, MapPin, MessageCircle, ShieldAlert, Sparkles, User, Users, Download } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, MapPin, MessageCircle, ShieldAlert, Sparkles, User, Users, Download, ArrowLeft, Ticket } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -17,13 +17,13 @@ export default function TicketView({ qrHash, onGoHome }) {
       html2canvas(ticketCardRef.current, {
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        scale: 3 // Higher resolution
+        backgroundColor: '#0A0A10',
+        scale: 3 // Retina resolution
       }).then(canvas => {
         const imageUri = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         const firstTicket = ticket.attendees[0]?.assigned_ticket_code || 'Boleto';
-        link.download = `Boleto-${firstTicket.replace(/\s+/g, '-')}.png`;
+        link.download = `Pase-Digital-${firstTicket.replace(/\s+/g, '-')}.png`;
         link.href = imageUri;
         link.click();
       }).catch(err => {
@@ -53,10 +53,10 @@ export default function TicketView({ qrHash, onGoHome }) {
   useEffect(() => {
     if (ticket && canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, ticket.qr_code_hash, {
-        width: 250,
+        width: 260,
         margin: 2,
         color: {
-          dark: '#2C1A0E',
+          dark: '#0A0A0E',
           light: '#FFFFFF'
         }
       });
@@ -65,8 +65,27 @@ export default function TicketView({ qrHash, onGoHome }) {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--accent-coffee)' }}>
-        <h2>Cargando boleto digital...</h2>
+      <div style={{
+        minHeight: '60vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'var(--apple-font)',
+        color: '#F5F5F7'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid rgba(255, 255, 255, 0.1)',
+          borderTopColor: 'var(--apple-blue)',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+          marginBottom: '16px'
+        }} />
+        <p style={{ fontSize: '1rem', color: 'var(--apple-text-secondary)', fontWeight: 500 }}>
+          Cargando pase digital...
+        </p>
       </div>
     );
   }
@@ -110,153 +129,441 @@ export default function TicketView({ qrHash, onGoHome }) {
 
   if (errorMsg || !ticket) {
     return (
-      <div style={{ maxWidth: '500px', margin: '60px auto', padding: '0 20px' }}>
-        <div className="card-glass" style={{ textAlign: 'center' }}>
-          <ShieldAlert size={48} color="var(--color-red)" style={{ marginBottom: '16px' }} />
-          <h2>Boleto No Encontrado</h2>
-          <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>{errorMsg}</p>
-          <button onClick={onGoHome} className="btn-primary" style={{ marginTop: '20px' }}>
-            Ir a Inicio
+      <div style={{ maxWidth: '480px', margin: '60px auto', padding: '0 20px', fontFamily: 'var(--apple-font)' }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '24px',
+          padding: '36px 24px',
+          textAlign: 'center'
+        }}>
+          <ShieldAlert size={48} color="#EF4444" style={{ marginBottom: '16px' }} />
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F5F5F7', marginBottom: '8px' }}>
+            Pase No Encontrado
+          </h2>
+          <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.92rem', marginBottom: '24px' }}>
+            {errorMsg}
+          </p>
+          <button onClick={onGoHome} className="apple-btn apple-btn-primary" style={{ padding: '12px 28px' }}>
+            Volver al Inicio
           </button>
         </div>
       </div>
     );
   }
 
-  const statusBadge = () => {
+  const renderStatusBadge = () => {
     switch (ticket.status) {
       case 'aprobado':
-        return <span className="badge badge-approved">Boleto Verificado y Aprobado</span>;
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            background: 'rgba(16, 185, 129, 0.14)',
+            border: '1px solid rgba(16, 185, 129, 0.35)',
+            color: '#34D399'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34D399' }} />
+            Pase Verificado y Aprobado
+          </span>
+        );
       case 'usado':
-        const usedTime = ticket.scanned_at ? new Date(ticket.scanned_at + 'Z').toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica', hour: '2-digit', minute: '2-digit' }) : '';
-        return <span className="badge badge-used" style={{ backgroundColor: '#D97706', color: '#FFF' }}>Ingresado al Evento ({usedTime})</span>;
+        const usedTime = ticket.scanned_at 
+          ? new Date(ticket.scanned_at + 'Z').toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica', hour: '2-digit', minute: '2-digit' }) 
+          : '';
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            background: 'rgba(59, 130, 246, 0.14)',
+            border: '1px solid rgba(59, 130, 246, 0.35)',
+            color: '#60A5FA'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#60A5FA' }} />
+            Ingresado al Evento {usedTime ? `(${usedTime})` : ''}
+          </span>
+        );
       case 'rechazado':
-        return <span className="badge badge-rejected">Reserva Rechazada</span>;
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            background: 'rgba(239, 68, 68, 0.14)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            color: '#F87171'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#F87171' }} />
+            Reserva Rechazada
+          </span>
+        );
       default:
-        return <span className="badge badge-pending">Revisión de Pago Pendiente</span>;
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            background: 'rgba(245, 158, 11, 0.14)',
+            border: '1px solid rgba(245, 158, 11, 0.35)',
+            color: '#FBBF24'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#FBBF24' }} />
+            Revisión de Pago Pendiente
+          </span>
+        );
     }
   };
 
-  return (
-    <div style={{ maxWidth: '650px', margin: '20px auto', padding: '0 20px' }}>
-      <div className="card-glass" style={{ borderRadius: '24px', padding: '30px' }}>
-        
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{ marginBottom: '10px' }}>{statusBadge()}</div>
-          <h2 style={{ fontSize: '1.8rem', color: 'var(--accent-coffee)' }}>Conferencia de Mujeres</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Boleto Digital de Acceso Oficial</p>
-        </div>
+  const formattedSeatList = ticket.attendees.map(a => formatTicketCode(a.assigned_ticket_code)).join(' • ');
 
-        {/* QR Box */}
-        <div style={{ textAlign: 'center', margin: '20px 0' }}>
-          <div 
-            ref={ticketCardRef}
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '4px solid #C5A880',
-              borderRadius: '24px',
-              padding: '30px 24px',
-              display: 'inline-block',
-              boxShadow: 'var(--shadow-md)',
-              width: '100%',
-              maxWidth: '360px',
-              textAlign: 'center',
-              boxSizing: 'border-box'
-            }}
-          >
-            <canvas ref={canvasRef} style={{ display: 'block', margin: '0 auto' }} />
-            <div style={{ marginTop: '16px' }}>
-              <div style={{ fontSize: '0.9rem', color: '#8C7456', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>
-                {ticket.zone_name}
+  return (
+    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '30px 16px', fontFamily: 'var(--apple-font)' }}>
+      
+      {/* Top Bar Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <button
+          onClick={onGoHome}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--apple-text-secondary)',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 0',
+            transition: 'color 0.2s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#F5F5F7'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--apple-text-secondary)'}
+        >
+          <ArrowLeft size={16} />
+          <span>Inicio</span>
+        </button>
+
+        <div>{renderStatusBadge()}</div>
+      </div>
+
+      {/* APPLE WALLET DIGITAL PASS */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+        <div 
+          ref={ticketCardRef}
+          style={{
+            width: '100%',
+            maxWidth: '380px',
+            background: 'linear-gradient(180deg, #181824 0%, #0E0E16 60%, #08080E 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.14)',
+            borderRadius: '26px',
+            boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.05)',
+            padding: '24px 22px',
+            boxSizing: 'border-box',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Subtle Ambient Apple Glow inside Card */}
+          <div style={{
+            position: 'absolute',
+            top: '-50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '260px',
+            height: '140px',
+            background: 'radial-gradient(ellipse, rgba(0, 113, 227, 0.22) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }} />
+
+          {/* Pass Top Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            paddingBottom: '14px',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0071E3, #2563EB)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF'
+              }}>
+                <Ticket size={16} />
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#2C1A0E', lineHeight: 1.2 }}>
-                {ticket.attendees.map(a => formatTicketCode(a.assigned_ticket_code)).join(' • ')}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#6B7280', marginTop: '14px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
-                CÓDIGO DE CONTROL: <strong style={{ color: '#111827', fontFamily: 'monospace' }}>{ticket.qr_code_hash.substring(0, 6).toUpperCase()}</strong>
-              </div>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.08em', color: '#F5F5F7', textTransform: 'uppercase' }}>
+                VISIÓN JESÚS PASS
+              </span>
+            </div>
+
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#A1A1A6',
+              letterSpacing: '0.04em'
+            }}>
+              OFICIAL
+            </span>
+          </div>
+
+          {/* Event Title on Pass */}
+          <div style={{ margin: '16px 0 18px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--apple-blue)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+              Congreso Anual de Mujeres
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              AUTÉNTICAS 2026
             </div>
           </div>
 
-          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
-            <button
-              onClick={handleDownloadTicketImage}
-              className="btn-primary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                fontSize: '0.9rem',
-                backgroundColor: 'var(--accent-coffee)',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <Download size={18} />
-              <span>Guardar Boleto en Galería (Imagen)</span>
-            </button>
+          {/* QR Code Canvas */}
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '20px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+            position: 'relative',
+            zIndex: 1,
+            margin: '0 auto 18px',
+            maxWidth: '280px'
+          }}>
+            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', height: 'auto', borderRadius: '10px' }} />
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#6B7280', letterSpacing: '0.08em', marginTop: '8px', textTransform: 'uppercase' }}>
+              Escanear para acceso oficial
+            </span>
           </div>
-        </div>
- 
-         {/* Details Grid */}
-         <div style={{
-           backgroundColor: '#FAF8F5',
-           border: '1px solid var(--accent-beige-border)',
-           borderRadius: '16px',
-           padding: '20px',
-           marginBottom: '24px'
-         }}>
-           <h3 style={{ fontSize: '1.1rem', marginBottom: '14px', borderBottom: '1px solid var(--accent-beige-border)', paddingBottom: '8px' }}>
-             Resumen de la Reserva
-           </h3>
- 
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', fontSize: '0.9rem' }}>
-             <div>
-               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>COMPRADOR:</span>
-               <strong>{ticket.purchaser_name}</strong>
-             </div>
- 
-             <div>
-               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CANTIDAD DE BOLETOS:</span>
-               <strong>{ticket.quantity} {ticket.quantity === 1 ? 'Persona' : 'Personas'}</strong>
-             </div>
- 
-             <div>
-               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>TOTAL PAGADO:</span>
-               <strong>₡{Number(ticket.total_amount).toLocaleString('es-CR')}</strong>
-             </div>
- 
-             <div>
-               <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>CONTACTO:</span>
-               <strong>{ticket.purchaser_phone}</strong>
-             </div>
-           </div>
- 
-           {/* Attendee List */}
-           <div style={{ marginTop: '16px', borderTop: '1px dashed var(--accent-beige-border)', paddingTop: '12px' }}>
-             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-coffee)' }}>
-               Lista de Asistentes:
-             </span>
-             <ul style={{ listStyle: 'none', marginTop: '8px', padding: 0 }}>
-               {ticket.attendees.map((att, i) => {
-                 const cleanSeat = formatTicketCode(att.assigned_ticket_code);
-                 return (
-                   <li key={i} style={{ fontSize: '0.88rem', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                     <span>• <strong>{att.full_name}</strong> ({att.phone})</span>
-                     <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--accent-gold)' }}>{cleanSeat}</span>
-                   </li>
-                 );
-               })}
-             </ul>
-           </div>
-         </div>
 
-        <button onClick={onGoHome} className="btn-secondary" style={{ width: '100%', padding: '12px' }}>
-          Volver a Inicio
+          {/* Zone & Seats Badge */}
+          <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', marginBottom: '4px' }}>
+              {ticket.zone_name}
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+              {formattedSeatList}
+            </div>
+            <div style={{ fontSize: '0.82rem', color: '#A1A1A6', marginTop: '4px', fontWeight: 500 }}>
+              {ticket.quantity} {ticket.quantity === 1 ? 'Lugar Asignado' : 'Lugares Asignados'}
+            </div>
+          </div>
+
+          {/* Perforated Divider */}
+          <div style={{
+            position: 'relative',
+            margin: '14px -22px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              position: 'absolute',
+              left: '-9px'
+            }} />
+            <div style={{
+              flex: 1,
+              borderTop: '1px dashed rgba(255, 255, 255, 0.16)',
+              margin: '0 16px'
+            }} />
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              position: 'absolute',
+              right: '-9px'
+            }} />
+          </div>
+
+          {/* Pass Metadata Footer */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '12px',
+            paddingTop: '6px',
+            fontSize: '0.82rem',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div>
+              <span style={{ display: 'block', fontSize: '0.68rem', color: '#6E6E73', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                COMPRADOR
+              </span>
+              <strong style={{ color: '#F5F5F7', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', whiteSpace: 'nowrap' }}>
+                {ticket.purchaser_name}
+              </strong>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ display: 'block', fontSize: '0.68rem', color: '#6E6E73', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                CÓDIGO CONTROL
+              </span>
+              <strong style={{ color: 'var(--apple-blue)', fontFamily: 'monospace', fontSize: '0.92rem', fontWeight: 800 }}>
+                {ticket.qr_code_hash.substring(0, 6).toUpperCase()}
+              </strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+        <button
+          onClick={handleDownloadTicketImage}
+          className="apple-btn apple-btn-secondary"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 24px',
+            fontSize: '0.92rem'
+          }}
+        >
+          <Download size={18} strokeWidth={2.2} />
+          <span>Guardar Pase en Fotos</span>
         </button>
       </div>
+
+      {/* Detailed Reservation Glass Card */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        padding: '24px',
+        marginBottom: '24px'
+      }}>
+        <h3 style={{
+          fontSize: '1rem',
+          fontWeight: 700,
+          color: '#F5F5F7',
+          letterSpacing: '-0.01em',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Users size={18} color="var(--apple-blue)" />
+          <span>Detalles de la Reserva</span>
+        </h3>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          fontSize: '0.88rem',
+          marginBottom: '20px'
+        }}>
+          <div>
+            <span style={{ color: 'var(--apple-text-secondary)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+              Responsable
+            </span>
+            <strong style={{ color: '#F5F5F7', fontWeight: 600 }}>{ticket.purchaser_name}</strong>
+          </div>
+
+          <div>
+            <span style={{ color: 'var(--apple-text-secondary)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+              Boletos
+            </span>
+            <strong style={{ color: '#F5F5F7', fontWeight: 600 }}>{ticket.quantity} {ticket.quantity === 1 ? 'Persona' : 'Personas'}</strong>
+          </div>
+
+          <div>
+            <span style={{ color: 'var(--apple-text-secondary)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+              Total Pagado
+            </span>
+            <strong style={{ color: '#34D399', fontWeight: 700 }}>₡{Number(ticket.total_amount).toLocaleString('es-CR')}</strong>
+          </div>
+
+          <div>
+            <span style={{ color: 'var(--apple-text-secondary)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+              Teléfono de Contacto
+            </span>
+            <strong style={{ color: '#F5F5F7', fontWeight: 600 }}>{ticket.purchaser_phone}</strong>
+          </div>
+        </div>
+
+        {/* Attendee breakdown */}
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--apple-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '12px' }}>
+            Lista de Asistentes Acreditados
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {ticket.attendees.map((att, i) => {
+              const cleanSeat = formatTicketCode(att.assigned_ticket_code);
+              return (
+                <div
+                  key={i}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '0.88rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: 'var(--apple-text-secondary)', fontSize: '0.8rem', fontWeight: 600 }}>#{i + 1}</span>
+                    <strong style={{ color: '#F5F5F7', fontWeight: 600 }}>{att.full_name}</strong>
+                    {att.phone && (
+                      <span style={{ color: 'var(--apple-text-secondary)', fontSize: '0.8rem' }}>({att.phone})</span>
+                    )}
+                  </div>
+                  <span style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: 'var(--apple-blue)',
+                    background: 'rgba(0, 113, 227, 0.12)',
+                    padding: '3px 10px',
+                    borderRadius: '999px'
+                  }}>
+                    {cleanSeat}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }

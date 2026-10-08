@@ -1,14 +1,25 @@
-import React from 'react';
-import { Calendar, MapPin, ArrowRight, Sparkles, Ticket } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, MapPin, ArrowRight, Sparkles, Ticket, ShieldCheck, Menu, X } from 'lucide-react';
 
 export default function CongresosPage({ config = {}, onSelectEvent }) {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const events = [
     {
       id: 'autenticas',
       title: 'Congreso Mujeres Auténticas 2026',
-      subtitle: 'EDICIÓN ESPECIAL • MUJER VALIENTE',
-      status: 'ENTRADAS DISPONIBLES',
-      statusColor: '#10B981',
+      subtitle: 'Edición Especial • Mujer Valiente',
+      status: 'Entradas Disponibles',
+      statusColor: '#34C759',
       date: 'Viernes 18 y Sábado 19 de Octubre, 2026',
       location: 'Auditorio Visión Jesús, San José, CR',
       image: config.autenticas_hero_poster || '/logo.png',
@@ -19,10 +30,10 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
     },
     {
       id: 'sanados',
-      title: 'SANADOS PARA SANAR',
-      subtitle: 'MILAGROS Y RESTAURACIÓN',
-      status: 'PRÓXIMAMENTE',
-      statusColor: '#3B82F6',
+      title: 'Sanados para Sanar',
+      subtitle: 'Milagros y Restauración',
+      status: 'Próximamente',
+      statusColor: '#0071E3',
       date: 'Temporada 2026',
       location: 'Auditorio Visión Jesús',
       image: '/logo_oficial_transparente.png',
@@ -44,211 +55,156 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#030812',
+      backgroundColor: 'var(--apple-bg-base)',
       color: '#FFFFFF',
-      fontFamily: "'Outfit', 'Inter', sans-serif"
+      fontFamily: 'var(--apple-font)',
+      position: 'relative',
+      overflowX: 'hidden'
     }}>
-      {/* HEADER OFFICIAL VISIÓN JESÚS */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        padding: '16px 40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(3, 8, 18, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        flexWrap: 'wrap',
-        gap: '16px'
+      {/* 0. APPLE FLOATING FROSTED NAVBAR */}
+      <div className="apple-nav-wrapper" style={{
+        top: isScrolled ? '12px' : '20px'
       }}>
-        {/* LOGO */}
-        <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          onClick={() => window.location.href = '/'}
+        <header 
+          className={`apple-nav-bar ${isScrolled ? 'apple-nav-scrolled' : ''}`}
+          style={{
+            maxWidth: isScrolled ? '1060px' : '1140px'
+          }}
         >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
-        </div>
-
-        {/* MENU LINKS */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <a 
-            href="/" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            INICIO
-          </a>
-
-          <a 
-            href="/nosotros" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            NOSOTROS
-          </a>
-
-          <a 
-            href="/modelo" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            MODELO DE JESÚS
-          </a>
-
-          <a 
-            href="/congresos" 
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-          >
-            CONGRESOS
-          </a>
-
-          <a 
-            href="/#contacto-section" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONTACTO
-          </a>
-
-          <button 
-            onClick={() => window.location.href = '/autenticas'}
-            style={{
-              background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '10px 24px',
-              fontWeight: 800,
+          {/* LOGO */}
+          <div 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
               cursor: 'pointer',
-              fontSize: '0.85rem',
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
+            onClick={() => window.location.href = '/'}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            🎟️ CONGRESO 2026
-          </button>
+            <img 
+              src="/logo_oficial_transparente.png" 
+              alt="Visión Jesús Logo" 
+              style={{ 
+                height: isScrolled ? '38px' : '44px', 
+                objectFit: 'contain',
+                transition: 'height 0.3s ease',
+                filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4))'
+              }} 
+            />
+          </div>
 
-          {/* Admin Profile Controls */}
-          {(() => {
-            const currentAdmin = (localStorage.getItem('admin_user') ? JSON.parse(localStorage.getItem('admin_user')) : null);
-            if (!currentAdmin) return null;
-            return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-                {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
-                  <button 
-                    onClick={() => window.location.href = '/escanear'}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.8rem', padding: '6px 14px',
-                      fontWeight: 800, borderRadius: '50px',
-                      border: '1px solid #977DFF',
-                      backgroundColor: 'rgba(151, 125, 255, 0.15)',
-                      color: '#977DFF', cursor: 'pointer',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    📱 Escáner Puerta
-                  </button>
-                )}
+          {/* DESKTOP MENU LINKS */}
+          <nav className="apple-nav-links">
+            <a 
+              href="/" 
+              className="apple-nav-link"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
+            >
+              Inicio
+            </a>
+            <a 
+              href="/nosotros" 
+              className="apple-nav-link"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }}
+            >
+              Nosotros
+            </a>
+            <a 
+              href="/modelo" 
+              className="apple-nav-link"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }}
+            >
+              Modelo de Jesús
+            </a>
+            <a 
+              href="/congresos" 
+              className="apple-nav-link active"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            >
+              Congresos
+            </a>
+            <a 
+              href="/#contacto-section" 
+              className="apple-nav-link"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }}
+            >
+              Contacto
+            </a>
+          </nav>
 
-                {currentAdmin.role !== 'scanner' && (
-                  <button 
-                    onClick={() => window.location.href = '/admin'}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.8rem', padding: '6px 14px',
-                      fontWeight: 800, borderRadius: '50px',
-                      border: 'none',
-                      background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-                      color: '#FFFFFF', cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    🛡️ Panel Admin ({currentAdmin.username})
-                  </button>
-                )}
+          {/* RIGHT ACTIONS */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              onClick={() => window.location.href = '/autenticas'}
+              className="apple-btn apple-btn-accent"
+              style={{ fontSize: '0.82rem', padding: '8px 18px', borderRadius: '9999px' }}
+            >
+              <Ticket size={15} />
+              <span>Congreso 2026</span>
+            </button>
 
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem('admin_user');
-                    window.location.href = '/';
-                  }}
-                  style={{
-                    fontSize: '0.8rem', color: '#FF4D4D', background: 'none',
-                    border: 'none', textDecoration: 'underline', cursor: 'pointer',
-                    fontWeight: 700
-                  }}
-                >
-                  Salir
-                </button>
-              </div>
-            );
-          })()}
-        </nav>
-      </header>
+            {/* Mobile Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="apple-mobile-menu-btn"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '9999px',
+                padding: '8px',
+                color: '#FFFFFF',
+                cursor: 'pointer'
+              }}
+              aria-label="Menú"
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </header>
 
-      {/* HERO SECTION CATALOG */}
+        {/* Mobile Sheet */}
+        {mobileMenuOpen && (
+          <div className="apple-mobile-sheet">
+            <a href="/" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Inicio</a>
+            <a href="/nosotros" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Nosotros</a>
+            <a href="/modelo" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Modelo de Jesús</a>
+            <a href="/congresos" className="apple-nav-link active" style={{ fontSize: '1rem', padding: '10px 14px' }}>Congresos</a>
+            <a href="/#contacto-section" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Contacto</a>
+          </div>
+        )}
+      </div>
+
+      {/* HERO SECTION CATALOG - APPLE CINEMATIC */}
       <section style={{
-        padding: '80px 20px 40px 20px',
+        padding: 'clamp(140px, 18vh, 180px) 20px 40px 20px',
         textAlign: 'center',
-        background: 'radial-gradient(circle at 50% 20%, rgba(151, 125, 255, 0.15) 0%, rgba(3, 8, 18, 0) 70%)'
+        position: 'relative'
       }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <span style={{
-            fontSize: '0.8rem',
-            fontWeight: 800,
-            letterSpacing: '2.5px',
-            color: '#977DFF',
-            textTransform: 'uppercase',
-            display: 'inline-block',
-            marginBottom: '12px'
-          }}>
-            ADQUIERE ACCESOS A
-          </span>
-          <h1 style={{
-            fontSize: 'clamp(2.4rem, 5vw, 4rem)',
-            fontWeight: 950,
-            textTransform: 'uppercase',
-            letterSpacing: '-1px',
-            margin: '0 0 16px 0',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            NUESTROS EVENTOS
+        {/* Apple Ambient Center Light */}
+        <div 
+          className="apple-ambient-glow"
+          style={{
+            top: '20%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, rgba(151, 125, 255, 0.18) 0%, rgba(0, 113, 227, 0.08) 50%, transparent 80%)'
+          }}
+        />
+
+        <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div className="apple-kicker">
+            <span className="apple-kicker-dot"></span>
+            <span>Acceso & Reservas Oficiales</span>
+          </div>
+
+          <h1 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.5rem, 5.5vw, 4.2rem)', marginBottom: '16px' }}>
+            Nuestros Eventos
           </h1>
-          <div style={{
-            width: '40px',
-            height: '4px',
-            backgroundColor: '#977DFF',
-            borderRadius: '2px',
-            margin: '0 auto 24px auto'
-          }}></div>
-          <p style={{
-            color: '#94A3B8',
-            fontSize: '1.05rem',
-            lineHeight: 1.6,
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
+
+          <p className="apple-hero-subtitle" style={{ maxWidth: '620px', marginBottom: '0' }}>
             Descubre nuestras conferencias, congresos y actividades especiales. Selecciona el evento para ver detalles y reservar tu lugar.
           </p>
         </div>
@@ -265,32 +221,19 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
             <div 
               key={evt.id}
               onClick={() => handleEventClick(evt)}
+              className="apple-bento-card"
               style={{
-                backgroundColor: 'rgba(15, 23, 42, 0.65)',
-                border: evt.featured ? '2px solid rgba(151, 125, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '24px',
-                overflow: 'hidden',
+                padding: 0,
                 cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 display: 'flex',
-                flexDirection: 'column',
-                boxShadow: evt.featured ? '0 20px 40px rgba(151, 125, 255, 0.15)' : '0 10px 30px rgba(0,0,0,0.3)',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.borderColor = '#977DFF';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = evt.featured ? 'rgba(151, 125, 255, 0.4)' : 'rgba(255, 255, 255, 0.08)';
+                flexDirection: 'column'
               }}
             >
               {/* Event Image Banner */}
               <div style={{
-                height: '240px',
+                height: '250px',
                 width: '100%',
-                backgroundColor: '#0F172A',
+                backgroundColor: 'var(--apple-bg-surface-elevated)',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
@@ -305,85 +248,92 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                     height: '100%',
                     objectFit: evt.id === 'autenticas' ? 'cover' : 'contain',
                     padding: evt.id === 'autenticas' ? '0' : '30px',
-                    opacity: 0.9,
-                    transition: 'transform 0.5s ease'
+                    opacity: 0.92,
+                    transition: 'transform 0.45s ease'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 />
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.9) 100%)'
+                  background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(14, 14, 20, 0.85) 100%)'
                 }} />
 
-                {/* Status Badge */}
+                {/* Status Badge - Apple Pill */}
                 <span style={{
                   position: 'absolute',
                   top: '16px',
                   right: '16px',
-                  backgroundColor: evt.statusColor,
-                  color: '#FFFFFF',
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  color: evt.statusColor,
+                  border: `1px solid ${evt.statusColor}40`,
                   padding: '6px 14px',
-                  borderRadius: '30px',
-                  fontSize: '0.72rem',
-                  fontWeight: 900,
-                  letterSpacing: '1px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                  borderRadius: '9999px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase'
                 }}>
                   {evt.status}
                 </span>
               </div>
 
               {/* Event Content */}
-              <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '28px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <span style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
-                  color: '#977DFF',
-                  letterSpacing: '1.5px',
-                  marginBottom: '6px',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: 'var(--apple-text-secondary)',
+                  letterSpacing: '0.04em',
+                  marginBottom: '8px',
                   textTransform: 'uppercase'
                 }}>
                   {evt.subtitle}
                 </span>
 
                 <h2 style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 800,
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
                   color: '#FFFFFF',
-                  margin: '0 0 12px 0',
-                  lineHeight: 1.3
+                  margin: '0 0 10px 0',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.25
                 }}>
                   {evt.title}
                 </h2>
 
                 <p style={{
-                  fontSize: '0.9rem',
-                  color: '#94A3B8',
-                  lineHeight: 1.5,
+                  fontSize: '0.94rem',
+                  color: 'var(--apple-text-secondary)',
+                  lineHeight: 1.55,
                   marginBottom: '20px',
                   flex: 1
                 }}>
                   {evt.description}
                 </p>
 
-                {/* Date & Location */}
+                {/* Date & Location Capsule */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '8px',
-                  padding: '14px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: '12px',
-                  marginBottom: '20px',
-                  fontSize: '0.83rem',
-                  color: '#CBD5E1'
+                  padding: '14px 18px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '16px',
+                  marginBottom: '24px',
+                  fontSize: '0.84rem',
+                  color: 'var(--apple-text-primary)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Calendar size={16} color="#977DFF" />
+                    <Calendar size={15} color="var(--apple-purple)" />
                     <span>{evt.date}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={16} color="#977DFF" />
+                    <MapPin size={15} color="var(--apple-purple)" />
                     <span>{evt.location}</span>
                   </div>
                 </div>
@@ -396,7 +346,7 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                   gap: '12px',
                   marginTop: 'auto'
                 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', fontWeight: 500 }}>
                     {evt.priceInfo}
                   </span>
 
@@ -405,24 +355,14 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                       e.stopPropagation();
                       handleEventClick(evt);
                     }}
+                    className={`apple-btn ${evt.featured ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
                     style={{
                       padding: '10px 20px',
-                      backgroundColor: evt.featured ? '#0033FF' : 'rgba(255, 255, 255, 0.08)',
-                      color: '#FFFFFF',
-                      border: evt.featured ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
-                      borderRadius: '50px',
-                      fontWeight: 800,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      boxShadow: evt.featured ? '0 4px 15px rgba(0, 51, 255, 0.4)' : 'none',
-                      whiteSpace: 'nowrap'
+                      fontSize: '0.84rem'
                     }}
                   >
                     <span>{evt.featured ? 'Ver Detalles' : 'Información'}</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} />
                   </button>
                 </div>
 

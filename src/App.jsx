@@ -286,35 +286,46 @@ export default function App() {
 
         {/* VIEW 1: HOME (Hero with Official Large Annual Logo + SVG Croquis Map) */}
         {currentView === 'home' && (
-          <div className="container" style={{ paddingTop: '20px' }}>
+          <div className="container" style={{ paddingTop: '20px', fontFamily: 'var(--apple-font)' }}>
             
-            {/* Event Hero Banner with Official Large Annual Logo */}
+            {/* Event Hero Banner with Apple Aesthetic */}
             <div id="map-selection-section" style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--accent-beige-border)',
-              borderRadius: '24px',
-              padding: '40px 24px',
+              backgroundColor: '#0E0E14',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '28px',
+              padding: '48px 24px',
               textAlign: 'center',
-              boxShadow: 'var(--shadow-sm)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
               marginBottom: '24px',
-              background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF5EF 100%)'
+              position: 'relative',
+              overflow: 'hidden'
             }}>
+              <div style={{
+                position: 'absolute',
+                top: '-50px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '450px',
+                height: '180px',
+                background: 'radial-gradient(ellipse, rgba(0, 113, 227, 0.18) 0%, transparent 70%)',
+                pointerEvents: 'none'
+              }} />
 
               {(() => {
                 const cutoffStr = homepageConfig.presale_cutoff_date || (homepageConfig.autenticas_presale_end ? homepageConfig.autenticas_presale_end.split('T')[0] : '2026-08-30');
                 const isPresale = new Date().getTime() <= new Date(`${cutoffStr}T23:59:59`).getTime();
                 return (
-                  <span className="badge badge-approved" style={{ backgroundColor: 'var(--accent-gold)', color: '#FFFFFF', marginBottom: '12px', fontSize: '0.9rem', padding: '6px 18px' }}>
-                    {isPresale ? 'PREVENTA ABIERTA • CONGRESO ANUAL 2026' : 'ENTRADAS DISPONIBLES • CONGRESO ANUAL 2026'}
+                  <span className="apple-kicker" style={{ marginBottom: '14px' }}>
+                    {isPresale ? 'PREVENTA OFICIAL • CONGRESO ANUAL 2026' : 'SELECCIÓN DE ASIENTOS • CONGRESO 2026'}
                   </span>
                 );
               })()}
 
-              <h1 style={{ fontSize: '2.5rem', marginTop: '8px', color: 'var(--accent-coffee)', fontFamily: 'var(--font-heading)' }}>
-                CONGRESO ANUAL DE MUJERES AUTÉNTICAS 2026
+              <h1 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2rem, 4.5vw, 3rem)', marginTop: '8px', marginBottom: '12px' }}>
+                CONGRESO ANUAL DE MUJERES AUTÉNTICAS
               </h1>
 
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontStyle: 'italic', maxWidth: '780px', margin: '10px auto 0' }}>
+              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '1.05rem', fontStyle: 'italic', maxWidth: '720px', margin: '0 auto', lineHeight: 1.5 }}>
                 "Deja de esconder tus cicatrices. Ha llegado el momento de descubrir la belleza que Dios ha escrito en ellas."
               </p>
             </div>

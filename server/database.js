@@ -486,7 +486,10 @@ function initDb() {
         title: 'Bienvenido a TU CASA',
         subtitle: 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración',
         bgUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
-        buttons: [{ id: '1', label: 'Congreso de Mujeres', emoji: '', url: '/autenticas', style: 'primary' }]
+        buttons: [
+          { id: '1', label: 'Conocé la Visión', emoji: '✨', url: '/nosotros', style: 'primary' },
+          { id: '2', label: 'Horarios de Servicios', emoji: '⏰', url: '#horarios-section', style: 'secondary' }
+        ]
       }),
       JSON.stringify({
         backgroundColor: '#030812',
@@ -586,21 +589,13 @@ function seedNosotrosSections(targetDb = db) {
         2,
         JSON.stringify({
           title: 'Visión Jesús es un espacio para ti:',
-          columns: 4,
+          columns: 3,
           cells: [
             {
               title: 'VJ Kids',
               text: 'Hay servicios apropiados según la edad disponibles para niños desde 1 a 12 años.',
               imageUrl: '',
               iconName: 'Heart',
-              colSpan: 1,
-              rowSpan: 1
-            },
-            {
-              title: 'Parqueo',
-              text: 'Nuestro equipo de estacionamiento te ayudará a encontrar un espacio.',
-              imageUrl: '',
-              iconName: 'Compass',
               colSpan: 1,
               rowSpan: 1
             },
@@ -613,7 +608,7 @@ function seedNosotrosSections(targetDb = db) {
               rowSpan: 1
             },
             {
-              title: 'Grupos Conexión',
+              title: 'Grupos de Amistad',
               text: 'Hay grupos para todas las edades e intereses. Encontrarás un espacio seguro, lleno de propósito y amistad.',
               imageUrl: '',
               iconName: 'Users',

@@ -34,21 +34,13 @@ insertSection.run(
   2,
   JSON.stringify({
     title: 'Visión Jesús es un espacio para ti:',
-    columns: 4,
+    columns: 3,
     cells: [
       {
         title: 'VJ Kids',
         text: 'Hay servicios apropiados según la edad disponibles para niños desde 1 a 12 años.',
         imageUrl: '',
         iconName: 'Heart',
-        colSpan: 1,
-        rowSpan: 1
-      },
-      {
-        title: 'Parqueo',
-        text: 'Nuestro equipo de estacionamiento te ayudará a encontrar un espacio.',
-        imageUrl: '',
-        iconName: 'Compass',
         colSpan: 1,
         rowSpan: 1
       },
@@ -61,7 +53,7 @@ insertSection.run(
         rowSpan: 1
       },
       {
-        title: 'Grupos Conexión',
+        title: 'Grupos de Amistad',
         text: 'Hay grupos para todas las edades e intereses. Encontrarás un espacio seguro, lleno de propósito y amistad.',
         imageUrl: '',
         iconName: 'Users',

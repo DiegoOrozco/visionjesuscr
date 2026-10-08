@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, Compass, Users, Flame, ArrowRight, ArrowLeft, Music, PlayCircle, Ticket, ChevronLeft, ChevronRight, ShieldCheck, Instagram, Facebook } from 'lucide-react';
+import { Calendar, Heart, MapPin, Mail, Phone, ExternalLink, MessageCircle, Compass, Users, Flame, ArrowRight, ArrowLeft, Music, PlayCircle, Ticket, ChevronLeft, ChevronRight, ShieldCheck, Instagram, Facebook, Menu, X, Sparkles } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -9,6 +9,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', question: '' });
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const galleryRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -85,18 +87,15 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
     return () => clearInterval(interval);
   }, [newsItems.length]);
 
-  // Auto-scroll to hash location if coming from another page (e.g. /#vision-section)
+  // Listen to window scroll for Apple floating frosted navbar
   useEffect(() => {
-    if (window.location.hash) {
-      const targetId = window.location.hash.replace('#', '');
-      setTimeout(() => {
-        const el = document.getElementById(targetId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 300);
-    }
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
 
   const handleButtonClick = (btn) => {
     if (btn.url === '/autenticas') {
@@ -148,20 +147,33 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             key={sec.id}
             className="hero-container"
             style={{
+              position: 'relative',
               width: '100%',
               minHeight: '100vh',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-end',
+              justifyContent: 'center',
               textAlign: 'center',
               overflow: 'hidden',
-              paddingTop: 'clamp(60px, 8vh, 100px)',
-              paddingBottom: 'clamp(40px, 6vh, 80px)',
+              paddingTop: 'clamp(100px, 14vh, 160px)',
+              paddingBottom: 'clamp(60px, 10vh, 120px)',
               boxSizing: 'border-box',
+              backgroundColor: '#000000',
               ...bgStyle
             }}
           >
+            {/* Apple Ambient Cinematic Glow */}
+            <div 
+              className="apple-ambient-glow"
+              style={{
+                top: '25%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'radial-gradient(circle, rgba(151, 125, 255, 0.22) 0%, rgba(0, 113, 227, 0.12) 50%, transparent 80%)'
+              }}
+            />
+
             {isVideo ? (
               <video 
                 src={bgUrl} 
@@ -169,7 +181,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 loop 
                 muted 
                 playsInline 
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.35 }} 
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.32 }} 
               />
             ) : (
               <div 
@@ -179,78 +191,61 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   top: 0, left: 0, right: 0, bottom: 0,
                   backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
                   zIndex: 0,
-                  opacity: 0.95
+                  opacity: 0.85
                 }} 
               />
             )}
+
+            {/* Apple Cinematic Bottom Vignette Gradient */}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '240px',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, #000000 100%)',
+              zIndex: 1,
+              pointerEvents: 'none'
+            }} />
             
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              
+              {/* Apple Kicker Pill */}
+              <div className="apple-kicker">
+                <span className="apple-kicker-dot"></span>
+                <span>Comunidad de Fe & Esperanza</span>
+              </div>
+
               {heroTitle && (
-                <h1 style={{
-                  fontSize: 'clamp(2rem, 5.5vw, 4.2rem)',
-                  fontWeight: 950,
-                  lineHeight: 1.05,
-                  color: '#FFFFFF',
-                  letterSpacing: '-1.5px',
-                  textTransform: 'uppercase',
-                  marginBottom: '16px'
-                }} className="hero-welcome-text">
+                <h1 className="apple-hero-headline apple-gradient-text" style={{ maxWidth: '880px' }}>
                   {heroTitle}
                 </h1>
               )}
+
               {heroSubtitle && (
-                <p style={{
-                  fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
-                  fontWeight: 500,
-                  color: '#EAEDF8',
-                  opacity: 0.9,
-                  maxWidth: '650px',
-                  lineHeight: 1.45,
-                  marginBottom: '24px'
-                }}>
+                <p className="apple-hero-subtitle">
                   {heroSubtitle}
                 </p>
               )}
 
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {heroButtons.map((btn) => (
-                  <button
-                    key={btn.id}
-                    onClick={() => handleButtonClick(btn)}
-                    style={{
-                      background: btn.style === 'primary' ? `linear-gradient(135deg, ${accentColor} 0%, #977DFF 100%)` : 'transparent',
-                      color: '#FFFFFF',
-                      border: btn.style === 'primary' ? 'none' : '2px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '50px',
-                      padding: '16px 36px',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      boxShadow: btn.style === 'primary' ? `0 8px 24px rgba(0, 51, 255, 0.3)` : 'none',
-                      transition: 'all 0.25s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      if (btn.style === 'primary') {
-                        e.currentTarget.style.boxShadow = `0 12px 30px rgba(0, 51, 255, 0.5)`;
-                      } else {
-                        e.currentTarget.style.borderColor = '#FFFFFF';
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      if (btn.style === 'primary') {
-                        e.currentTarget.style.boxShadow = `0 8px 24px rgba(0, 51, 255, 0.3)`;
-                      } else {
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    {btn.label}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+                {heroButtons.map((btn, bIdx) => {
+                  const isPrimary = btn.style === 'primary' || bIdx === 0;
+                  return (
+                    <button
+                      key={btn.id}
+                      onClick={() => handleButtonClick(btn)}
+                      className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
+                      style={{
+                        padding: '14px 28px',
+                        fontSize: '0.94rem'
+                      }}
+                    >
+                      <span>{btn.label}</span>
+                      {isPrimary && <ArrowRight size={16} />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -269,36 +264,30 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         if (items.length === 0) return null;
 
         return (
-          <div key={sec.id} style={{ padding: '100px 20px', ...bgStyle }}>
-            <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-              <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                <span style={{
-                  backgroundColor: 'rgba(0, 51, 255, 0.15)',
-                  border: '1px solid rgba(0, 51, 255, 0.4)',
-                  color: '#977DFF',
-                  padding: '6px 18px',
-                  borderRadius: '50px',
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase'
-                }}>
-                  {content.title || 'NOTICIAS Y EVENTOS'}
-                </span>
-                <h2 style={{ fontSize: '3rem', fontWeight: 900, color: '#FFFFFF', marginTop: '16px', textTransform: 'uppercase' }}>
-                  LO QUE VIENE EN LA CASA
+          <div key={sec.id} style={{ padding: '100px 20px', backgroundColor: 'var(--apple-bg-base)', ...bgStyle }}>
+            <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+                <div className="apple-kicker">
+                  <span className="apple-kicker-dot"></span>
+                  <span>{content.title || 'NOTICIAS & EVENTOS'}</span>
+                </div>
+                <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', marginBottom: '12px' }}>
+                  Lo que viene en la Casa
                 </h2>
+                <p className="apple-hero-subtitle" style={{ marginBottom: '0', maxWidth: '600px' }}>
+                  Conéctate, participa y sé parte de cada experiencia y actividad especial.
+                </p>
               </div>
 
               <div style={{ position: 'relative', overflow: 'hidden' }}>
                 <div 
                   ref={galleryRef}
-                  style={{ display: 'flex', transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)', transform: `translateX(-${currentSlide * 100}%)` }}
+                  style={{ display: 'flex', transition: 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)', transform: `translateX(-${currentSlide * 100}%)` }}
                 >
                   {items.map((item, idx) => {
                     const targetUrl = item.link || item.url || item.buttonUrl || item.targetUrl || '/autenticas';
                     return (
-                      <div key={idx} style={{ minWidth: '100%', boxSizing: 'border-box', padding: '0 10px' }}>
+                      <div key={idx} style={{ minWidth: '100%', boxSizing: 'border-box', padding: '0 8px' }}>
                         <div 
                           onClick={() => {
                             if (targetUrl.startsWith('http')) {
@@ -307,44 +296,56 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                               window.location.href = targetUrl;
                             }
                           }}
+                          className="apple-bento-card"
                           style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                            backgroundColor: 'rgba(0, 3, 61, 0.45)',
-                            border: '1px solid rgba(151, 125, 255, 0.25)',
-                            borderRadius: '32px',
-                            overflow: 'hidden',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                            backdropFilter: 'blur(8px)',
+                            padding: 0,
                             cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.borderColor = '#977DFF';
-                            e.currentTarget.style.boxShadow = '0 25px 60px rgba(151, 125, 255, 0.2)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.borderColor = 'rgba(151, 125, 255, 0.25)';
-                            e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.5)';
+                            minHeight: '380px'
                           }}
                         >
                           {item.image && (
-                            <div style={{ height: '360px', position: 'relative' }}>
-                              <img src={item.image.startsWith('http') || item.image.startsWith('/') ? (item.image.startsWith('/') ? `${API_URL}${item.image}` : item.image) : `${API_URL}/${item.image}`} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: '#977DFF', color: '#FFFFFF', padding: '6px 16px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800 }}>
-                                {item.badge || 'NUEVO'}
+                            <div style={{ minHeight: '320px', position: 'relative', overflow: 'hidden' }}>
+                              <img 
+                                src={item.image.startsWith('http') || item.image.startsWith('/') ? (item.image.startsWith('/') ? `${API_URL}${item.image}` : item.image) : `${API_URL}/${item.image}`} 
+                                alt={item.title} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} 
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              />
+                              <div style={{ 
+                                position: 'absolute', 
+                                top: '20px', 
+                                left: '20px', 
+                                background: 'rgba(0, 0, 0, 0.65)', 
+                                backdropFilter: 'blur(16px)',
+                                WebkitBackdropFilter: 'blur(16px)',
+                                color: '#FFFFFF', 
+                                padding: '6px 14px', 
+                                borderRadius: '9999px', 
+                                fontSize: '0.76rem', 
+                                fontWeight: 700,
+                                letterSpacing: '0.04em',
+                                border: '1px solid rgba(255, 255, 255, 0.15)'
+                              }}>
+                                {item.badge || 'DESTACADO'}
                               </div>
                             </div>
                           )}
-                          <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase' }}>{item.title}</h3>
-                            <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>{item.description}</p>
+                          <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '14px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                              {item.title}
+                            </h3>
+                            <p style={{ color: 'var(--apple-text-secondary)', fontSize: '1.02rem', lineHeight: 1.6, marginBottom: '28px' }}>
+                              {item.description}
+                            </p>
                             <button 
-                              style={{ alignSelf: 'flex-start', background: `linear-gradient(135deg, ${accentColor} 0%, #977DFF 100%)`, border: 'none', color: '#FFFFFF', padding: '12px 28px', borderRadius: '50px', fontWeight: 800, cursor: 'pointer' }}
+                              className="apple-btn apple-btn-primary"
+                              style={{ alignSelf: 'flex-start', padding: '12px 24px' }}
                             >
-                              {item.buttonText || 'Ver Detalles'}
+                              <span>{item.buttonText || 'Ver Detalles'}</span>
+                              <ArrowRight size={15} />
                             </button>
                           </div>
                         </div>
@@ -357,15 +358,19 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                   <>
                     <button 
                       onClick={() => setCurrentSlide(prev => Math.max(prev - 1, 0))}
-                      style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', width: '50px', height: '50px', borderRadius: '50px', backgroundColor: 'rgba(3,8,18,0.7)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'rgba(14, 14, 20, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
                     >
-                      <ChevronLeft size={24} />
+                      <ChevronLeft size={20} />
                     </button>
                     <button 
                       onClick={() => setCurrentSlide(prev => Math.min(prev + 1, items.length - 1))}
-                      style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '50px', height: '50px', borderRadius: '50px', backgroundColor: 'rgba(3,8,18,0.7)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'rgba(14, 14, 20, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
                     >
-                      <ChevronRight size={24} />
+                      <ChevronRight size={20} />
                     </button>
                   </>
                 )}
@@ -377,76 +382,59 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
 
       case 'pillars': {
         const pillars = content.pillars || [
-          { id: '1', title: 'NUESTRA VISIÓN', text: 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.', icon: 'Compass' },
-          { id: '2', title: 'NUESTRA MISIÓN', text: 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.', icon: 'Flame' },
-          { id: '3', title: 'NUESTROS VALORES', text: 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.', icon: 'Users' }
+          { id: '1', title: 'Nuestra Visión', text: 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.', icon: 'Compass' },
+          { id: '2', title: 'Nuestra Misión', text: 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.', icon: 'Flame' },
+          { id: '3', title: 'Nuestros Valores', text: 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.', icon: 'Users' }
         ];
         return (
-          <div id="vision-section" key={sec.id} style={{ padding: '90px 20px', ...bgStyle }}>
-            <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-              <div style={{ textAlign: 'center', marginBottom: '54px' }}>
-                <span style={{
-                  backgroundColor: 'rgba(0, 51, 255, 0.15)',
-                  border: `1px solid rgba(0, 51, 255, 0.4)`,
-                  color: '#977DFF',
-                  padding: '6px 18px',
-                  borderRadius: '50px',
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase'
-                }}>
-                  {content.title || 'CONOCÉ LA VISIÓN'}
-                </span>
-                <h2 style={{ fontSize: '3.2rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginTop: '16px', marginBottom: '14px' }}>
-                  NUESTRA IGLESIA
+          <div id="vision-section" key={sec.id} style={{ padding: '100px 20px', backgroundColor: 'var(--apple-bg-base)', ...bgStyle }}>
+            <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <div className="apple-kicker">
+                  <span className="apple-kicker-dot"></span>
+                  <span>{content.title || 'CONOCÉ LA VISIÓN'}</span>
+                </div>
+                <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
+                  Nuestra Iglesia
                 </h2>
-                <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6 }}>
+                <p className="apple-hero-subtitle" style={{ maxWidth: '640px', marginBottom: '0' }}>
                   {content.subtitle || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo.'}
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '24px' }}>
                 {pillars.map((pil, idx) => (
                   <div 
                     key={pil.id || idx}
+                    className="apple-bento-card"
                     style={{
-                      backgroundColor: 'rgba(0, 3, 61, 0.45)',
-                      border: `1px solid rgba(151, 125, 255, 0.25)`,
-                      borderRadius: '24px',
-                      padding: '36px 28px',
-                      boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
-                      backdropFilter: 'blur(8px)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-6px)';
-                      e.currentTarget.style.boxShadow = `0 18px 50px rgba(0, 51, 255, 0.25)`;
-                      e.currentTarget.style.borderColor = accentColor;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.5)';
-                      e.currentTarget.style.borderColor = 'rgba(151, 125, 255, 0.25)';
+                      padding: '36px 32px',
+                      display: 'flex',
+                      flexDirection: 'column'
                     }}
                   >
                     <div style={{
-                      width: '56px',
-                      height: '56px',
+                      width: '54px',
+                      height: '54px',
                       borderRadius: '16px',
-                      backgroundColor: 'rgba(234, 237, 248, 0.1)',
-                      color: accentColor,
+                      backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: 'var(--apple-purple)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      marginBottom: '20px'
+                      marginBottom: '24px'
                     }}>
-                      {pil.icon === 'Compass' && <Compass size={28} />}
-                      {pil.icon === 'Flame' && <Flame size={28} />}
-                      {pil.icon === 'Users' && <Users size={28} />}
+                      {pil.icon === 'Compass' && <Compass size={26} />}
+                      {pil.icon === 'Flame' && <Flame size={26} />}
+                      {pil.icon === 'Users' && <Users size={26} />}
                     </div>
-                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>{pil.title}</h3>
-                    <p style={{ color: '#EAEDF8', opacity: 0.85, fontSize: '0.95rem', lineHeight: 1.6 }}>{pil.text}</p>
+                    <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                      {pil.title}
+                    </h3>
+                    <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
+                      {pil.text}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -467,56 +455,117 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             id="horarios-section" 
             key={sec.id}
             style={{
-              backgroundImage: (displayTitle || list.length > 0) ? (schedBg ? `url(${schedBg})` : 'linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%)') : 'none',
-              backgroundColor: '#030812',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundColor: 'var(--apple-bg-base)',
               padding: (displayTitle || list.length > 0) ? '100px 20px' : '40px 20px', 
               textAlign: 'center',
-              borderTop: '1px solid rgba(0, 51, 255, 0.15)',
-              borderBottom: '1px solid rgba(0, 51, 255, 0.15)',
-              minHeight: 'auto', 
+              borderTop: '1px solid var(--apple-border)',
+              borderBottom: '1px solid var(--apple-border)',
+              position: 'relative',
+              overflow: 'hidden',
               ...bgStyle
             }}
           >
+            {/* Apple Ambient Center Light */}
+            <div 
+              className="apple-ambient-glow"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(151, 125, 255, 0.12) 0%, transparent 70%)'
+              }}
+            />
+
             {!(displayTitle || list.length > 0) && schedBg && (
-              <img src={schedBg} alt="Horarios" style={{ width: '100%', maxWidth: '1200px', height: 'auto', display: 'block', objectFit: 'contain', margin: '0 auto' }} />
+              <img src={schedBg} alt="Horarios" style={{ width: '100%', maxWidth: '1200px', height: 'auto', display: 'block', objectFit: 'contain', margin: '0 auto', borderRadius: '24px' }} />
             )}
+
             {(displayTitle || list.length > 0) && (
-              <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                <Flame size={48} color={accentColor} style={{ marginBottom: '20px', filter: `drop-shadow(0 0 10px ${accentColor})` }} />
+              <div className="container" style={{ maxWidth: '780px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                <div className="apple-kicker" style={{ marginBottom: '16px' }}>
+                  <span className="apple-kicker-dot"></span>
+                  <span>Servicios Semanales</span>
+                </div>
+
                 {displayTitle && (
-                  <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '48px', textTransform: 'uppercase' }}>
+                  <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '40px' }}>
                     {displayTitle}
                   </h2>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '2rem', fontWeight: 800 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {list.map((s, sIdx) => (
-                    <div key={s.id || sIdx} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', color: s.isVirtual ? accentColor : '#FFFFFF' }}>
-                      {s.isVirtual ? <Music size={28} color={accentColor} /> : <PlayCircle size={28} color={accentColor} />}
-                    <span>{s.text}</span>
-                  </div>
-                ))}
-              </div>
+                    <div 
+                      key={s.id || sIdx} 
+                      style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        padding: '18px 28px',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '9999px',
+                        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '50%',
+                          backgroundColor: s.isVirtual ? 'rgba(151, 125, 255, 0.15)' : 'rgba(0, 113, 227, 0.15)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: s.isVirtual ? 'var(--apple-purple)' : 'var(--apple-blue)'
+                        }}>
+                          {s.isVirtual ? <Music size={18} /> : <PlayCircle size={18} />}
+                        </div>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
+                          {s.text}
+                        </span>
+                      </div>
 
-              <button 
-                onClick={() => setModalType('pregunta')}
-                style={{
-                  background: `linear-gradient(135deg, ${accentColor} 0%, #977DFF 100%)`,
-                  color: '#FFF',
-                  border: 'none',
-                  borderRadius: '50px',
-                  marginTop: '48px',
-                  padding: '16px 40px',
-                  fontSize: '1.05rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: `0 8px 24px rgba(0, 51, 255, 0.3)`
-                }}
-              >
-              </button>
-            </div>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        padding: '5px 12px',
+                        borderRadius: '9999px',
+                        backgroundColor: s.isVirtual ? 'rgba(151, 125, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+                        color: s.isVirtual ? 'var(--apple-purple)' : 'var(--apple-text-secondary)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase'
+                      }}>
+                        {s.isVirtual ? 'En Línea' : 'Presencial'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: '44px' }}>
+                  <button 
+                    onClick={() => setModalType('pregunta')}
+                    className="apple-btn apple-btn-secondary"
+                    style={{ padding: '14px 32px', fontSize: '0.94rem' }}
+                  >
+                    <span>¿Tenés alguna pregunta?</span>
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         );
@@ -641,9 +690,14 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             </style>
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
               {content.title && (
-                <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                  <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{content.title}</h2>
-                  <div style={{ height: '4px', width: '80px', backgroundColor: accentColor, margin: '0 auto', borderRadius: '4px' }} />
+                <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+                  <div className="apple-kicker">
+                    <span className="apple-kicker-dot"></span>
+                    <span>Destacados</span>
+                  </div>
+                  <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
+                    {content.title}
+                  </h2>
                 </div>
               )}
               <div className={gridClass}>
@@ -654,56 +708,66 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                     : '';
                   
                   return (
-                    <div key={idx} style={{ 
-                      gridColumn: `span ${cell.colSpan || 1}`,
-                      gridRow: `span ${cell.rowSpan || 1}`,
-                      backgroundColor: 'rgba(255,255,255,0.03)', 
-                      borderRadius: '20px', 
-                      overflow: 'hidden', 
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'default'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.4)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                    <div 
+                      key={idx} 
+                      className="apple-bento-card"
+                      style={{ 
+                        gridColumn: `span ${cell.colSpan || 1}`,
+                        gridRow: `span ${cell.rowSpan || 1}`,
+                        padding: 0,
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
                     >
                       {imgUrl && (
-                        <div style={{ height: '220px', width: '100%' }}>
-                          <img src={imgUrl} alt={cell.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ height: '230px', width: '100%', overflow: 'hidden' }}>
+                          <img 
+                            src={imgUrl} 
+                            alt={cell.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} 
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          />
                         </div>
                       )}
-                      <div style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                         {cell.iconName && LucideIcons[cell.iconName] && (
-                          <div style={{ marginBottom: '16px', color: accentColor }}>
-                            {React.createElement(LucideIcons[cell.iconName], { size: 36 })}
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '14px', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.06)', 
+                            border: '1px solid rgba(255, 255, 255, 0.1)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            marginBottom: '20px', 
+                            color: 'var(--apple-purple)' 
+                          }}>
+                            {React.createElement(LucideIcons[cell.iconName], { size: 24 })}
                           </div>
                         )}
-                        {cell.title && <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '14px' }}>{cell.title}</h3>}
-                        {cell.text && <p style={{ fontSize: '1rem', color: '#BAC2DE', lineHeight: 1.6, marginBottom: '24px', flex: 1 }}>{cell.text}</p>}
+                        {cell.title && (
+                          <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                            {cell.title}
+                          </h3>
+                        )}
+                        {cell.text && (
+                          <p style={{ fontSize: '0.98rem', color: 'var(--apple-text-secondary)', lineHeight: 1.6, marginBottom: '24px', flex: 1 }}>
+                            {cell.text}
+                          </p>
+                        )}
                         {cell.buttonText && cell.buttonUrl && (
                           <div style={{ marginTop: 'auto' }}>
                             <a 
                               href={cell.buttonUrl} 
                               target={cell.buttonUrl.startsWith('http') ? '_blank' : '_self'} 
                               rel="noreferrer"
-                              style={{ 
-                                display: 'inline-block',
-                                padding: '12px 24px', 
-                                borderRadius: '50px', 
-                                fontSize: '0.9rem', 
-                                fontWeight: 800, 
-                                backgroundColor: accentColor, 
-                                color: '#FFFFFF', 
-                                textDecoration: 'none',
-                                transition: 'all 0.2s ease',
-                                boxShadow: `0 8px 20px ${accentColor}40`
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              className="apple-btn apple-btn-primary"
+                              style={{ padding: '10px 22px', fontSize: '0.86rem' }}
                             >
-                              {cell.buttonText}
+                              <span>{cell.buttonText}</span>
+                              <ArrowRight size={14} />
                             </a>
                           </div>
                         )}
@@ -822,249 +886,249 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       overflowX: 'hidden'
     }}>
       
-      {/* 0. HERO TOP HEADER / NAVBAR */}
-      <header style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        padding: '20px 40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'linear-gradient(180deg, rgba(3, 8, 18, 0.85) 0%, rgba(3, 8, 18, 0) 100%)',
-        backdropFilter: 'blur(12px)',
-        flexWrap: 'wrap',
-        gap: '16px'
+      {/* 0. APPLE FLOATING FROSTED NAVBAR */}
+      <div className="apple-nav-wrapper" style={{
+        top: isScrolled ? '12px' : '20px'
       }}>
-        {/* LOGO */}
-        <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        <header 
+          className={`apple-nav-bar ${isScrolled ? 'apple-nav-scrolled' : ''}`}
+          style={{
+            maxWidth: isScrolled ? '1060px' : '1140px'
+          }}
         >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '84px', objectFit: 'contain' }} />
-        </div>
-
-        {/* MENU LINKS */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <a 
-            href="/" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              if (window.location.pathname === '/') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                window.location.href = '/';
-              }
-            }} 
+          {/* LOGO */}
+          <div 
             style={{ 
-              color: window.location.pathname === '/' ? '#977DFF' : '#EAEDF8', 
-              fontSize: '0.85rem', 
-              fontWeight: 800, 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              textDecoration: 'none', 
-              cursor: 'pointer', 
-              transition: 'color 0.2s' 
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/' ? '#977DFF' : '#EAEDF8'}
-          >
-            INICIO
-          </a>
-          <a 
-            href="/nosotros" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              if (window.location.pathname === '/nosotros') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                window.location.href = '/nosotros';
-              }
-            }} 
-            style={{ 
-              color: window.location.pathname === '/nosotros' ? '#977DFF' : '#EAEDF8', 
-              fontSize: '0.85rem', 
-              fontWeight: 800, 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              textDecoration: 'none', 
-              cursor: 'pointer', 
-              transition: 'color 0.2s' 
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/nosotros' ? '#977DFF' : '#EAEDF8'}
-          >
-            NOSOTROS
-          </a>
-          <a 
-            href="/modelo" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              if (window.location.pathname === '/modelo') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                window.location.href = '/modelo';
-              }
-            }} 
-            style={{ 
-              color: window.location.pathname === '/modelo' ? '#977DFF' : '#EAEDF8', 
-              fontSize: '0.85rem', 
-              fontWeight: 800, 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              textDecoration: 'none', 
-              cursor: 'pointer', 
-              transition: 'color 0.2s' 
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/modelo' ? '#977DFF' : '#EAEDF8'}
-          >
-            MODELO DE JESÚS
-          </a>
-          <a 
-            href="/congresos" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              if (window.location.pathname === '/congresos') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                window.location.href = '/congresos';
-              }
-            }} 
-            style={{ 
-              color: window.location.pathname === '/congresos' ? '#977DFF' : '#EAEDF8', 
-              fontSize: '0.85rem', 
-              fontWeight: 800, 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              textDecoration: 'none', 
-              cursor: 'pointer', 
-              transition: 'color 0.2s' 
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = window.location.pathname === '/congresos' ? '#977DFF' : '#EAEDF8'}
-          >
-            CONGRESOS
-          </a>
-          <button 
-            onClick={() => {
-              const contactEl = document.getElementById('contacto-section');
-              if (contactEl) {
-                contactEl.scrollIntoView({ behavior: 'smooth' });
-              } else {
-                setModalType('pregunta');
-              }
-            }}
-            style={{ 
-              color: '#EAEDF8', 
-              fontSize: '0.85rem', 
-              fontWeight: 800, 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer', 
-              transition: 'color 0.2s',
-              padding: 0
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONTACTO
-          </button>
-          <button 
-            onClick={onGoToTickets}
-            style={{
-              background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '10px 24px',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              letterSpacing: '1.5px',
-              textTransform: 'uppercase',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
               cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(0, 51, 255, 0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease'
+              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 26px rgba(0, 51, 255, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 51, 255, 0.4)';
-            }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <Ticket size={16} />
-            <span>CONGRESO 2026</span>
-          </button>
+            <img 
+              src="/logo_oficial_transparente.png" 
+              alt="Visión Jesús Logo" 
+              style={{ 
+                height: isScrolled ? '38px' : '44px', 
+                objectFit: 'contain',
+                transition: 'height 0.3s ease',
+                filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4))'
+              }} 
+            />
+          </div>
 
-          {/* Admin Profile Controls */}
-          {(() => {
-            const currentAdmin = adminUser || (localStorage.getItem('admin_user') ? JSON.parse(localStorage.getItem('admin_user')) : null);
-            if (!currentAdmin) return null;
-            return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-                {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
+          {/* DESKTOP MENU LINKS */}
+          <nav className="apple-nav-links">
+            <a 
+              href="/" 
+              className={`apple-nav-link ${window.location.pathname === '/' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Inicio
+            </a>
+            <a 
+              href="/nosotros" 
+              className={`apple-nav-link ${window.location.pathname === '/nosotros' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/nosotros';
+              }}
+            >
+              Nosotros
+            </a>
+            <a 
+              href="/modelo" 
+              className={`apple-nav-link ${window.location.pathname === '/modelo' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/modelo';
+              }}
+            >
+              Modelo de Jesús
+            </a>
+            <a 
+              href="/eventos" 
+              className={`apple-nav-link ${window.location.pathname === '/eventos' || window.location.pathname === '/congresos' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/eventos';
+              }}
+            >
+              Eventos
+            </a>
+            <button 
+              onClick={() => {
+                const contactEl = document.getElementById('contacto-section');
+                if (contactEl) {
+                  contactEl.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  setModalType('pregunta');
+                }
+              }}
+              className="apple-nav-link"
+            >
+              Contacto
+            </button>
+          </nav>
+
+          {/* RIGHT ACTIONS: CTA + ADMIN + MOBILE TOGGLE */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              onClick={() => { window.location.href = '/eventos'; }}
+              className="apple-btn apple-btn-accent"
+              style={{
+                fontSize: '0.82rem',
+                padding: '8px 18px',
+                borderRadius: '9999px'
+              }}
+            >
+              <Calendar size={15} />
+              <span>Eventos</span>
+            </button>
+
+            {/* Admin Profile Controls */}
+            {(() => {
+              const currentAdmin = adminUser || (localStorage.getItem('admin_user') ? JSON.parse(localStorage.getItem('admin_user')) : null);
+              if (!currentAdmin) return null;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '6px' }}>
+                  {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
+                    <button 
+                      onClick={() => window.location.href = '/escanear'}
+                      className="apple-btn apple-btn-secondary"
+                      style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+                    >
+                      <span>Escáner</span>
+                    </button>
+                  )}
+
+                  {currentAdmin.role !== 'scanner' && (
+                    <button 
+                      onClick={() => window.location.href = '/admin'}
+                      className="apple-btn apple-btn-primary"
+                      style={{ fontSize: '0.78rem', padding: '6px 14px' }}
+                    >
+                      <ShieldCheck size={14} />
+                      <span>{currentAdmin.username}</span>
+                    </button>
+                  )}
+
                   <button 
-                    onClick={() => window.location.href = '/escanear'}
+                    onClick={() => {
+                      localStorage.removeItem('admin_user');
+                      window.location.href = '/';
+                    }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.8rem', padding: '6px 14px',
-                      fontWeight: 800, borderRadius: '50px',
-                      border: '1px solid #977DFF',
-                      backgroundColor: 'rgba(151, 125, 255, 0.15)',
-                      color: '#977DFF', cursor: 'pointer',
-                      textTransform: 'uppercase'
+                      fontSize: '0.78rem', 
+                      color: '#FF453A', 
+                      background: 'none', 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      fontWeight: 600, 
+                      padding: '4px 6px'
                     }}
                   >
-                    📱 Escáner Puerta
+                    Salir
                   </button>
-                )}
+                </div>
+              );
+            })()}
 
-                {currentAdmin.role !== 'scanner' && (
-                  <button 
-                    onClick={() => window.location.href = '/admin'}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.8rem', padding: '6px 14px',
-                      fontWeight: 800, borderRadius: '50px',
-                      border: 'none',
-                      background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-                      color: '#FFFFFF', cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    🛡️ Panel Admin ({currentAdmin.username})
-                  </button>
-                )}
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="apple-mobile-menu-btn"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '9999px',
+                padding: '8px',
+                color: '#FFFFFF',
+                cursor: 'pointer'
+              }}
+              aria-label="Menú"
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </header>
 
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem('admin_user');
-                    window.location.href = '/';
-                  }}
-                  style={{
-                    fontSize: '0.8rem', color: '#FF4D4D', background: 'none',
-                    border: 'none', textDecoration: 'underline', cursor: 'pointer',
-                    fontWeight: 700
-                  }}
-                >
-                  Salir
-                </button>
-              </div>
-            );
-          })()}
-        </nav>
-      </header>
+        {/* Apple iOS Mobile Sheet Drawer */}
+        {mobileMenuOpen && (
+          <div className="apple-mobile-sheet">
+            <a 
+              href="/" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Inicio
+            </a>
+            <a 
+              href="/nosotros" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/nosotros';
+              }}
+            >
+              Nosotros
+            </a>
+            <a 
+              href="/modelo" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/modelo';
+              }}
+            >
+              Modelo de Jesús
+            </a>
+            <a 
+              href="/eventos" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/eventos';
+              }}
+            >
+              Eventos
+            </a>
+            <button 
+              onClick={() => {
+                setMobileMenuOpen(false);
+                const contactEl = document.getElementById('contacto-section');
+                if (contactEl) {
+                  contactEl.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  setModalType('pregunta');
+                }
+              }}
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+            >
+              Contacto
+            </button>
+          </div>
+        )}
+      </div>
 
       {sections && sections.length > 0 ? (
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -1102,17 +1166,29 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           position: 'relative',
           width: '100%',
           minHeight: '100vh',
-          backgroundColor: '#030812',
+          backgroundColor: '#000000',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-        justifyContent: 'flex-end',
-        textAlign: 'center',
-        paddingTop: '120px',
-        paddingBottom: '120px',
-        boxSizing: 'border-box'
-      }}>
+          justifyContent: 'center',
+          textAlign: 'center',
+          paddingTop: 'clamp(100px, 14vh, 160px)',
+          paddingBottom: 'clamp(60px, 10vh, 120px)',
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Apple Ambient Cinematic Glow */}
+        <div 
+          className="apple-ambient-glow"
+          style={{
+            top: '25%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, rgba(151, 125, 255, 0.22) 0%, rgba(0, 113, 227, 0.12) 50%, transparent 80%)'
+          }}
+        />
+
         {(() => {
           let bgUrl = heroBg || '';
           bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
@@ -1131,7 +1207,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               height: '100%',
               objectFit: 'cover',
               zIndex: 0,
-              opacity: 0.35
+              opacity: 0.32
             }}
           >
             <source src={heroVideoUrl.startsWith('http') || heroVideoUrl.startsWith('/') ? (heroVideoUrl.startsWith('/') ? `${API_URL}${heroVideoUrl}` : heroVideoUrl) : `${API_URL}/${heroVideoUrl}`} type="video/mp4" />
@@ -1144,96 +1220,83 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               top: 0, left: 0, right: 0, bottom: 0,
               backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none',
               zIndex: 0,
-              opacity: 0.95
+              opacity: 0.85
             }} 
           />
         )
         })()}
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {(config.hero_title !== undefined ? config.hero_title : '') && (
-            <h1 style={{
-              fontSize: 'clamp(2.2rem, 6vw, 4.8rem)',
-              fontWeight: 950,
-              lineHeight: 1.05,
-              color: '#FFFFFF',
-              letterSpacing: '-1.5px',
-              textTransform: 'uppercase',
-              marginBottom: '24px'
-            }} className="hero-welcome-text">
-              {config.hero_title !== undefined ? config.hero_title : ''}
-            </h1>
-          )}
-          {(config.hero_subtitle !== undefined ? config.hero_subtitle : '') && (
-            <p style={{
-              fontSize: 'clamp(0.95rem, 2.2vw, 1.35rem)',
-              fontWeight: 500,
-              color: '#EAEDF8',
-              opacity: 0.9,
-              maxWidth: '650px',
-              lineHeight: 1.5,
-              marginBottom: '40px'
-            }}>
-              {config.hero_subtitle !== undefined ? config.hero_subtitle : ''}
-            </p>
-          )}
-
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }]).map((btn) => (
-              <button
-                key={btn.id}
-                onClick={() => handleButtonClick(btn)}
-                style={{
-                  background: btn.style === 'primary' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
-                  color: '#FFFFFF',
-                  border: btn.style === 'primary' ? 'none' : '2px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '50px',
-                  padding: '16px 36px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  boxShadow: btn.style === 'primary' ? '0 8px 24px rgba(0, 51, 255, 0.3)' : 'none',
-                  transition: 'all 0.25s ease'
-                }}
-              >
-                {btn.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom gradient line */}
+        {/* Apple Cinematic Bottom Vignette Gradient */}
         <div style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
-          height: '4px',
-          background: 'linear-gradient(90deg, #0033FF 0%, #977DFF 50%, #FFFFFF 100%)',
-          zIndex: 3
+          height: '240px',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, #000000 100%)',
+          zIndex: 1,
+          pointerEvents: 'none'
         }} />
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          
+          {/* Apple Kicker Pill */}
+          <div className="apple-kicker">
+            <span className="apple-kicker-dot"></span>
+            <span>Comunidad de Fe & Esperanza</span>
+          </div>
+
+          {(config.hero_title !== undefined ? config.hero_title : '') && (
+            <h1 className="apple-hero-headline apple-gradient-text" style={{ maxWidth: '880px' }}>
+              {config.hero_title !== undefined ? config.hero_title : ''}
+            </h1>
+          )}
+
+          {(config.hero_subtitle !== undefined ? config.hero_subtitle : '') && (
+            <p className="apple-hero-subtitle">
+              {config.hero_subtitle !== undefined ? config.hero_subtitle : ''}
+            </p>
+          )}
+
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }]).map((btn, bIdx) => {
+              const isPrimary = btn.style === 'primary' || bIdx === 0;
+              return (
+                <button
+                  key={btn.id}
+                  onClick={() => handleButtonClick(btn)}
+                  className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
+                  style={{
+                    padding: '14px 28px',
+                    fontSize: '0.94rem'
+                  }}
+                >
+                  <span>{btn.label}</span>
+                  {isPrimary && <ArrowRight size={16} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* 2. NEWS / EVENTS GALLERY CAROUSEL */}
       {newsItems.length > 0 && (
         <div style={{
-          padding: '80px 20px',
+          padding: '100px 20px',
           position: 'relative',
+          backgroundColor: 'var(--apple-bg-base)',
           zIndex: 1
         }}>
-          <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-              <h2 style={{
-                fontSize: '2.5rem',
-                fontWeight: 900,
-                color: '#FFFFFF',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '8px'
-              }}>
-                NOTICIAS Y EVENTOS
+          <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <div className="apple-kicker">
+                <span className="apple-kicker-dot"></span>
+                <span>Actualidad & Comunidad</span>
+              </div>
+              <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
+                Noticias y Eventos
               </h2>
-              <div style={{ width: '60px', height: '4px', background: 'linear-gradient(90deg, #0033FF, #977DFF)', borderRadius: '4px', margin: '0 auto' }} />
             </div>
 
             {/* Gallery Cards */}
@@ -1243,7 +1306,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 style={{
                   display: 'grid',
                   gridTemplateColumns: newsItems.length === 1 ? '1fr' : newsItems.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(320px, 1fr))',
-                  gap: '28px'
+                  gap: '24px'
                 }}
               >
                 {newsItems.map((item, idx) => {
@@ -1262,32 +1325,18 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                           window.location.href = target;
                         }
                       }}
+                      className="apple-bento-card"
                       style={{
-                        backgroundColor: 'rgba(0, 3, 61, 0.45)',
-                        border: '1px solid rgba(151, 125, 255, 0.2)',
-                        borderRadius: '24px',
-                        overflow: 'hidden',
+                        padding: 0,
                         cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.5)',
-                        transform: 'translateY(0)',
-                        backdropFilter: 'blur(8px)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-6px)';
-                        e.currentTarget.style.boxShadow = '0 20px 48px rgba(0, 51, 255, 0.25)';
-                        e.currentTarget.style.borderColor = 'rgba(0, 51, 255, 0.6)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.5)';
-                        e.currentTarget.style.borderColor = 'rgba(151, 125, 255, 0.2)';
+                        display: 'flex',
+                        flexDirection: 'column'
                       }}
                     >
                       {imageUrl ? (
                         <div style={{
                           width: '100%',
-                          height: '260px',
+                          height: '240px',
                           overflow: 'hidden',
                           position: 'relative'
                         }}>
@@ -1300,23 +1349,24 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                               objectFit: 'cover',
                               transition: 'transform 0.4s ease'
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                           />
                           {item.badge && (
                             <span style={{
                               position: 'absolute',
-                              top: '14px',
-                              left: '14px',
-                              background: 'linear-gradient(135deg, #0033FF, #977DFF)',
+                              top: '16px',
+                              left: '16px',
+                              background: 'rgba(0, 0, 0, 0.65)',
+                              backdropFilter: 'blur(16px)',
+                              WebkitBackdropFilter: 'blur(16px)',
                               color: '#FFF',
-                              padding: '6px 16px',
-                              borderRadius: '8px',
-                              fontSize: '0.75rem',
-                              fontWeight: 800,
-                              textTransform: 'uppercase',
-                              letterSpacing: '1px',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                              padding: '5px 14px',
+                              borderRadius: '9999px',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              letterSpacing: '0.04em',
+                              border: '1px solid rgba(255, 255, 255, 0.15)'
                             }}>
                               {item.badge}
                             </span>
@@ -1325,67 +1375,47 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                       ) : (
                         <div style={{
                           width: '100%',
-                          height: '180px',
-                          background: 'linear-gradient(135deg, #00033D 0%, #030812 100%)',
+                          height: '160px',
+                          background: 'rgba(255, 255, 255, 0.03)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           position: 'relative'
                         }}>
-                          <Calendar size={48} color="rgba(151, 125, 255, 0.4)" />
-                          {item.badge && (
-                            <span style={{
-                              position: 'absolute',
-                              top: '14px',
-                              left: '14px',
-                              background: 'linear-gradient(135deg, #0033FF, #977DFF)',
-                              color: '#FFF',
-                              padding: '6px 16px',
-                              borderRadius: '8px',
-                              fontSize: '0.75rem',
-                              fontWeight: 800,
-                              textTransform: 'uppercase',
-                              letterSpacing: '1px'
-                            }}>
-                              {item.badge}
-                            </span>
-                          )}
+                          <Calendar size={40} color="var(--apple-text-tertiary)" />
                         </div>
                       )}
-                      <div style={{ padding: '24px' }}>
+                      <div style={{ padding: '28px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <h3 style={{
-                          fontSize: '1.25rem',
-                          fontWeight: 800,
+                          fontSize: '1.3rem',
+                          fontWeight: 700,
                           color: '#FFFFFF',
-                          marginBottom: '8px',
+                          letterSpacing: '-0.02em',
+                          marginBottom: '10px',
                           lineHeight: 1.3
                         }}>
                           {item.title}
                         </h3>
                         {item.description && (
                           <p style={{
-                            color: '#EAEDF8',
-                            opacity: 0.8,
-                            fontSize: '0.9rem',
+                            color: 'var(--apple-text-secondary)',
+                            fontSize: '0.94rem',
                             lineHeight: 1.6,
-                            marginBottom: item.link ? '16px' : '0'
+                            marginBottom: item.link ? '20px' : '0'
                           }}>
                             {item.description}
                           </p>
                         )}
                         {item.link && (
                           <span style={{
-                            color: '#977DFF',
-                            fontSize: '0.88rem',
-                            fontWeight: 700,
+                            marginTop: 'auto',
+                            color: 'var(--apple-text-primary)',
+                            fontSize: '0.86rem',
+                            fontWeight: 600,
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px',
-                            transition: 'color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.color = '#0033FF'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = '#977DFF'}
-                          >
+                            gap: '6px'
+                          }}>
                             Ver más <ArrowRight size={14} />
                           </span>
                         )}
@@ -1400,240 +1430,209 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       )}
 
       {/* 3. CONOCÉ LA VISIÓN SECTION */}
-      <div id="vision-section" style={{ padding: '90px 20px', position: 'relative', zIndex: 1 }}>
-        <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '54px' }}>
-            <span style={{
-              backgroundColor: 'rgba(0, 51, 255, 0.15)',
-              border: '1px solid rgba(0, 51, 255, 0.4)',
-              color: '#977DFF',
-              padding: '6px 18px',
-              borderRadius: '50px',
-              fontSize: '0.85rem',
-              fontWeight: 800,
-              letterSpacing: '2px',
-              textTransform: 'uppercase'
-            }}>
-              ACERCA DE NOSOTROS
-            </span>
+      <div id="vision-section" style={{ padding: '100px 20px', position: 'relative', backgroundColor: 'var(--apple-bg-base)', zIndex: 1 }}>
+        <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <div className="apple-kicker">
+              <span className="apple-kicker-dot"></span>
+              <span>Acerca de Nosotros</span>
+            </div>
 
-            <h2 style={{
-              fontSize: '3.2rem',
-              fontWeight: 900,
-              color: '#FFFFFF',
-              textTransform: 'uppercase',
-              letterSpacing: '-0.5px',
-              marginTop: '16px',
-              marginBottom: '14px'
-            }}>
-              CONOCÉ LA VISIÓN
+            <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
+              Conocé la Visión
             </h2>
 
-            <p style={{
-              color: '#EAEDF8',
-              opacity: 0.8,
-              fontSize: '1.2rem',
-              maxWidth: '780px',
-              margin: '0 auto',
-              lineHeight: 1.6
-            }}>
+            <p className="apple-hero-subtitle" style={{ maxWidth: '680px', marginBottom: '0' }}>
               {config.about_text || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo en cada corazón, hogar y comunidad.'}
             </p>
           </div>
 
-          {/* 3 PILLARS CARDS: VISIÓN, MISIÓN, VALORES */}
+          {/* 3 PILLARS BENTO CARDS: VISIÓN, MISIÓN, VALORES */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '28px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
+            gap: '24px'
           }}>
             {/* CARD 1: VISIÓN */}
-            <div style={{
-              backgroundColor: 'rgba(0, 3, 61, 0.45)',
-              border: '1px solid rgba(0, 51, 255, 0.25)',
-              borderRadius: '24px',
-              padding: '36px 28px',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
-              position: 'relative',
-              overflow: 'hidden',
-              backdropFilter: 'blur(8px)'
-            }}>
+            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: '52px',
+                height: '52px',
                 borderRadius: '16px',
-                backgroundColor: 'rgba(0, 51, 255, 0.15)',
-                color: '#0033FF',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--apple-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '20px'
+                marginBottom: '22px'
               }}>
-                <Compass size={28} />
+                <Compass size={26} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                {config.vision_title || 'NUESTRA VISIÓN'}
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                {config.vision_title || 'Nuestra Visión'}
               </h3>
-              <p style={{ color: '#EAEDF8', opacity: 0.85, fontSize: '0.95rem', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
                 {config.vision_text || 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.'}
               </p>
             </div>
 
             {/* CARD 2: MISIÓN */}
-            <div style={{
-              backgroundColor: 'rgba(0, 3, 61, 0.45)',
-              border: '1px solid rgba(151, 125, 255, 0.25)',
-              borderRadius: '24px',
-              padding: '36px 28px',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
-              position: 'relative',
-              overflow: 'hidden',
-              backdropFilter: 'blur(8px)'
-            }}>
+            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: '52px',
+                height: '52px',
                 borderRadius: '16px',
-                backgroundColor: 'rgba(151, 125, 255, 0.15)',
-                color: '#977DFF',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--apple-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '20px'
+                marginBottom: '22px'
               }}>
-                <Flame size={28} />
+                <Flame size={26} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                {config.mision_title || 'NUESTRA MISIÓN'}
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                {config.mision_title || 'Nuestra Misión'}
               </h3>
-              <p style={{ color: '#EAEDF8', opacity: 0.85, fontSize: '0.95rem', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
                 {config.mision_text || 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.'}
               </p>
             </div>
 
             {/* CARD 3: VALORES */}
-            <div style={{
-              backgroundColor: 'rgba(0, 3, 61, 0.45)',
-              border: '1px solid rgba(234, 237, 248, 0.25)',
-              borderRadius: '24px',
-              padding: '36px 28px',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
-              position: 'relative',
-              overflow: 'hidden',
-              backdropFilter: 'blur(8px)'
-            }}>
+            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: '52px',
+                height: '52px',
                 borderRadius: '16px',
-                backgroundColor: 'rgba(234, 237, 248, 0.1)',
-                color: '#EAEDF8',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--apple-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '20px'
+                marginBottom: '22px'
               }}>
-                <Users size={28} />
+                <Users size={26} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: '12px' }}>
-                {config.valores_title || 'NUESTROS VALORES'}
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                {config.valores_title || 'Nuestros Valores'}
               </h3>
-              <p style={{ color: '#EAEDF8', opacity: 0.85, fontSize: '0.95rem', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
                 {config.valores_text || 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.'}
               </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
       {/* 4. SCHEDULES SECTION */}
       {schedules && schedules.length > 0 ? (
         <div id="horarios-section" style={{
-          backgroundImage: `linear-gradient(180deg, rgba(3, 8, 18, 0.8) 0%, rgba(3, 8, 18, 0.95) 100%), url(${scheduleBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundColor: 'var(--apple-bg-base)',
           padding: '100px 20px',
           color: '#FFFFFF',
           textAlign: 'center',
-          borderTop: '1px solid rgba(0, 51, 255, 0.15)',
-          borderBottom: '1px solid rgba(0, 51, 255, 0.15)',
-          position: 'relative'
+          borderTop: '1px solid var(--apple-border)',
+          borderBottom: '1px solid var(--apple-border)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '300px',
-            height: '150px',
-            background: 'radial-gradient(circle, rgba(151, 125, 255, 0.15) 0%, rgba(151, 125, 255, 0) 70%)',
-            pointerEvents: 'none'
-          }} />
+          {/* Apple Ambient Center Light */}
+          <div 
+            className="apple-ambient-glow"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle, rgba(151, 125, 255, 0.12) 0%, transparent 70%)'
+            }}
+          />
 
-          <div className="container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <Flame size={48} color="#977DFF" style={{ marginBottom: '20px', filter: 'drop-shadow(0 0 10px rgba(151,125,255,0.5))' }} />
+          <div className="container" style={{ maxWidth: '780px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div className="apple-kicker" style={{ marginBottom: '16px' }}>
+              <span className="apple-kicker-dot"></span>
+              <span>Reuniones Semanales</span>
+            </div>
             
-            <h2 style={{
-              fontSize: '3rem',
-              fontWeight: 900,
-              marginBottom: '48px',
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
-            }}>
-              HORARIOS DE SERVICIOS
+            <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '40px' }}>
+              Horarios de Servicios
             </h2>
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              fontSize: '2rem',
-              fontWeight: 800,
-              letterSpacing: '0.5px'
-            }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {schedules.map((s, idx) => (
                 <div 
                   key={s.id || idx} 
                   style={{ 
                     display: 'flex', 
-                    justifyContent: 'center', 
+                    justifyContent: 'space-between', 
                     alignItems: 'center', 
-                    gap: '16px',
-                    color: s.isVirtual ? '#977DFF' : '#FFFFFF'
+                    padding: '18px 28px',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '9999px',
+                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
-                  {s.isVirtual ? <Music size={28} color="#977DFF" /> : <PlayCircle size={28} color="#0033FF" />}
-                  <span>{s.text}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      backgroundColor: s.isVirtual ? 'rgba(151, 125, 255, 0.15)' : 'rgba(0, 113, 227, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: s.isVirtual ? 'var(--apple-purple)' : 'var(--apple-blue)'
+                    }}>
+                      {s.isVirtual ? <Music size={18} /> : <PlayCircle size={18} />}
+                    </div>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
+                      {s.text}
+                    </span>
+                  </div>
+
+                  <span style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    backgroundColor: s.isVirtual ? 'rgba(151, 125, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+                    color: s.isVirtual ? 'var(--apple-purple)' : 'var(--apple-text-secondary)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase'
+                  }}>
+                    {s.isVirtual ? 'En Línea' : 'Presencial'}
+                  </span>
                 </div>
               ))}
             </div>
 
-            <button 
-              onClick={() => setModalType('pregunta')}
-              style={{
-                background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-                color: '#FFF',
-                border: 'none',
-                borderRadius: '50px',
-                marginTop: '48px',
-                padding: '16px 40px',
-                fontSize: '1.05rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                boxShadow: '0 8px 24px rgba(0, 51, 255, 0.3)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 51, 255, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 51, 255, 0.3)';
-              }}
-            >
-              ¿TENÉS ALGUNA PREGUNTA?
-            </button>
+            <div style={{ marginTop: '44px' }}>
+              <button 
+                onClick={() => setModalType('pregunta')}
+                className="apple-btn apple-btn-secondary"
+                style={{ padding: '14px 32px', fontSize: '0.94rem' }}
+              >
+                <span>¿Tenés alguna pregunta?</span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
           </div>
         </div>
       ) : scheduleBg ? (
@@ -1884,35 +1883,35 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         </div>
       </footer>
 
-      {/* QUESTION MODAL ONLY */}
+      {/* QUESTION MODAL ONLY - APPLE FROSTED SHEET */}
       {modalType === 'pregunta' && (
-        <div className="modal-overlay" onClick={() => setModalType(null)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', borderRadius: '24px', backgroundColor: '#00033D', border: '1px solid rgba(151, 125, 255, 0.3)', color: '#FFF' }}>
-            <div style={{ padding: '28px' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.4rem', marginBottom: '8px' }}>Enviar Pregunta</h3>
-              <p style={{ color: '#EAEDF8', opacity: 0.8, fontSize: '0.9rem', marginBottom: '20px' }}>
+        <div className="modal-overlay" onClick={() => setModalType(null)} style={{ backdropFilter: 'blur(20px)', backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', borderRadius: '28px', backgroundColor: 'rgba(18, 18, 24, 0.94)', border: '1px solid rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(32px)', color: '#FFF', boxShadow: '0 24px 60px rgba(0,0,0,0.8)' }}>
+            <div style={{ padding: '36px 32px' }}>
+              <h3 style={{ color: '#FFFFFF', fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '8px' }}>Enviar Pregunta</h3>
+              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.94rem', lineHeight: 1.5, marginBottom: '24px' }}>
                 ¿Tienes alguna duda sobre nuestros horarios, ministerios o actividades? Escríbenos directamente aquí.
               </p>
 
               {formSubmitted ? (
-                <div style={{ textAlign: 'center', color: '#34D399', fontWeight: 700, padding: '20px' }}>
-                  ¡Mensaje recibido! Te responderemos por correo o WhatsApp.
+                <div style={{ textAlign: 'center', color: '#34C759', fontWeight: 600, padding: '24px', backgroundColor: 'rgba(52, 199, 89, 0.1)', borderRadius: '16px', border: '1px solid rgba(52, 199, 89, 0.2)' }}>
+                  ¡Mensaje recibido! Te responderemos muy pronto.
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit}>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Tu Nombre</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} required style={{ backgroundColor: '#030812', border: '1px solid rgba(151, 125, 255, 0.2)', color: '#FFF' }} />
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--apple-text-secondary)', marginBottom: '8px' }}>Tu Nombre</label>
+                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} required style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: '#FFF', padding: '12px 16px' }} />
                   </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Correo de contacto</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} required style={{ backgroundColor: '#030812', border: '1px solid rgba(151, 125, 255, 0.2)', color: '#FFF' }} />
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--apple-text-secondary)', marginBottom: '8px' }}>Correo de contacto</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} required style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: '#FFF', padding: '12px 16px' }} />
                   </div>
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>Pregunta / Comentario</label>
-                    <textarea name="question" rows="3" value={formData.question} onChange={handleInputChange} required style={{ width: '100%', borderRadius: '10px', backgroundColor: '#030812', border: '1px solid rgba(151, 125, 255, 0.2)', color: '#FFF', padding: '10px' }}></textarea>
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--apple-text-secondary)', marginBottom: '8px' }}>Pregunta o comentario</label>
+                    <textarea name="question" rows="3" value={formData.question} onChange={handleInputChange} required style={{ width: '100%', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFF', padding: '12px 16px', boxSizing: 'border-box' }}></textarea>
                   </div>
-                  <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '50px', border: 'none', color: '#FFF', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)', boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)' }}>Enviar Mensaje</button>
+                  <button type="submit" className="apple-btn apple-btn-primary" style={{ width: '100%', padding: '14px', fontSize: '0.94rem' }}>Enviar Mensaje</button>
                 </form>
               )}
             </div>
@@ -1920,7 +1919,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         </div>
       )}
 
-      {/* STICKY MOBILE CTA BAR */}
+      {/* STICKY MOBILE CTA BAR - APPLE FLOATING PILL */}
       <div className="mobile-sticky-cta-bar">
         <button 
           onClick={onGoToTickets || (() => {
@@ -1929,8 +1928,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           })} 
           className="mobile-sticky-cta-btn"
         >
-          <Ticket size={20} />
-          <span>Adquirir Entradas • Auténticas 2026</span>
+          <Ticket size={18} />
+          <span>Congreso 2026 • Entradas Disponibles</span>
         </button>
       </div>
 
@@ -1938,37 +1937,41 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         .mobile-sticky-cta-bar {
           display: none;
           position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
+          bottom: 20px;
+          left: 16px;
+          right: 16px;
           z-index: 999;
-          padding: 12px 16px;
-          background: rgba(3, 8, 18, 0.92);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-top: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+          pointer-events: none;
         }
         @media (max-width: 768px) {
           .mobile-sticky-cta-bar {
-            display: block;
+            display: flex;
+            justify-content: center;
           }
         }
         .mobile-sticky-cta-btn {
+          pointer-events: auto;
           width: 100%;
-          padding: 14px;
-          border-radius: 50px;
-          border: none;
-          background: linear-gradient(135deg, #0033FF 0%, #DB2777 100%);
-          color: #FFFFFF;
-          font-weight: 800;
-          font-size: 0.95rem;
+          max-width: 440px;
+          padding: 14px 20px;
+          border-radius: 9999px;
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          background: #FFFFFF;
+          color: #000000;
+          font-family: var(--apple-font);
+          font-weight: 600;
+          font-size: 0.9rem;
+          letter-spacing: -0.01em;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
-          box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4);
+          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
           cursor: pointer;
+          transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mobile-sticky-cta-btn:active {
+          transform: scale(0.96);
         }
       `}</style>
 
