@@ -135,6 +135,34 @@ function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS friendship_groups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      zone TEXT NOT NULL,
+      canton TEXT NOT NULL,
+      address_reference TEXT,
+      meeting_day TEXT NOT NULL,
+      meeting_time TEXT NOT NULL,
+      modality TEXT DEFAULT 'Presencial',
+      network_category TEXT DEFAULT 'Mixto',
+      leaders TEXT,
+      phone TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS group_contact_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER,
+      group_name TEXT NOT NULL,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      notes TEXT,
+      status TEXT DEFAULT 'pendiente',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);

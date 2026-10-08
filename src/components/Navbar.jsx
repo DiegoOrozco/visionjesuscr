@@ -13,6 +13,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
     { label: 'INICIO', url: '/' },
     { label: 'NOSOTROS', url: '/nosotros' },
     { label: 'MODELO DE JESÚS', url: '/modelo' },
+    { label: 'GRUPOS DE AMISTAD', url: '/grupos-de-amistad' },
     { label: 'EVENTOS', url: '/eventos' },
     { label: 'ORACIÓN & TESTIMONIOS', url: '/oracion' },
     { label: 'CONTACTO', url: '/#contacto-section' }

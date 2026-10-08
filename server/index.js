@@ -2145,6 +2145,31 @@ app.get('/api/testimonies', (req, res) => {
   }
 });
 
+app.get('/api/friendship-groups', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM friendship_groups WHERE is_active = 1 ORDER BY zone ASC, canton ASC').all();
+    res.json({ success: true, groups: rows });
+  } catch (e) {
+    console.error('Error fetching friendship groups:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.post('/api/group-contact', (req, res) => {
+  try {
+    const { groupId, groupName, name, phone, email, notes } = req.body;
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, message: 'Nombre y teléfono son obligatorios.' });
+    }
+    const stmt = db.prepare('INSERT INTO group_contact_requests (group_id, group_name, name, phone, email, notes) VALUES (?, ?, ?, ?, ?, ?)');
+    const result = stmt.run(groupId || null, groupName || 'Contacto General', name, phone, email || '', notes || '');
+    res.json({ success: true, message: 'Solicitud enviada con éxito.', id: result.lastInsertRowid });
+  } catch (e) {
+    console.error('Error saving group contact request:', e);
+    res.status(500).json({ success: false, message: 'Error interno procesando la solicitud.' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Express API Server listening on port ${PORT}`);
 });
