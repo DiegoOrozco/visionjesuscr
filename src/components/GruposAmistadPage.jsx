@@ -174,15 +174,6 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
             <a href="/oracion" onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }} className="apple-nav-link">Oración & Testimonios</a>
             <a href="/donar" onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }} className="apple-nav-link">Donar</a>
           </nav>
-
-          <button 
-            onClick={() => window.location.href = '/eventos'}
-            className="apple-btn apple-btn-primary"
-            style={{ padding: '8px 18px', fontSize: '0.84rem' }}
-          >
-            <Calendar size={14} />
-            <span>Eventos</span>
-          </button>
         </header>
       </div>
 

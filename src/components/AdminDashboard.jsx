@@ -39,6 +39,38 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     return 'reservations';
   });
 
+  const [activeSuite, setActiveSuite] = useState(() => {
+    if (['church_web', 'oracion_admin', 'grupos_admin', 'autenticas', 'sanados', 'modelo', 'move', 'tienda'].includes(activeTab)) return 'web';
+    if (['users', 'activity_log'].includes(activeTab)) return 'system';
+    return 'tickets';
+  });
+
+  const [activeEventId, setActiveEventId] = useState('autenticas-2026');
+
+  const availableEvents = [
+    {
+      id: 'autenticas-2026',
+      name: 'Congreso Mujeres Auténticas 2026',
+      date: '18-19 Nov 2026',
+      status: 'Activo',
+      badgeColor: '#10B981'
+    },
+    {
+      id: 'sanados-2026',
+      name: 'Noche de Milagros - Sanados para Sanar 2026',
+      date: '28 Nov 2026',
+      status: 'Próximo',
+      badgeColor: '#0071E3'
+    },
+    {
+      id: 'liderazgo-2027',
+      name: 'Congreso Internacional de Liderazgo 2027',
+      date: 'Feb 2027',
+      status: 'Proyección 2027',
+      badgeColor: '#977DFF'
+    }
+  ];
+
   // Pricing & Presale Editing State
   const [pricingFields, setPricingFields] = useState({
     presale_cutoff_date: '2026-08-15',
@@ -261,6 +293,108 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       const data = await res.json();
       if (data.success) {
         setTestimoniesList(prev => prev.filter(t => t.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Grupos de Amistad & Lead Requests State
+  const [adminGroupsList, setAdminGroupsList] = useState([]);
+  const [adminGroupContactsList, setAdminGroupContactsList] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [loadingGroupContacts, setLoadingGroupContacts] = useState(false);
+  const [groupFilterZone, setGroupFilterZone] = useState('all');
+  const [contactFilterStatus, setContactFilterStatus] = useState('all');
+  const [editingGroupModal, setEditingGroupModal] = useState(null); // null or group object
+
+  const fetchAdminGroups = async () => {
+    setLoadingGroups(true);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/friendship-groups`);
+      const data = await res.json();
+      if (data.success) setAdminGroupsList(data.groups || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
+
+  const fetchAdminGroupContacts = async () => {
+    setLoadingGroupContacts(true);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/group-contacts`);
+      const data = await res.json();
+      if (data.success) setAdminGroupContactsList(data.contacts || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingGroupContacts(false);
+    }
+  };
+
+  const handleSaveGroupSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingGroupModal) return;
+    const isNew = !editingGroupModal.id;
+    const url = isNew ? `${API_URL}/api/admin/friendship-groups` : `${API_URL}/api/admin/friendship-groups/${editingGroupModal.id}`;
+    const method = isNew ? 'POST' : 'PUT';
+
+    try {
+      const res = await authFetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingGroupModal)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingGroupModal(null);
+        fetchAdminGroups();
+      } else {
+        alert(data.message || 'Error guardando el grupo.');
+      }
+    } catch (err) {
+      alert('Error de red guardando el grupo.');
+    }
+  };
+
+  const handleDeleteGroup = async (id) => {
+    if (!window.confirm('¿Deseas eliminar este Grupo de Amistad?')) return;
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/friendship-groups/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setAdminGroupsList(prev => prev.filter(g => g.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdateGroupContactStatus = async (id, status) => {
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/group-contacts/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdminGroupContactsList(prev => prev.map(c => c.id === id ? { ...c, status } : c));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteGroupContact = async (id) => {
+    if (!window.confirm('¿Deseas eliminar esta solicitud de contacto?')) return;
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/group-contacts/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setAdminGroupContactsList(prev => prev.filter(c => c.id !== id));
       }
     } catch (e) {
       console.error(e);
@@ -998,6 +1132,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     if (adminUser && activeTab === 'oracion_admin') {
       fetchAdminPrayers();
       fetchAdminTestimonies();
+    }
+    if (adminUser && activeTab === 'grupos_admin') {
+      fetchAdminGroups();
+      fetchAdminGroupContacts();
     }
   }, [adminUser, activeTab]);
 
@@ -1968,6 +2106,33 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Heart size={18} />
             Oración & Testimonios
+          </button>
+        )}
+
+        {/* Grupos de Amistad & Lead Requests Tab */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => {
+              setActiveTab('grupos_admin');
+              fetchAdminGroups();
+              fetchAdminGroupContacts();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'grupos_admin' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'grupos_admin' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Users size={18} />
+            Grupos de Amistad & Contactos
           </button>
         )}
 
@@ -5399,6 +5564,428 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: GRUPOS DE AMISTAD & CONTACTOS (Admin) */}
+      {activeTab === 'grupos_admin' && adminUser.role === 'admin' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {/* DIRECTORIO DE GRUPOS DE AMISTAD */}
+          <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={22} color="#3B82F6" />
+                  Directorio de Grupos de Amistad (Casas de Paz)
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                  Crea, edita o desactiva las Casas de Paz y grupos pequeños por Zona y Cantón.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setEditingGroupModal({ name: '', zone: 'Desamparados', canton: 'Desamparados', address_reference: '', meeting_day: 'Viernes', meeting_time: '7:30 PM', modality: 'Presencial', network_category: 'Mixto', leaders: '', phone: '', is_active: 1 })}
+                  className="btn-primary"
+                  style={{ padding: '8px 18px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={16} />
+                  + Crear Nuevo Grupo
+                </button>
+                <button
+                  onClick={fetchAdminGroups}
+                  className="btn-secondary"
+                  style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <RefreshCw size={14} className={loadingGroups ? 'animate-spin' : ''} />
+                  Actualizar
+                </button>
+              </div>
+            </div>
+
+            {/* FILTROS POR ZONA */}
+            <div style={{ marginBottom: '20px', backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Filtrar por Zona / Modalidad</label>
+              <select
+                value={groupFilterZone}
+                onChange={(e) => setGroupFilterZone(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+              >
+                <option value="all">Todas las Zonas</option>
+                <option value="Desamparados">Desamparados</option>
+                <option value="San José">San José Centro</option>
+                <option value="Curridabat">Curridabat / Este</option>
+                <option value="Virtual">Virtual / Online</option>
+              </select>
+            </div>
+
+            {/* TABLA DE GRUPOS DE AMISTAD */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#FAF8F5', borderBottom: '2px solid var(--accent-beige-border)', textAlign: 'left', color: 'var(--accent-coffee)' }}>
+                    <th style={{ padding: '12px 14px' }}>Grupo</th>
+                    <th style={{ padding: '12px 14px' }}>Zona / Cantón</th>
+                    <th style={{ padding: '12px 14px' }}>Día & Hora</th>
+                    <th style={{ padding: '12px 14px' }}>Categoría</th>
+                    <th style={{ padding: '12px 14px' }}>Anfitriones / Líderes</th>
+                    <th style={{ padding: '12px 14px' }}>Estado</th>
+                    <th style={{ padding: '12px 14px' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminGroupsList
+                    .filter(g => groupFilterZone === 'all' || g.zone === groupFilterZone || g.modality === groupFilterZone)
+                    .map((grp) => (
+                      <tr key={grp.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--accent-coffee)' }}>
+                          {grp.name}
+                          <div style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>{grp.address_reference}</div>
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontWeight: 700 }}>{grp.zone}</span> • {grp.canton}
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap', fontWeight: 700, color: '#3B82F6' }}>
+                          {grp.meeting_day} @ {grp.meeting_time}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ backgroundColor: '#EFF6FF', color: '#1D4ED8', padding: '4px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.75rem' }}>
+                            {grp.network_category || 'Mixto'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div>{grp.leaders || 'Equipo Pastoral'}</div>
+                          {grp.phone && (
+                            <a href={`https://wa.me/506${grp.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem', color: '#25D366', fontWeight: 700, textDecoration: 'none' }}>
+                              📱 {grp.phone}
+                            </a>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ backgroundColor: grp.is_active ? '#F0FDF4' : '#FEF2F2', color: grp.is_active ? '#166534' : '#991B1B', padding: '4px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.75rem' }}>
+                            {grp.is_active ? 'ACTIVO' : 'INACTIVO'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          <button
+                            onClick={() => setEditingGroupModal(grp)}
+                            className="btn-secondary"
+                            style={{ padding: '4px 10px', fontSize: '0.78rem', fontWeight: 700, marginRight: '8px', borderRadius: '6px' }}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteGroup(grp.id)}
+                            style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                            title="Eliminar grupo"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  {adminGroupsList.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        No hay grupos registrados. Haz clic en "+ Crear Nuevo Grupo".
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SOLICITUDES DE CONTACTO ("¡QUIERO UNIRME!") */}
+          <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <MessageCircle size={22} color="#10B981" />
+                  Solicitudes de Integración ("¡Quiero Unirme!")
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                  Personas interesadas en unirse a una Casa de Paz o ser contactadas por los anfitriones.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchAdminGroupContacts}
+                className="btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <RefreshCw size={14} className={loadingGroupContacts ? 'animate-spin' : ''} />
+                Actualizar Solicitudes
+              </button>
+            </div>
+
+            {/* FILTROS SOLICITUDES */}
+            <div style={{ marginBottom: '20px', backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Filtrar Estado</label>
+              <select
+                value={contactFilterStatus}
+                onChange={(e) => setContactFilterStatus(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+              >
+                <option value="all">Todos los Estados</option>
+                <option value="pendiente">Pendientes de Contacto</option>
+                <option value="contactado">Contactados</option>
+                <option value="integrado">Integrados a Casa de Paz</option>
+              </select>
+            </div>
+
+            {/* GRID DE SOLICITUDES */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+              {adminGroupContactsList
+                .filter(c => contactFilterStatus === 'all' || (c.status || 'pendiente') === contactFilterStatus)
+                .map((req) => (
+                  <div key={req.id} style={{
+                    backgroundColor: '#FAF8F5',
+                    border: '1px solid var(--accent-beige-border)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justify: 'space-between',
+                    gap: '12px'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: 850, color: 'var(--accent-coffee)' }}>{req.name}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {new Date(req.created_at).toLocaleDateString('es-CR', { day: '2-digit', month: 'short' })}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#3B82F6', marginBottom: '8px' }}>
+                        Grupo: {req.group_name || 'Contacto General'}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '10px' }}>
+                        <a href={`https://wa.me/506${req.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ backgroundColor: '#25D366', color: '#FFF', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          📱 Contactar WhatsApp ({req.phone})
+                        </a>
+                      </div>
+
+                      {req.notes && (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic', margin: '4px 0 0', backgroundColor: '#FFF', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                          "{req.notes}"
+                        </p>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderTop: '1px solid #E2E8F0', paddingTop: '12px' }}>
+                      <select
+                        value={req.status || 'pendiente'}
+                        onChange={(e) => handleUpdateGroupContactStatus(req.id, e.target.value)}
+                        style={{ padding: '6px 10px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem', border: '1px solid #CBD5E1' }}
+                      >
+                        <option value="pendiente">⏳ Pendiente</option>
+                        <option value="contactado">📞 Contactado</option>
+                        <option value="integrado">🎉 Integrado a Grupo</option>
+                      </select>
+
+                      <button
+                        onClick={() => handleDeleteGroupContact(req.id)}
+                        style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                        title="Eliminar solicitud"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {adminGroupContactsList.length === 0 && (
+                <div style={{ gridColumn: '1 / -1', padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No se han recibido solicitudes de contacto por el momento.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA CREAR O EDITAR GRUPO DE AMISTAD */}
+      {editingGroupModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.65)',
+          display: 'flex',
+          alignItems: 'center',
+          justify: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            width: '100%',
+            maxWidth: '600px',
+            padding: '32px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 850 }}>
+                {editingGroupModal.id ? 'Editar Grupo de Amistad' : 'Crear Nuevo Grupo de Amistad'}
+              </h3>
+              <button onClick={() => setEditingGroupModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B' }}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveGroupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Nombre del Grupo / Casa de Paz</label>
+                <input
+                  type="text"
+                  value={editingGroupModal.name || ''}
+                  onChange={(e) => setEditingGroupModal({ ...editingGroupModal, name: e.target.value })}
+                  required
+                  placeholder="ej: Casa de Paz Gravilias"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Zona</label>
+                  <select
+                    value={editingGroupModal.zone || 'Desamparados'}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, zone: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  >
+                    <option value="Desamparados">Desamparados</option>
+                    <option value="San José">San José Centro</option>
+                    <option value="Curridabat">Curridabat / Este</option>
+                    <option value="Virtual">Virtual / Online</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Cantón / Distrito</label>
+                  <input
+                    type="text"
+                    value={editingGroupModal.canton || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, canton: e.target.value })}
+                    required
+                    placeholder="ej: San Miguel, Gravilias, Zapote"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Día de Reunión</label>
+                  <input
+                    type="text"
+                    value={editingGroupModal.meeting_day || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, meeting_day: e.target.value })}
+                    placeholder="ej: Viernes"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Hora de Reunión</label>
+                  <input
+                    type="text"
+                    value={editingGroupModal.meeting_time || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, meeting_time: e.target.value })}
+                    placeholder="ej: 7:30 PM"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Modalidad</label>
+                  <select
+                    value={editingGroupModal.modality || 'Presencial'}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, modality: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  >
+                    <option value="Presencial">Presencial</option>
+                    <option value="Virtual">Virtual / Zoom</option>
+                    <option value="Híbrido">Híbrido</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Red / Categoría</label>
+                  <select
+                    value={editingGroupModal.network_category || 'Mixto'}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, network_category: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  >
+                    <option value="Mixto">Mixto (Familias)</option>
+                    <option value="Jóvenes">MOVE (Jóvenes)</option>
+                    <option value="Matrimonios">Matrimonios</option>
+                    <option value="Mujeres">Mujeres / Auténticas</option>
+                    <option value="Hombres">Hombres</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Dirección / Referencia</label>
+                <input
+                  type="text"
+                  value={editingGroupModal.address_reference || ''}
+                  onChange={(e) => setEditingGroupModal({ ...editingGroupModal, address_reference: e.target.value })}
+                  placeholder="ej: De la plaza de deportes 200m este, casa esquinera"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Anfitriones / Líderes</label>
+                  <input
+                    type="text"
+                    value={editingGroupModal.leaders || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, leaders: e.target.value })}
+                    placeholder="ej: Juan & María Pérez"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Teléfono de Contacto</label>
+                  <input
+                    type="text"
+                    value={editingGroupModal.phone || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, phone: e.target.value })}
+                    placeholder="ej: 8888-8888"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-coffee)', cursor: 'pointer', marginTop: '6px' }}>
+                  <input
+                    type="checkbox"
+                    checked={editingGroupModal.is_active === 1 || editingGroupModal.is_active === true}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, is_active: e.target.checked ? 1 : 0 })}
+                  />
+                  Grupo Activo y Visible en el Buscador
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <button type="button" onClick={() => setEditingGroupModal(null)} className="btn-secondary" style={{ flex: 1, padding: '12px' }}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 1, padding: '12px', fontWeight: 800 }}>
+                  {editingGroupModal.id ? 'Guardar Cambios' : 'Crear Grupo'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -137,15 +137,6 @@ export default function OracionPage({ config = {}, onGoHome }) {
             <a href="/oracion" onClick={(e) => { e.preventDefault(); }} className="apple-nav-link" style={{ color: '#FFFFFF' }}>Oración & Testimonios</a>
             <a href="/donar" onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }} className="apple-nav-link">Donar</a>
           </nav>
-
-          <button 
-            onClick={() => window.location.href = '/eventos'}
-            className="apple-btn apple-btn-primary"
-            style={{ padding: '8px 18px', fontSize: '0.84rem' }}
-          >
-            <Calendar size={14} />
-            <span>Eventos</span>
-          </button>
         </header>
       </div>
 
@@ -490,7 +481,9 @@ export default function OracionPage({ config = {}, onGoHome }) {
                 <div style={{ textAlign: 'center', padding: '20px' }}>
                   <CheckCircle2 size={40} style={{ color: '#10B981', margin: '0 auto 12px' }} />
                   <h4 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF' }}>¡Gracias por compartir tu testimonio!</h4>
-                  <p style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: '16px' }}>Tu victoria inspira la fe de toda la congregación.</p>
+                  <p style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: '16px', lineHeight: 1.6 }}>
+                    Tu testimonio ha sido recibido con éxito. Será revisado y aprobado por nuestro equipo pastoral antes de ser publicado en el muro de fe.
+                  </p>
                   <button onClick={() => setTestimonySuccess(false)} className="apple-btn apple-btn-secondary">
                     Compartir otro testimonio
                   </button>

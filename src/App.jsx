@@ -230,7 +230,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#07070B', color: '#FFFFFF' }}>
-      {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found', 'congresos'].includes(currentView) && (
+      {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found', 'congresos', 'donaciones', 'nosotros', 'oracion', 'grupos-amistad'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
           setCurrentView={setCurrentView} 

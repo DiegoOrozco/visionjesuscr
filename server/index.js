@@ -2126,9 +2126,9 @@ app.post('/api/testimonies', (req, res) => {
     if (!name || !story) {
       return res.status(400).json({ success: false, message: 'Nombre e historia son obligatorios.' });
     }
-    const stmt = db.prepare('INSERT INTO testimonies (name, title, story) VALUES (?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO testimonies (name, title, story, is_approved) VALUES (?, ?, ?, 0)');
     const result = stmt.run(name, title || 'Dios es Fiel', story);
-    res.json({ success: true, message: 'Testimonio recibido con éxito.', id: result.lastInsertRowid });
+    res.json({ success: true, message: 'Testimonio recibido con éxito. Será publicado tras ser aprobado por el equipo pastoral.', id: result.lastInsertRowid });
   } catch (e) {
     console.error('Error saving testimony:', e);
     res.status(500).json({ success: false, message: 'Error interno guardando el testimonio.' });
@@ -2218,12 +2218,82 @@ app.post('/api/group-contact', (req, res) => {
     if (!name || !phone) {
       return res.status(400).json({ success: false, message: 'Nombre y teléfono son obligatorios.' });
     }
-    const stmt = db.prepare('INSERT INTO group_contact_requests (group_id, group_name, name, phone, email, notes) VALUES (?, ?, ?, ?, ?, ?)');
-    const result = stmt.run(groupId || null, groupName || 'Contacto General', name, phone, email || '', notes || '');
-    res.json({ success: true, message: 'Solicitud enviada con éxito.', id: result.lastInsertRowid });
+// Admin endpoints for Friendship Groups & Contact Requests
+app.get('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM friendship_groups ORDER BY zone ASC, canton ASC').all();
+    res.json({ success: true, groups: rows });
   } catch (e) {
-    console.error('Error saving group contact request:', e);
-    res.status(500).json({ success: false, message: 'Error interno procesando la solicitud.' });
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.post('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
+  try {
+    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone } = req.body;
+    if (!name || !zone || !canton) {
+      return res.status(400).json({ success: false, message: 'Nombre, zona y cantón son obligatorios.' });
+    }
+    const stmt = db.prepare(`
+      INSERT INTO friendship_groups (name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    `);
+    const result = stmt.run(name, zone, canton, address_reference || '', meeting_day || 'Por coordinar', meeting_time || 'Por coordinar', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '');
+    res.json({ success: true, message: 'Grupo de amistad creado con éxito.', id: result.lastInsertRowid });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.put('/api/admin/friendship-groups/:id', verifyAdminToken, (req, res) => {
+  try {
+    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, is_active } = req.body;
+    const stmt = db.prepare(`
+      UPDATE friendship_groups 
+      SET name = ?, zone = ?, canton = ?, address_reference = ?, meeting_day = ?, meeting_time = ?, modality = ?, network_category = ?, leaders = ?, phone = ?, is_active = ?
+      WHERE id = ?
+    `);
+    stmt.run(name, zone, canton, address_reference || '', meeting_day || '', meeting_time || '', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '', is_active !== undefined ? is_active : 1, req.params.id);
+    res.json({ success: true, message: 'Grupo de amistad actualizado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.delete('/api/admin/friendship-groups/:id', verifyAdminToken, (req, res) => {
+  try {
+    db.prepare('DELETE FROM friendship_groups WHERE id = ?').run(req.params.id);
+    res.json({ success: true, message: 'Grupo eliminado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.get('/api/admin/group-contacts', verifyAdminToken, (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM group_contact_requests ORDER BY created_at DESC').all();
+    res.json({ success: true, contacts: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.put('/api/admin/group-contacts/:id/status', verifyAdminToken, (req, res) => {
+  try {
+    const { status } = req.body;
+    db.prepare('UPDATE group_contact_requests SET status = ? WHERE id = ?').run(status || 'pendiente', req.params.id);
+    res.json({ success: true, message: 'Estado actualizado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.delete('/api/admin/group-contacts/:id', verifyAdminToken, (req, res) => {
+  try {
+    db.prepare('DELETE FROM group_contact_requests WHERE id = ?').run(req.params.id);
+    res.json({ success: true, message: 'Solicitud eliminada.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

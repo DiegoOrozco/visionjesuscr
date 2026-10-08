@@ -131,7 +131,7 @@ function initDb() {
       name TEXT NOT NULL,
       title TEXT NOT NULL,
       story TEXT NOT NULL,
-      is_approved INTEGER DEFAULT 1,
+      is_approved INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
