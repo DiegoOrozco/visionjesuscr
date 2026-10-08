@@ -1,79 +1,213 @@
-import React from 'react';
-import { QrCode, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, QrCode, Menu, X } from 'lucide-react';
 
-export default function Navbar({ currentView, setCurrentView, adminUser, onLogout, onGoHome, navbarConfig = {} }) {
-  const handleNavLanding = () => {
-    if (adminUser && adminUser.role === 'scanner') return;
-    window.location.href = '/';
+export default function Navbar({ 
+  currentView, 
+  setCurrentView, 
+  adminUser, 
+  onLogout, 
+  onGoHome, 
+  navbarConfig = {} 
+}) {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Monitor scroll for subtle pill resize & contrast enhancement
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 25) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile sheet on escape key or resize > 900px
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900 && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileMenuOpen]);
+
+  // Current admin session
+  const currentAdmin = adminUser || (() => {
+    try {
+      const saved = localStorage.getItem('admin_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('admin_token');
+      window.location.href = '/';
+    }
   };
 
-  const isAutenticasPage = window.location.pathname === '/autenticas' || currentView === 'autenticas-promo';
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    if (currentAdmin && currentAdmin.role === 'scanner') return;
 
-  const officialNavLinks = [
-    { label: 'INICIO', url: '/' },
-    { label: 'NOSOTROS', url: '/nosotros' },
-    { label: 'MODELO DE JESÚS', url: '/modelo' },
-    { label: 'GRUPOS DE AMISTAD', url: '/grupos-de-amistad' },
-    { label: 'EVENTOS', url: '/eventos' },
-    { label: 'ORACIÓN & TESTIMONIOS', url: '/oracion' },
-    { label: 'DONAR', url: '/donar' },
-    { label: 'CONTACTO', url: '/#contacto-section' }
+    if (onGoHome) {
+      onGoHome();
+    } else if (setCurrentView) {
+      window.history.pushState({}, '', '/');
+      setCurrentView('landing');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  const navLinks = [
+    { label: 'Inicio', path: '/' },
+    { label: 'Nosotros', path: '/nosotros' },
+    { label: 'Modelo de Jesús', path: '/modelo' },
+    { label: 'Grupos de Amistad', path: '/grupos-de-amistad' },
+    { label: 'Eventos', path: '/eventos' },
+    { label: 'Oración & Testimonios', path: '/oracion' },
+    { label: 'Donar', path: '/donar' },
+    { label: 'Contacto', path: '/#contacto-section', isAnchor: true }
   ];
 
-  // Parse dynamic navbar links, ignoring legacy links from old DB state
-  let dynamicLinks = [];
-  try {
-    if (navbarConfig.navbar_links) {
-      const parsed = typeof navbarConfig.navbar_links === 'string' 
-        ? JSON.parse(navbarConfig.navbar_links) 
-        : navbarConfig.navbar_links;
-      if (Array.isArray(parsed) && parsed.length > 0 && !parsed.some(l => l.label === 'Congreso Mujeres' || l.label === 'Conocé la Visión' || l.label === 'Experiencias y Horarios' || l.label === 'Inicio')) {
-        dynamicLinks = parsed;
+  const isLinkActive = (link) => {
+    const currentPath = window.location.pathname;
+    if (link.isAnchor) return false;
+    if (link.path === '/') {
+      return currentPath === '/' && (!currentView || currentView === 'landing');
+    }
+    if (link.path === '/nosotros') {
+      return currentPath === '/nosotros' || currentView === 'nosotros';
+    }
+    if (link.path === '/modelo') {
+      return currentPath === '/modelo' || currentView === 'modelo-promo';
+    }
+    if (link.path === '/grupos-de-amistad') {
+      return currentPath === '/grupos-de-amistad' || currentPath === '/casas-de-paz' || currentView === 'grupos-amistad';
+    }
+    if (link.path === '/eventos') {
+      return currentPath === '/eventos' || currentPath === '/congresos' || currentView === 'congresos';
+    }
+    if (link.path === '/oracion') {
+      return currentPath === '/oracion' || currentPath === '/peticiones' || currentView === 'oracion';
+    }
+    if (link.path === '/donar') {
+      return currentPath === '/donar' || currentPath === '/ofrendas' || currentView === 'donaciones';
+    }
+    return currentPath === link.path;
+  };
+
+  const handleLinkClick = (e, link) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    if (link.isAnchor) {
+      const contactEl = document.getElementById('contacto-section');
+      if (contactEl) {
+        contactEl.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        if (setCurrentView) {
+          window.history.pushState({}, '', '/#contacto-section');
+          setCurrentView('landing');
+          setTimeout(() => {
+            const el = document.getElementById('contacto-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
+        } else {
+          window.location.href = '/#contacto-section';
+        }
+      }
+      return;
+    }
+
+    const currentPath = window.location.pathname;
+    if (currentPath === link.path && link.path === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (setCurrentView) {
+      if (link.path === '/') {
+        window.history.pushState({}, '', '/');
+        setCurrentView('landing');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/nosotros') {
+        window.history.pushState({}, '', '/nosotros');
+        setCurrentView('nosotros');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/modelo') {
+        window.history.pushState({}, '', '/modelo');
+        setCurrentView('modelo-promo');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/grupos-de-amistad') {
+        window.history.pushState({}, '', '/grupos-de-amistad');
+        setCurrentView('grupos-amistad');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/eventos') {
+        window.history.pushState({}, '', '/eventos');
+        setCurrentView('congresos');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/oracion') {
+        window.history.pushState({}, '', '/oracion');
+        setCurrentView('oracion');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (link.path === '/donar') {
+        window.history.pushState({}, '', '/donar');
+        setCurrentView('donaciones');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
       }
     }
-  } catch(e) {}
 
-  const navLinksToRender = (dynamicLinks.length >= 7) ? dynamicLinks : officialNavLinks;
-
-  const handleLinkClick = (link) => {
-    if (link.url.startsWith('http')) {
-      window.open(link.url, '_blank');
-    } else {
-      window.location.href = link.url;
-    }
+    window.location.href = link.path;
   };
 
   return (
-    <header style={{
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000,
-      backgroundColor: isAutenticasPage ? 'rgba(255, 255, 255, 0.85)' : 'rgba(8, 8, 12, 0.78)',
-      backdropFilter: 'blur(28px) saturate(190%)',
-      WebkitBackdropFilter: 'blur(28px) saturate(190%)',
-      borderBottom: isAutenticasPage ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.08)',
-      boxShadow: isAutenticasPage ? '0 4px 20px rgba(0, 0, 0, 0.04)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-    }}>
-      <div className="container" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '68px',
-        padding: '0 24px'
-      }}>
-        {/* Brand Logo - Apple Clean Proportions */}
+    <div className="apple-nav-wrapper" style={{ top: isScrolled ? '12px' : '20px' }}>
+      <header 
+        className={`apple-nav-bar ${isScrolled ? 'apple-nav-scrolled' : ''}`}
+        style={{ maxWidth: isScrolled ? '1060px' : '1140px' }}
+      >
+        {/* BRAND LOGO */}
         <div 
-          onClick={handleNavLanding} 
+          onClick={handleLogoClick}
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
             gap: '12px', 
-            cursor: (adminUser && adminUser.role === 'scanner') ? 'default' : 'pointer',
-            transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            cursor: (currentAdmin && currentAdmin.role === 'scanner') ? 'default' : 'pointer',
+            transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }}
           onMouseEnter={(e) => {
-            if (!adminUser || adminUser.role !== 'scanner') {
+            if (!currentAdmin || currentAdmin.role !== 'scanner') {
               e.currentTarget.style.transform = 'scale(1.03)';
             }
           }}
@@ -82,118 +216,180 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
           }}
         >
           <img 
-            src={isAutenticasPage ? '/logo.png' : '/logo_oficial_transparente.png'} 
+            src="/logo_oficial_transparente.png" 
             alt="Visión Jesús Logo" 
-            style={{
-              height: '46px',
+            style={{ 
+              height: isScrolled ? '38px' : '44px', 
               objectFit: 'contain',
-              filter: isAutenticasPage ? 'none' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))'
-            }}
+              transition: 'height 0.3s ease',
+              filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4))'
+            }} 
           />
         </div>
 
-        {/* Desktop Navigation */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          
-          {(!adminUser || adminUser.role !== 'scanner') && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-              {navLinksToRender.map((link, idx) => {
-                const isCurrentPath = (window.location.pathname === link.url) || 
-                  ((link.url === '/congresos' || link.url === '/eventos') && (window.location.pathname === '/congresos' || window.location.pathname === '/eventos')) ||
-                  (link.url === '/' && window.location.pathname === '/');
+        {/* DESKTOP LINKS */}
+        <nav className="apple-nav-links">
+          {navLinks.map((link) => {
+            const active = isLinkActive(link);
+            return (
+              <a 
+                key={link.path}
+                href={link.path}
+                className={`apple-nav-link ${active ? 'active' : ''}`}
+                onClick={(e) => handleLinkClick(e, link)}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+        </nav>
 
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleLinkClick(link)}
-                    className="apple-nav-link"
-                    style={{
-                      color: isAutenticasPage 
-                        ? (isCurrentPath ? '#0033FF' : '#5C3D2E')
-                        : (isCurrentPath ? '#FFFFFF' : 'var(--apple-text-secondary)'),
-                      backgroundColor: isCurrentPath 
-                        ? (isAutenticasPage ? 'rgba(0, 51, 255, 0.08)' : 'rgba(255, 255, 255, 0.1)')
-                        : 'transparent',
-                      fontWeight: isCurrentPath ? 600 : 500,
-                      borderRadius: '9999px',
-                      padding: '7px 14px',
-                      fontSize: '0.84rem',
-                      letterSpacing: '-0.01em',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isCurrentPath) {
-                        e.currentTarget.style.color = isAutenticasPage ? '#0033FF' : '#FFFFFF';
-                        e.currentTarget.style.backgroundColor = isAutenticasPage ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isCurrentPath) {
-                        e.currentTarget.style.color = isAutenticasPage ? '#5C3D2E' : 'var(--apple-text-secondary)';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    {link.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Render admin links ONLY if logged in */}
-          {adminUser && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-              {(adminUser.role === 'admin' || adminUser.role === 'scanner') && (
+        {/* RIGHT ACTIONS: ADMIN PROFILE + MOBILE MENU TOGGLE */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {currentAdmin && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '4px' }}>
+              {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
                 <button 
-                  className={`apple-btn apple-btn-secondary ${currentView === 'scanner' ? 'active' : ''}`}
-                  onClick={() => setCurrentView('scanner')}
-                  style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+                  onClick={() => {
+                    if (setCurrentView) setCurrentView('scanner');
+                    else window.location.href = '/escanear';
+                  }}
+                  className="apple-btn apple-btn-secondary"
+                  style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+                  title="Escáner Puerta"
                 >
-                  <QrCode size={16} color={isAutenticasPage ? 'var(--accent-coffee)' : 'var(--apple-purple)'} />
-                  <span>Escáner Puerta</span>
+                  <QrCode size={14} color="var(--apple-purple, #977DFF)" />
+                  <span>Escáner</span>
                 </button>
               )}
 
-              {adminUser.role !== 'scanner' && (
+              {currentAdmin.role !== 'scanner' && (
                 <button 
-                  className="apple-btn apple-btn-primary"
                   onClick={() => {
                     window.history.pushState({}, '', '/login');
-                    setCurrentView('admin');
+                    if (setCurrentView) setCurrentView('admin');
+                    else window.location.href = '/admin';
                   }}
-                  style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+                  className="apple-btn apple-btn-primary"
+                  style={{ fontSize: '0.78rem', padding: '6px 14px' }}
+                  title="Panel de Administración"
                 >
-                  <ShieldCheck size={16} />
-                  <span>Panel Admin ({adminUser.username})</span>
+                  <ShieldCheck size={14} />
+                  <span>{currentAdmin.username || 'admin'}</span>
                 </button>
               )}
 
               <button 
-                onClick={onLogout}
-                style={{ 
-                  fontSize: '0.82rem', 
-                  color: '#FF453A', 
-                  background: 'none', 
+                onClick={handleLogout}
+                style={{
+                  fontSize: '0.78rem',
+                  color: '#FF453A',
+                  background: 'none',
                   border: 'none',
-                  textDecoration: 'none', 
                   cursor: 'pointer',
-                  padding: '6px 10px',
+                  fontWeight: 600,
+                  padding: '4px 8px',
                   borderRadius: '9999px',
-                  fontWeight: 500,
                   transition: 'background-color 0.2s ease'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 69, 58, 0.1)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                title="Cerrar sesión"
               >
                 Salir
               </button>
             </div>
           )}
-        </nav>
-      </div>
-    </header>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="apple-mobile-menu-btn"
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '9999px',
+              padding: '8px',
+              color: '#FFFFFF',
+              cursor: 'pointer'
+            }}
+            aria-label="Menú de Navegación"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Apple iOS Mobile Sheet Drawer */}
+      {mobileMenuOpen && (
+        <div className="apple-mobile-sheet">
+          {navLinks.map((link) => {
+            const active = isLinkActive(link);
+            return (
+              <a 
+                key={link.path}
+                href={link.path}
+                className={`apple-nav-link ${active ? 'active' : ''}`}
+                style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+                onClick={(e) => handleLinkClick(e, link)}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+
+          {currentAdmin && (
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(currentAdmin.role === 'admin' || currentAdmin.role === 'scanner') && (
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (setCurrentView) setCurrentView('scanner');
+                    else window.location.href = '/escanear';
+                  }}
+                  className="apple-btn apple-btn-secondary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  <QrCode size={16} />
+                  <span>Escáner Puerta</span>
+                </button>
+              )}
+
+              {currentAdmin.role !== 'scanner' && (
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    window.history.pushState({}, '', '/login');
+                    if (setCurrentView) setCurrentView('admin');
+                    else window.location.href = '/admin';
+                  }}
+                  className="apple-btn apple-btn-primary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  <ShieldCheck size={16} />
+                  <span>Panel Admin ({currentAdmin.username})</span>
+                </button>
+              )}
+
+              <button 
+                onClick={handleLogout}
+                style={{
+                  fontSize: '0.9rem',
+                  color: '#FF453A',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  padding: '8px',
+                  textAlign: 'center'
+                }}
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

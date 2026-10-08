@@ -28,54 +28,6 @@ export default function NotFound404({ onGoHome }) {
         background: 'radial-gradient(circle, rgba(0, 113, 227, 0.18) 0%, transparent 70%)'
       }} />
 
-      {/* APPLE FROSTED GLASS HEADER */}
-      <div className="apple-nav-wrapper">
-        <header className="apple-nav-bar">
-          <div 
-            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-            onClick={handleHomeClick}
-          >
-            <img 
-              src="/logo_oficial_transparente.png" 
-              alt="Visión Jesús Logo" 
-              style={{ height: '46px', objectFit: 'contain' }} 
-            />
-          </div>
-
-          <nav className="apple-nav-links">
-            <a 
-              href="/" 
-              onClick={(e) => { e.preventDefault(); handleHomeClick(); }} 
-              className="apple-nav-link"
-              style={{ color: '#FFFFFF' }}
-            >
-              Inicio
-            </a>
-            <a 
-              href="/congresos" 
-              onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
-              className="apple-nav-link"
-            >
-              Eventos
-            </a>
-            <a 
-              href="/#horarios-section" 
-              onClick={(e) => { e.preventDefault(); window.location.href = '/#horarios-section'; }} 
-              className="apple-nav-link"
-            >
-              Horarios
-            </a>
-            <a 
-              href="/#contacto-section" 
-              onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
-              className="apple-nav-link"
-            >
-              Contacto
-            </a>
-          </nav>
-        </header>
-      </div>
-
       {/* MAIN 404 CONTENT */}
       <div style={{
         flex: 1,

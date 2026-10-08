@@ -155,28 +155,6 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
       overflowX: 'hidden'
     }}>
 
-      {/* APPLE FROSTED NAVBAR */}
-      <div className="apple-nav-wrapper">
-        <header className="apple-nav-bar">
-          <div 
-            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-            onClick={() => window.location.href = '/'}
-          >
-            <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '46px', objectFit: 'contain' }} />
-          </div>
-
-          <nav className="apple-nav-links">
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="apple-nav-link">Inicio</a>
-            <a href="/nosotros" onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} className="apple-nav-link">Nosotros</a>
-            <a href="/modelo" onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }} className="apple-nav-link">Modelo de Jesús</a>
-            <a href="/grupos-de-amistad" onClick={(e) => { e.preventDefault(); }} className="apple-nav-link" style={{ color: '#FFFFFF' }}>Grupos de Amistad</a>
-            <a href="/eventos" onClick={(e) => { e.preventDefault(); window.location.href = '/eventos'; }} className="apple-nav-link">Eventos</a>
-            <a href="/oracion" onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }} className="apple-nav-link">Oración & Testimonios</a>
-            <a href="/donar" onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }} className="apple-nav-link">Donar</a>
-          </nav>
-        </header>
-      </div>
-
       {/* HERO SECTION */}
       <div style={{
         position: 'relative',

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Compass, Users, Heart, Coffee, Sparkles, MapPin, ArrowRight, ShieldCheck, Calendar, Clock, ChevronRight } from 'lucide-react';
-import Navbar from './Navbar';
 
 export default function NosotrosPage({ config = {}, onGoHome }) {
   const API_URL = import.meta.env.VITE_API_URL || '';
@@ -89,9 +88,6 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#07070B', color: '#FFFFFF', fontFamily: 'var(--apple-font, -apple-system, BlinkMacSystemFont, sans-serif)' }}>
-      {/* Dynamic Header */}
-      <Navbar navbarConfig={config} onGoHome={onGoHome} />
-
       {/* HERO SECTION */}
       <section style={{
         position: 'relative',

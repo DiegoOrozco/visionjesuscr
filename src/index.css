@@ -465,6 +465,10 @@ body {
   font-weight: 600;
 }
 
+.apple-mobile-menu-btn {
+  display: none;
+}
+
 /* Apple Buttons */
 .apple-btn {
   display: inline-flex;
