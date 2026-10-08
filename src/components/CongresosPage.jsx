@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, ArrowRight, Sparkles, Ticket, ShieldCheck, Menu, X } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, Sparkles, Ticket, ShieldCheck, Menu, X, Filter, Clock, Tag } from 'lucide-react';
 
 export default function CongresosPage({ config = {}, onSelectEvent }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeYear, setActiveYear] = useState('todos'); // 'todos' | '2026' | '2027'
+  const [activeCategory, setActiveCategory] = useState('Todas'); // 'Todas' | 'Congresos' | 'Adoración' | 'Jóvenes'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,34 +15,108 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const events = [
+  const allEvents = [
     {
       id: 'autenticas',
+      year: '2026',
+      category: 'Congresos',
       title: 'Congreso Mujeres Auténticas 2026',
-      subtitle: 'Edición Especial • Mujer Valiente',
+      subtitle: 'Edición Especial • Sanidad & Dignidad',
       status: 'Entradas Disponibles',
-      statusColor: '#34C759',
-      date: 'Viernes 18 y Sábado 19 de Octubre, 2026',
-      location: 'Auditorio Visión Jesús, San José, CR',
-      image: config.autenticas_hero_poster || '/logo.png',
-      description: 'El congreso anual de mujeres que marcará un antes y un después. Taller especial "Entre Nosotras", mañana de sanidad, brunch exclusivo y conferencistas invitadas.',
+      statusColor: '#10B981',
+      date: 'Viernes 18 y Sábado 19 de Noviembre, 2026',
+      time: '7:00 PM',
+      location: 'Auditorio Visión Jesús, Desamparados, CR',
+      image: config.autenticas_hero_bg || '/logo_oficial_transparente.png',
+      description: 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada cicatriz.',
       url: '/autenticas',
       featured: true,
-      priceInfo: 'Gold: ₡15.000 • General: ₡10.000'
+      priceInfo: 'Gold: ₡12.000 / General: ₡7.500'
     },
     {
       id: 'sanados',
-      title: 'Sanados para Sanar',
-      subtitle: 'Milagros y Restauración',
-      status: 'Próximamente',
-      statusColor: '#0071E3',
-      date: 'Temporada 2026',
-      location: 'Auditorio Visión Jesús',
-      image: '/logo_oficial_transparente.png',
-      description: 'Un tiempo consagrado para recibir sanidad divina, liberación y restauración integral para toda la familia.',
-      url: '/sanados',
+      year: '2026',
+      category: 'Adoración',
+      title: 'Noche de Milagros - Sanados para Sanar 2026',
+      subtitle: 'Unción, Sanidad Interior y Restauración',
+      status: 'Entrada Libre',
+      statusColor: '#0033FF',
+      date: 'Sábado 28 de Noviembre, 2026',
+      time: '6:30 PM',
+      location: 'Auditorio Principal Visión Jesús',
+      image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1000',
+      description: 'Un tiempo especial consagrado para la intercesión, oración por los enfermos y manifestación del poder de Dios en las familias.',
+      url: '/oracion',
       featured: false,
-      priceInfo: 'Próximamente más detalles'
+      priceInfo: 'Entrada Gratuita • Cupo Limitado'
+    },
+    {
+      id: 'fiesta2026',
+      year: '2026',
+      category: 'Congregacional',
+      title: 'Cierre Anual de Acción de Gracias 2026',
+      subtitle: 'Celebración & Noche de Gratitud',
+      status: 'Próximamente',
+      statusColor: '#F59E0B',
+      date: 'Domingo 20 de Diciembre, 2026',
+      time: '5:00 PM',
+      location: 'Auditorio Principal Visión Jesús',
+      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+      description: 'Gran servicio congregacional para dar gracias a Dios por cada victoria del año 2026 y consagrar los proyectos del nuevo año.',
+      url: '/#horarios-section',
+      featured: false,
+      priceInfo: 'Entrada Gratuita'
+    },
+    {
+      id: 'liderazgo2027',
+      year: '2027',
+      category: 'Congresos',
+      title: 'Congreso Internacional de Liderazgo 2027',
+      subtitle: 'Equipamiento & Visión del Reino',
+      status: 'Proyección 2027',
+      statusColor: '#977DFF',
+      date: 'Febrero 2027',
+      time: 'Por Confirmar',
+      location: 'Auditorio Principal Visión Jesús',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000',
+      description: 'Capacitación intensiva para pastores, líderes de célula y servidores. Herramientas prácticas y principios apostólicos para el crecimiento.',
+      url: '/modelo',
+      featured: false,
+      priceInfo: 'Detalles de inscripción en Enero 2027'
+    },
+    {
+      id: 'move2027',
+      year: '2027',
+      category: 'Jóvenes',
+      title: 'Encuentro MOVE Jóvenes 2027',
+      subtitle: 'Generación sin Reservas',
+      status: 'Proyección 2027',
+      statusColor: '#977DFF',
+      date: 'Mayo 2027',
+      time: '5:30 PM',
+      location: 'Sede Desamparados',
+      image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000',
+      description: 'El movimiento juvenil de Visión Jesús en un festival de alabanza, adoración extrema y mensaje transformador para adolescentes y jóvenes.',
+      url: '/#contacto-section',
+      featured: false,
+      priceInfo: 'Entrada Gratuita'
+    },
+    {
+      id: 'fuxion2027',
+      year: '2027',
+      category: 'Congresos',
+      title: 'Congreso de Hombres & Familias FUXION 2027',
+      subtitle: 'Varones de Carácter & Sacerdocio',
+      status: 'Proyección 2027',
+      statusColor: '#977DFF',
+      date: 'Julio 2027',
+      time: 'Por Confirmar',
+      location: 'Auditorio Principal',
+      image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000',
+      description: 'Congreso enfocado en afirma la identidad del hombre como sacerdote del hogar, líder espiritual y testimonio activo en la sociedad.',
+      url: '/modelo',
+      featured: false,
+      priceInfo: 'Próximamente'
     }
   ];
 
@@ -52,87 +128,47 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
     }
   };
 
+  const filteredEvents = allEvents.filter(evt => {
+    const matchesYear = activeYear === 'todos' || evt.year === activeYear;
+    const matchesCategory = activeCategory === 'Todas' || evt.category === activeCategory;
+    return matchesYear && matchesCategory;
+  });
+
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'var(--apple-bg-base)',
+      backgroundColor: '#030812',
       color: '#FFFFFF',
-      fontFamily: 'var(--apple-font)',
+      fontFamily: "'Outfit', 'Inter', sans-serif",
       position: 'relative',
       overflowX: 'hidden'
     }}>
       {/* 0. APPLE FLOATING FROSTED NAVBAR */}
-      <div className="apple-nav-wrapper" style={{
-        top: isScrolled ? '12px' : '20px'
-      }}>
+      <div className="apple-nav-wrapper" style={{ top: isScrolled ? '12px' : '20px' }}>
         <header 
           className={`apple-nav-bar ${isScrolled ? 'apple-nav-scrolled' : ''}`}
-          style={{
-            maxWidth: isScrolled ? '1060px' : '1140px'
-          }}
+          style={{ maxWidth: isScrolled ? '1060px' : '1140px' }}
         >
           {/* LOGO */}
           <div 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px', 
-              cursor: 'pointer',
-              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }}
+            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
             onClick={() => window.location.href = '/'}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <img 
               src="/logo_oficial_transparente.png" 
               alt="Visión Jesús Logo" 
-              style={{ 
-                height: isScrolled ? '38px' : '44px', 
-                objectFit: 'contain',
-                transition: 'height 0.3s ease',
-                filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4))'
-              }} 
+              style={{ height: isScrolled ? '38px' : '44px', objectFit: 'contain' }} 
             />
           </div>
 
           {/* DESKTOP MENU LINKS */}
           <nav className="apple-nav-links">
-            <a 
-              href="/" 
-              className="apple-nav-link"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
-            >
-              Inicio
-            </a>
-            <a 
-              href="/nosotros" 
-              className="apple-nav-link"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }}
-            >
-              Nosotros
-            </a>
-            <a 
-              href="/modelo" 
-              className="apple-nav-link"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }}
-            >
-              Modelo de Jesús
-            </a>
-            <a 
-              href="/congresos" 
-              className="apple-nav-link active"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            >
-              Congresos
-            </a>
-            <a 
-              href="/#contacto-section" 
-              className="apple-nav-link"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }}
-            >
-              Contacto
-            </a>
+            <a href="/" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}>Inicio</a>
+            <a href="/nosotros" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }}>Nosotros</a>
+            <a href="/modelo" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }}>Modelo de Jesús</a>
+            <a href="/grupos-de-amistad" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/grupos-de-amistad'; }}>Grupos de Amistad</a>
+            <a href="/eventos" className="apple-nav-link active" onClick={(e) => { e.preventDefault(); }}>Eventos</a>
+            <a href="/oracion" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }}>Oración</a>
           </nav>
 
           {/* RIGHT ACTIONS */}
@@ -168,56 +204,109 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
         {/* Mobile Sheet */}
         {mobileMenuOpen && (
           <div className="apple-mobile-sheet">
-            <a href="/" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Inicio</a>
-            <a href="/nosotros" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Nosotros</a>
-            <a href="/modelo" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Modelo de Jesús</a>
-            <a href="/congresos" className="apple-nav-link active" style={{ fontSize: '1rem', padding: '10px 14px' }}>Congresos</a>
-            <a href="/#contacto-section" className="apple-nav-link" style={{ fontSize: '1rem', padding: '10px 14px' }}>Contacto</a>
+            <a href="/" className="apple-nav-link">Inicio</a>
+            <a href="/nosotros" className="apple-nav-link">Nosotros</a>
+            <a href="/modelo" className="apple-nav-link">Modelo de Jesús</a>
+            <a href="/grupos-de-amistad" className="apple-nav-link">Grupos de Amistad</a>
+            <a href="/eventos" className="apple-nav-link active">Eventos</a>
+            <a href="/oracion" className="apple-nav-link">Oración</a>
           </div>
         )}
       </div>
 
-      {/* HERO SECTION CATALOG - APPLE CINEMATIC */}
+      {/* HERO SECTION */}
       <section style={{
-        padding: 'clamp(140px, 18vh, 180px) 20px 40px 20px',
+        padding: 'clamp(120px, 16vh, 160px) 20px 40px',
         textAlign: 'center',
-        position: 'relative'
+        position: 'relative',
+        background: 'radial-gradient(circle at 50% 20%, rgba(0, 51, 255, 0.2) 0%, rgba(3, 8, 18, 1) 75%)'
       }}>
-        {/* Apple Ambient Center Light */}
-        <div 
-          className="apple-ambient-glow"
-          style={{
-            top: '20%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'radial-gradient(circle, rgba(151, 125, 255, 0.18) 0%, rgba(0, 113, 227, 0.08) 50%, transparent 80%)'
-          }}
-        />
-
-        <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
           <div className="apple-kicker">
             <span className="apple-kicker-dot"></span>
-            <span>Acceso & Reservas Oficiales</span>
+            <span>CARTELERA & AGENDA INSTITUCIONAL</span>
           </div>
 
           <h1 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.5rem, 5.5vw, 4.2rem)', marginBottom: '16px' }}>
-            Nuestros Eventos
+            Eventos Visión Jesús
           </h1>
 
-          <p className="apple-hero-subtitle" style={{ maxWidth: '620px', marginBottom: '0' }}>
-            Descubre nuestras conferencias, congresos y actividades especiales. Selecciona el evento para ver detalles y reservar tu lugar.
+          <p className="apple-hero-subtitle" style={{ maxWidth: '680px', margin: '0 auto 30px' }}>
+            Descubre nuestras actividades especiales para el **cierre del 2026** y la **proyección del año 2027**. Selecciona el evento para ver detalles y registrarte.
           </p>
+
+          {/* YEAR FILTER TABS */}
+          <div style={{
+            display: 'inline-flex',
+            gap: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            padding: '6px',
+            borderRadius: '50px',
+            backdropFilter: 'blur(16px)'
+          }}>
+            <button
+              onClick={() => setActiveYear('todos')}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '50px',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                border: 'none',
+                background: activeYear === 'todos' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                color: activeYear === 'todos' ? '#FFFFFF' : '#94A3B8',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ⚡ Todos los Eventos
+            </button>
+
+            <button
+              onClick={() => setActiveYear('2026')}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '50px',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                border: 'none',
+                background: activeYear === '2026' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                color: activeYear === '2026' ? '#FFFFFF' : '#94A3B8',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              📅 Cierre 2026
+            </button>
+
+            <button
+              onClick={() => setActiveYear('2027')}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '50px',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                border: 'none',
+                background: activeYear === '2027' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                color: activeYear === '2027' ? '#FFFFFF' : '#94A3B8',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              🚀 Proyección 2027
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* EVENTS GRID CATALOG */}
-      <section style={{ padding: '40px 20px 100px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* EVENTS GRID */}
+      <section style={{ padding: '20px 20px 100px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
           gap: '30px'
         }}>
-          {events.map((evt) => (
+          {filteredEvents.map((evt) => (
             <div 
               key={evt.id}
               onClick={() => handleEventClick(evt)}
@@ -226,18 +315,20 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                 padding: 0,
                 cursor: 'pointer',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                border: '1px solid rgba(151, 125, 255, 0.2)',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                background: 'rgba(0, 3, 61, 0.45)',
+                backdropFilter: 'blur(16px)',
+                transition: 'all 0.3s ease'
               }}
             >
               {/* Event Image Banner */}
               <div style={{
-                height: '250px',
+                height: '220px',
                 width: '100%',
-                backgroundColor: 'var(--apple-bg-surface-elevated)',
                 position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 overflow: 'hidden'
               }}>
                 <img 
@@ -246,143 +337,103 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: evt.id === 'autenticas' ? 'cover' : 'contain',
-                    padding: evt.id === 'autenticas' ? '0' : '30px',
-                    opacity: 0.92,
-                    transition: 'transform 0.45s ease'
+                    objectFit: 'cover',
+                    transition: 'transform 0.5s ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 />
+                
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(14, 14, 20, 0.85) 100%)'
+                  background: 'linear-gradient(180deg, rgba(3, 8, 18, 0.2) 0%, rgba(3, 8, 18, 0.95) 100%)'
                 }} />
 
-                {/* Status Badge - Apple Pill */}
-                <span style={{
+                {/* Status Badge */}
+                <div style={{
+                  position: 'absolute',
+                  top: '16px',
+                  left: '16px',
+                  backgroundColor: evt.statusColor,
+                  color: '#FFFFFF',
+                  padding: '4px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}>
+                  {evt.status}
+                </div>
+
+                {/* Year Pill */}
+                <div style={{
                   position: 'absolute',
                   top: '16px',
                   right: '16px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  color: evt.statusColor,
-                  border: `1px solid ${evt.statusColor}40`,
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase'
+                  backgroundColor: 'rgba(3, 8, 18, 0.85)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#EAEDF8',
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: 800
                 }}>
-                  {evt.status}
-                </span>
+                  {evt.year}
+                </div>
               </div>
 
-              {/* Event Content */}
-              <div style={{ padding: '28px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <span style={{
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  color: 'var(--apple-text-secondary)',
-                  letterSpacing: '0.04em',
-                  marginBottom: '8px',
-                  textTransform: 'uppercase'
-                }}>
+              {/* Event Card Body */}
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#977DFF', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>
                   {evt.subtitle}
                 </span>
 
-                <h2 style={{
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  margin: '0 0 10px 0',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.25
-                }}>
+                <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '14px', lineHeight: 1.25, letterSpacing: '-0.3px' }}>
                   {evt.title}
-                </h2>
+                </h3>
 
-                <p style={{
-                  fontSize: '0.94rem',
-                  color: 'var(--apple-text-secondary)',
-                  lineHeight: 1.55,
-                  marginBottom: '20px',
-                  flex: 1
-                }}>
+                <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '20px', flex: 1 }}>
                   {evt.description}
                 </p>
 
-                {/* Date & Location Capsule */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  padding: '14px 18px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '16px',
-                  marginBottom: '24px',
-                  fontSize: '0.84rem',
-                  color: 'var(--apple-text-primary)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Calendar size={15} color="var(--apple-purple)" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#EAEDF8', fontSize: '0.88rem' }}>
+                    <Calendar size={15} style={{ color: '#977DFF', flexShrink: 0 }} />
                     <span>{evt.date}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={15} color="var(--apple-purple)" />
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#EAEDF8', fontSize: '0.88rem' }}>
+                    <MapPin size={15} style={{ color: '#977DFF', flexShrink: 0 }} />
                     <span>{evt.location}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10B981', fontSize: '0.88rem', fontWeight: 700 }}>
+                    <Tag size={15} style={{ flexShrink: 0 }} />
+                    <span>{evt.priceInfo}</span>
                   </div>
                 </div>
 
-                {/* Footer Price & Action */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  marginTop: 'auto'
-                }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', fontWeight: 500 }}>
-                    {evt.priceInfo}
-                  </span>
-
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEventClick(evt);
-                    }}
-                    className={`apple-btn ${evt.featured ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
-                    style={{
-                      padding: '10px 20px',
-                      fontSize: '0.84rem'
-                    }}
-                  >
-                    <span>{evt.featured ? 'Ver Detalles' : 'Información'}</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-
+                <button 
+                  className="apple-btn apple-btn-primary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '12px',
+                    borderRadius: '50px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <span>{evt.id === 'autenticas' ? 'Reservar Entradas' : 'Ver Detalles del Evento'}</span>
+                  <ArrowRight size={16} />
+                </button>
               </div>
-
             </div>
           ))}
         </div>
       </section>
-
-      {/* FOOTER SIMPLE */}
-      <footer style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '30px 20px',
-        textAlign: 'center',
-        color: '#64748B',
-        fontSize: '0.85rem'
-      }}>
-        © {new Date().getFullYear()} Iglesia Visión Jesús. Todos los derechos reservados.
-      </footer>
     </div>
   );
 }
