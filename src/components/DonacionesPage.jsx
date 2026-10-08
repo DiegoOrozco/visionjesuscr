@@ -6,11 +6,17 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
 
   const bankDetails = {
     sinpePhone: config.sinpe_phone || '60121225',
-    sinpeDisplay: '6012-1225',
-    sinpeHolder: config.sinpe_holder || 'Iglesia Visión Jesús'
+    sinpeDisplay: config.sinpe_display || '6012-1225',
+    sinpeHolder: config.sinpe_holder || 'Iglesia Visión Jesús',
+    bncrCrc: config.iban_bncr_crc || '',
+    bncrUsd: config.iban_bncr_usd || '',
+    bacCrc: config.iban_bac_crc || '',
+    bacUsd: config.iban_bac_usd || '',
+    holderName: config.sinpe_holder || 'Iglesia Visión Jesús'
   };
 
   const handleCopy = (text, key) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
     setTimeout(() => {
@@ -218,7 +224,7 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
               }}
             >
               {copiedKey === 'sinpe' ? <Check size={20} style={{ color: '#10B981' }} /> : <Copy size={20} />}
-              <span>{copiedKey === 'sinpe' ? '¡Número 60121225 Copiado!' : 'Copiar Número SINPE (60121225)'}</span>
+              <span>{copiedKey === 'sinpe' ? '¡Número Copiado!' : `Copiar Número SINPE (${bankDetails.sinpeDisplay})`}</span>
             </button>
           </div>
 
@@ -257,34 +263,63 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
                 Cuentas IBAN
               </h3>
 
-              <p style={{ color: '#94A3B8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '20px' }}>
-                Actualmente estamos en proceso de validación y confirmación de las cuentas bancarias oficiales IBAN (Colones & Dólares).
-              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                {bankDetails.bncrCrc && (
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#60A5FA' }}>Banco Nacional (BNCR) • Colones</span>
+                      <button onClick={() => handleCopy(bankDetails.bncrCrc, 'bncr_crc')} style={{ background: 'none', border: 'none', color: copiedKey === 'bncr_crc' ? '#10B981' : '#977DFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800 }}>
+                        {copiedKey === 'bncr_crc' ? '✓ Copiado' : 'Copiar IBAN'}
+                      </button>
+                    </div>
+                    <code style={{ display: 'block', fontSize: '0.85rem', color: '#FFF', marginTop: '4px', wordBreak: 'break-all' }}>{bankDetails.bncrCrc}</code>
+                  </div>
+                )}
 
-              <div style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '16px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
-                <span style={{ fontSize: '0.88rem', color: '#EAEDF8', fontWeight: 600, display: 'block', lineHeight: 1.6 }}>
-                  ℹ️ Por el momento, todas las ofrendas, diezmos y siembras se reciben de manera directa mediante <strong>SINPE Móvil al 6012-1225</strong>.
-                </span>
-                <span style={{ display: 'inline-block', marginTop: '12px', fontSize: '0.78rem', color: '#10B981', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  • Próximamente Disponibles •
-                </span>
+                {bankDetails.bncrUsd && (
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#60A5FA' }}>Banco Nacional (BNCR) • Dólares ($)</span>
+                      <button onClick={() => handleCopy(bankDetails.bncrUsd, 'bncr_usd')} style={{ background: 'none', border: 'none', color: copiedKey === 'bncr_usd' ? '#10B981' : '#977DFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800 }}>
+                        {copiedKey === 'bncr_usd' ? '✓ Copiado' : 'Copiar IBAN'}
+                      </button>
+                    </div>
+                    <code style={{ display: 'block', fontSize: '0.85rem', color: '#FFF', marginTop: '4px', wordBreak: 'break-all' }}>{bankDetails.bncrUsd}</code>
+                  </div>
+                )}
+
+                {bankDetails.bacCrc && (
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#EF4444' }}>BAC Credomatic • Colones</span>
+                      <button onClick={() => handleCopy(bankDetails.bacCrc, 'bac_crc')} style={{ background: 'none', border: 'none', color: copiedKey === 'bac_crc' ? '#10B981' : '#977DFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800 }}>
+                        {copiedKey === 'bac_crc' ? '✓ Copiado' : 'Copiar IBAN'}
+                      </button>
+                    </div>
+                    <code style={{ display: 'block', fontSize: '0.85rem', color: '#FFF', marginTop: '4px', wordBreak: 'break-all' }}>{bankDetails.bacCrc}</code>
+                  </div>
+                )}
+
+                {bankDetails.bacUsd && (
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#EF4444' }}>BAC Credomatic • Dólares ($)</span>
+                      <button onClick={() => handleCopy(bankDetails.bacUsd, 'bac_usd')} style={{ background: 'none', border: 'none', color: copiedKey === 'bac_usd' ? '#10B981' : '#977DFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800 }}>
+                        {copiedKey === 'bac_usd' ? '✓ Copiado' : 'Copiar IBAN'}
+                      </button>
+                    </div>
+                    <code style={{ display: 'block', fontSize: '0.85rem', color: '#FFF', marginTop: '4px', wordBreak: 'break-all' }}>{bankDetails.bacUsd}</code>
+                  </div>
+                )}
+
+                {!bankDetails.bncrCrc && !bankDetails.bncrUsd && !bankDetails.bacCrc && !bankDetails.bacUsd && (
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '0.88rem', color: '#EAEDF8', fontWeight: 600, display: 'block', lineHeight: 1.6 }}>
+                      ℹ️ Por el momento, todas las ofrendas y diezmos se reciben mediante <strong>SINPE Móvil al {bankDetails.sinpeDisplay}</strong>.
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
-
-            <div style={{
-              textAlign: 'center',
-              padding: '14px',
-              color: '#64748B',
-              fontSize: '0.84rem',
-              fontWeight: 600
-            }}>
-              Disponible en la próxima actualización bancaria
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair } from 'lucide-react';
+import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair, CreditCard, Calendar } from 'lucide-react';
 import AutenticasPromo from './AutenticasPromo';
 import ModeloDeJesus from './ModeloDeJesus';
 import CongresosPage from './CongresosPage';
@@ -40,7 +40,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   });
 
   const [activeSuite, setActiveSuite] = useState(() => {
-    if (['church_web', 'oracion_admin', 'grupos_admin', 'autenticas', 'sanados', 'modelo', 'move', 'tienda'].includes(activeTab)) return 'web';
+    if (['church_web', 'oracion_admin', 'grupos_admin', 'events_admin', 'donaciones_admin', 'autenticas', 'sanados', 'modelo', 'move', 'tienda'].includes(activeTab)) return 'web';
     if (['users', 'activity_log'].includes(activeTab)) return 'system';
     return 'tickets';
   });
@@ -1301,7 +1301,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         move_subtitle: homepageConfig.move_subtitle || '',
         tienda_hero_bg: homepageConfig.tienda_hero_bg || '',
         tienda_title: homepageConfig.tienda_title || '',
-        tienda_subtitle: homepageConfig.tienda_subtitle || ''
+        tienda_subtitle: homepageConfig.tienda_subtitle || '',
+        donar_title: homepageConfig.donar_title || 'DONACIONES Y OFRENDAS',
+        donar_subtitle: homepageConfig.donar_subtitle || 'Generosidad que transforma vidas y expande el Reino de Dios',
+        donar_verse: homepageConfig.donar_verse || 'Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.',
+        donar_verse_ref: homepageConfig.donar_verse_ref || '2 Corintios 9:7',
+        sinpe_phone: homepageConfig.sinpe_phone || '8888-8888',
+        sinpe_display: homepageConfig.sinpe_display || '8888-8888',
+        sinpe_holder: homepageConfig.sinpe_holder || 'Iglesia Visión Jesús',
+        iban_bncr_crc: homepageConfig.iban_bncr_crc || 'CR05015100010012345678',
+        iban_bncr_usd: homepageConfig.iban_bncr_usd || 'CR05015100010087654321',
+        iban_bac_crc: homepageConfig.iban_bac_crc || 'CR05010200009876543210',
+        iban_bac_usd: homepageConfig.iban_bac_usd || 'CR05010200001234567890',
+        legal_transparency_note: homepageConfig.legal_transparency_note || 'Iglesia Visión Jesús es una entidad legalmente constituida en Costa Rica. Todas las ofrendas y diezmos son administrados con transparencia para la obra del Evangelio.'
       });
 
       setPricingFields({
@@ -2094,7 +2106,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           <button
             onClick={() => {
               setActiveSuite('web');
-              if (!['church_web', 'oracion_admin', 'grupos_admin'].includes(activeTab)) {
+              if (!['church_web', 'oracion_admin', 'grupos_admin', 'events_admin', 'donaciones_admin'].includes(activeTab)) {
                 setActiveTab('church_web');
               }
             }}
@@ -2393,6 +2405,30 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Calendar size={16} />
             <span>Cartelera de Eventos</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('donaciones_admin');
+            }}
+            style={{
+              backgroundColor: activeTab === 'donaciones_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'donaciones_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: activeTab === 'donaciones_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <CreditCard size={16} />
+            <span>Donaciones & SINPE</span>
           </button>
         </div>
       )}
@@ -6490,6 +6526,203 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             >
               {saveLoading ? 'Guardando Cartelera...' : 'Guardar Toda la Cartelera de Eventos'}
             </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB: GESTIÓN DE DONACIONES Y OFRENDAS (Admin) */}
+      {activeTab === 'donaciones_admin' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CreditCard size={22} color="#977DFF" />
+                Gestión de Donaciones, SINPE Móvil y Cuentas IBAN
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                Administra de forma segura los números de SINPE Móvil, titulares de cuenta, IBANs bancarios y la nota de transparencia legal.
+              </p>
+            </div>
+          </div>
+
+          {saveSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {saveSuccessMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSaveConfigSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+              
+              {/* SECCIÓN 1: ENCABEZADO Y VERSÍCULO */}
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <h4 style={{ fontSize: '1.1rem', color: '#977DFF', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  1. Encabezado y Promesa Bíblica
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Título Principal</label>
+                    <input
+                      type="text"
+                      value={configFields.donar_title || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, donar_title: e.target.value })}
+                      placeholder="DONACIONES Y OFRENDAS"
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Subtítulo / Eslogan</label>
+                    <input
+                      type="text"
+                      value={configFields.donar_subtitle || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, donar_subtitle: e.target.value })}
+                      placeholder="Generosidad que transforma vidas..."
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Versículo Bíblico</label>
+                    <textarea
+                      rows={2}
+                      value={configFields.donar_verse || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, donar_verse: e.target.value })}
+                      placeholder="Cada uno dé como propuso en su corazón..."
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Cita Bíblica</label>
+                    <input
+                      type="text"
+                      value={configFields.donar_verse_ref || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, donar_verse_ref: e.target.value })}
+                      placeholder="2 Corintios 9:7"
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECCIÓN 2: CONFIGURACIÓN DE SINPE MÓVIL */}
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <h4 style={{ fontSize: '1.1rem', color: '#10B981', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  2. SINPE Móvil (Costa Rica)
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Número de Teléfono (Sin espacios)</label>
+                    <input
+                      type="text"
+                      value={configFields.sinpe_phone || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, sinpe_phone: e.target.value })}
+                      placeholder="88888888"
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Teléfono en Formato Visible</label>
+                    <input
+                      type="text"
+                      value={configFields.sinpe_display || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, sinpe_display: e.target.value })}
+                      placeholder="8888-8888"
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Nombre del Titular de la Cuenta</label>
+                    <input
+                      type="text"
+                      value={configFields.sinpe_holder || ''}
+                      onChange={(e) => setConfigFields({ ...configFields, sinpe_holder: e.target.value })}
+                      placeholder="Iglesia Visión Jesús"
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECCIÓN 3: CUENTAS BANCARIAS IBAN */}
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <h4 style={{ fontSize: '1.1rem', color: '#3B82F6', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  3. Cuentas Bancarias Oficiales (IBAN)
+                </h4>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>BNCR (Banco Nacional) - Colones (CRC)</label>
+                      <input
+                        type="text"
+                        value={configFields.iban_bncr_crc || ''}
+                        onChange={(e) => setConfigFields({ ...configFields, iban_bncr_crc: e.target.value })}
+                        placeholder="CR05015100010012345678"
+                        style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>BNCR (Banco Nacional) - Dólares (USD)</label>
+                      <input
+                        type="text"
+                        value={configFields.iban_bncr_usd || ''}
+                        onChange={(e) => setConfigFields({ ...configFields, iban_bncr_usd: e.target.value })}
+                        placeholder="CR05015100010087654321"
+                        style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>BAC Credomatic - Colones (CRC)</label>
+                      <input
+                        type="text"
+                        value={configFields.iban_bac_crc || ''}
+                        onChange={(e) => setConfigFields({ ...configFields, iban_bac_crc: e.target.value })}
+                        placeholder="CR05010200009876543210"
+                        style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>BAC Credomatic - Dólares (USD)</label>
+                      <input
+                        type="text"
+                        value={configFields.iban_bac_usd || ''}
+                        onChange={(e) => setConfigFields({ ...configFields, iban_bac_usd: e.target.value })}
+                        placeholder="CR05010200001234567890"
+                        style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECCIÓN 4: TRANSPARENCIA Y NOTAS LEGALES */}
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <h4 style={{ fontSize: '1.1rem', color: '#F59E0B', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  4. Transparencia Legal
+                </h4>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Nota de Transparencia Legal / Comprobantes</label>
+                  <textarea
+                    rows={3}
+                    value={configFields.legal_transparency_note || ''}
+                    onChange={(e) => setConfigFields({ ...configFields, legal_transparency_note: e.target.value })}
+                    placeholder="Iglesia Visión Jesús es una entidad legalmente constituida..."
+                    style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saveLoading}
+                className="btn-primary"
+                style={{ padding: '14px', fontSize: '1.05rem', fontWeight: 800, background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', border: 'none', borderRadius: '12px' }}
+              >
+                {saveLoading ? 'Guardando Donaciones...' : 'Guardar Información de Donaciones'}
+              </button>
+            </div>
           </form>
         </div>
       )}
