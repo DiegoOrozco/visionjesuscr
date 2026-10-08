@@ -1008,20 +1008,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             </button>
           </nav>
 
-          {/* RIGHT ACTIONS: CTA + ADMIN + MOBILE TOGGLE */}
+          {/* RIGHT ACTIONS: ADMIN + MOBILE TOGGLE */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button 
-              onClick={() => { window.location.href = '/eventos'; }}
-              className="apple-btn apple-btn-accent"
-              style={{
-                fontSize: '0.82rem',
-                padding: '8px 18px',
-                borderRadius: '9999px'
-              }}
-            >
-              <Calendar size={15} />
-              <span>Eventos</span>
-            </button>
 
             {/* Admin Profile Controls */}
             {(() => {

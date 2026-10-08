@@ -5,14 +5,9 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
   const [copiedKey, setCopiedKey] = useState(null);
 
   const bankDetails = {
-    sinpePhone: config.sinpe_phone || '6453-1212',
-    sinpeHolder: config.sinpe_holder || 'Iglesia Visión Jesús',
-    bnColones: config.iban_bn_crc || 'CR05015100010012345678',
-    bnDolares: config.iban_bn_usd || 'CR05015100010098765432',
-    bacColones: config.iban_bac_crc || 'CR92010200009012345678',
-    bacDolares: config.iban_bac_usd || 'CR92010200009098765432',
-    holderName: config.bank_holder_name || 'Asociación Centro de Fe Visión Jesús',
-    cedulaJuridica: config.cedula_juridica || '3-002-123456'
+    sinpePhone: config.sinpe_phone || '60121225',
+    sinpeDisplay: '6012-1225',
+    sinpeHolder: config.sinpe_holder || 'Iglesia Visión Jesús'
   };
 
   const handleCopy = (text, key) => {
@@ -51,15 +46,6 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
             <a href="/oracion" onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }} className="apple-nav-link">Oración & Testimonios</a>
             <a href="/donar" onClick={(e) => { e.preventDefault(); }} className="apple-nav-link" style={{ color: '#FFFFFF' }}>Donar</a>
           </nav>
-
-          <button 
-            onClick={() => window.location.href = '/eventos'}
-            className="apple-btn apple-btn-primary"
-            style={{ padding: '8px 18px', fontSize: '0.84rem' }}
-          >
-            <Calendar size={14} />
-            <span>Eventos</span>
-          </button>
         </header>
       </div>
 
@@ -201,45 +187,45 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
                 padding: '18px',
                 marginBottom: '20px'
               }}>
-                <span style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Número de SINPE Móvil:</span>
-                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '1px' }}>
-                  {bankDetails.sinpePhone}
+                <span style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Número de SINPE Móvil Oficial:</span>
+                <span style={{ fontSize: '2rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '2px' }}>
+                  {bankDetails.sinpeDisplay}
                 </span>
-                <span style={{ fontSize: '0.84rem', color: '#977DFF', display: 'block', marginTop: '4px', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.88rem', color: '#977DFF', display: 'block', marginTop: '6px', fontWeight: 700 }}>
                   Titular: {bankDetails.sinpeHolder}
                 </span>
               </div>
             </div>
 
             <button
-              onClick={() => handleCopy(bankDetails.sinpePhone.replace(/[^0-9]/g, ''), 'sinpe')}
+              onClick={() => handleCopy(bankDetails.sinpePhone, 'sinpe')}
               style={{
                 width: '100%',
                 background: copiedKey === 'sinpe' ? 'rgba(16, 185, 129, 0.2)' : 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
                 border: copiedKey === 'sinpe' ? '1px solid #10B981' : 'none',
                 color: '#FFFFFF',
                 borderRadius: '50px',
-                padding: '14px',
+                padding: '16px',
                 fontWeight: 800,
-                fontSize: '0.92rem',
+                fontSize: '0.98rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 15px rgba(0, 51, 255, 0.3)',
+                boxShadow: '0 4px 20px rgba(0, 51, 255, 0.35)',
                 transition: 'all 0.2s ease'
               }}
             >
-              {copiedKey === 'sinpe' ? <Check size={18} style={{ color: '#10B981' }} /> : <Copy size={18} />}
-              <span>{copiedKey === 'sinpe' ? '¡Número Copiado!' : 'Copiar Número SINPE'}</span>
+              {copiedKey === 'sinpe' ? <Check size={20} style={{ color: '#10B981' }} /> : <Copy size={20} />}
+              <span>{copiedKey === 'sinpe' ? '¡Número 60121225 Copiado!' : 'Copiar Número SINPE (60121225)'}</span>
             </button>
           </div>
 
-          {/* METHOD 2: CUENTAS BANCARIAS IBAN */}
+          {/* METHOD 2: PRÓXIMAMENTE TRANSFERENCIAS IBAN */}
           <div style={{
-            background: 'rgba(0, 3, 61, 0.45)',
-            border: '1px solid rgba(151, 125, 255, 0.25)',
+            background: 'rgba(0, 3, 61, 0.35)',
+            border: '1px dashed rgba(151, 125, 255, 0.3)',
             borderRadius: '28px',
             padding: '32px',
             backdropFilter: 'blur(16px)',
@@ -252,8 +238,8 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
                 width: '54px',
                 height: '54px',
                 borderRadius: '18px',
-                background: 'rgba(0, 51, 255, 0.15)',
-                border: '1px solid rgba(0, 51, 255, 0.35)',
+                background: 'rgba(151, 125, 255, 0.12)',
+                border: '1px solid rgba(151, 125, 255, 0.3)',
                 color: '#977DFF',
                 display: 'flex',
                 alignItems: 'center',
@@ -264,58 +250,41 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
               </div>
 
               <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#977DFF', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                TRANSFERENCIAS NATIVAS IBAN
+                TRANSFERENCIAS BANCARIAS
               </span>
 
               <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FFFFFF', margin: '6px 0 12px' }}>
-                Cuentas Bancarias
+                Cuentas IBAN
               </h3>
 
               <p style={{ color: '#94A3B8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '20px' }}>
-                Cuentas oficiales a nombre de <strong>{bankDetails.holderName}</strong> (Cédula Jurídica: {bankDetails.cedulaJuridica}).
+                Actualmente estamos en proceso de validación y confirmación de las cuentas bancarias oficiales IBAN (Colones & Dólares).
               </p>
 
-              {/* BNCR Accounts */}
               <div style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '16px',
-                padding: '14px',
-                marginBottom: '12px'
+                padding: '20px',
+                textAlign: 'center'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF' }}>Banco Nacional (BNCR)</span>
-                  <span style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 700 }}>Colones & Dólares</span>
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#94A3B8', wordBreak: 'break-all' }}>CRC: {bankDetails.bnColones}</span>
-                  <button onClick={() => handleCopy(bankDetails.bnColones, 'bnCrc')} style={{ background: 'none', border: 'none', color: '#977DFF', cursor: 'pointer', padding: '4px' }}>
-                    {copiedKey === 'bnCrc' ? <Check size={16} style={{ color: '#10B981' }} /> : <Copy size={16} />}
-                  </button>
-                </div>
+                <span style={{ fontSize: '0.88rem', color: '#EAEDF8', fontWeight: 600, display: 'block', lineHeight: 1.6 }}>
+                  ℹ️ Por el momento, todas las ofrendas, diezmos y siembras se reciben de manera directa mediante <strong>SINPE Móvil al 6012-1225</strong>.
+                </span>
+                <span style={{ display: 'inline-block', marginTop: '12px', fontSize: '0.78rem', color: '#10B981', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  • Próximamente Disponibles •
+                </span>
               </div>
+            </div>
 
-              {/* BAC Credomatic Accounts */}
-              <div style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '16px',
-                padding: '14px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF' }}>BAC Credomatic</span>
-                  <span style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 700 }}>Colones & Dólares</span>
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#94A3B8', wordBreak: 'break-all' }}>CRC: {bankDetails.bacColones}</span>
-                  <button onClick={() => handleCopy(bankDetails.bacColones, 'bacCrc')} style={{ background: 'none', border: 'none', color: '#977DFF', cursor: 'pointer', padding: '4px' }}>
-                    {copiedKey === 'bacCrc' ? <Check size={16} style={{ color: '#10B981' }} /> : <Copy size={16} />}
-                  </button>
-                </div>
-              </div>
-
+            <div style={{
+              textAlign: 'center',
+              padding: '14px',
+              color: '#64748B',
+              fontSize: '0.84rem',
+              fontWeight: 600
+            }}>
+              Disponible en la próxima actualización bancaria
             </div>
           </div>
 

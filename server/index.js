@@ -2145,6 +2145,63 @@ app.get('/api/testimonies', (req, res) => {
   }
 });
 
+// Admin endpoints for Prayers & Testimonies
+app.get('/api/admin/prayers', verifyAdminToken, (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM prayer_requests ORDER BY created_at DESC').all();
+    res.json({ success: true, prayers: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.put('/api/admin/prayers/:id/status', verifyAdminToken, (req, res) => {
+  try {
+    const { status } = req.body;
+    db.prepare('UPDATE prayer_requests SET status = ? WHERE id = ?').run(status || 'pendiente', req.params.id);
+    res.json({ success: true, message: 'Estado de petición actualizado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.delete('/api/admin/prayers/:id', verifyAdminToken, (req, res) => {
+  try {
+    db.prepare('DELETE FROM prayer_requests WHERE id = ?').run(req.params.id);
+    res.json({ success: true, message: 'Petición eliminada.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.get('/api/admin/testimonies', verifyAdminToken, (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM testimonies ORDER BY created_at DESC').all();
+    res.json({ success: true, testimonies: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.put('/api/admin/testimonies/:id/approve', verifyAdminToken, (req, res) => {
+  try {
+    const { is_approved } = req.body;
+    db.prepare('UPDATE testimonies SET is_approved = ? WHERE id = ?').run(is_approved ? 1 : 0, req.params.id);
+    res.json({ success: true, message: 'Estado del testimonio actualizado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.delete('/api/admin/testimonies/:id', verifyAdminToken, (req, res) => {
+  try {
+    db.prepare('DELETE FROM testimonies WHERE id = ?').run(req.params.id);
+    res.json({ success: true, message: 'Testimonio eliminado.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.get('/api/friendship-groups', (req, res) => {
   try {
     const rows = db.prepare('SELECT * FROM friendship_groups WHERE is_active = 1 ORDER BY zone ASC, canton ASC').all();

@@ -173,6 +173,100 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [zoneSuccessMsg, setZoneSuccessMsg] = useState('');
   const [zoneSaving, setZoneSaving] = useState(false);
 
+  // Prayers & Testimonies State
+  const [prayersList, setPrayersList] = useState([]);
+  const [testimoniesList, setTestimoniesList] = useState([]);
+  const [loadingPrayers, setLoadingPrayers] = useState(false);
+  const [loadingTestimonies, setLoadingTestimonies] = useState(false);
+  const [prayerFilterType, setPrayerFilterType] = useState('all');
+  const [prayerFilterStatus, setPrayerFilterStatus] = useState('all');
+  const [testimonyFilterApproved, setTestimonyFilterApproved] = useState('all');
+
+  const fetchAdminPrayers = async () => {
+    setLoadingPrayers(true);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/prayers`);
+      const data = await res.json();
+      if (data.success) setPrayersList(data.prayers || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingPrayers(false);
+    }
+  };
+
+  const fetchAdminTestimonies = async () => {
+    setLoadingTestimonies(true);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/testimonies`);
+      const data = await res.json();
+      if (data.success) setTestimoniesList(data.testimonies || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTestimonies(false);
+    }
+  };
+
+  const handleUpdatePrayerStatus = async (id, status) => {
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/prayers/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPrayersList(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeletePrayer = async (id) => {
+    if (!window.confirm('¿Deseas eliminar esta petición de oración?')) return;
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/prayers/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setPrayersList(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleTestimonyApproval = async (id, currentApproved) => {
+    const nextVal = currentApproved ? 0 : 1;
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/testimonies/${id}/approve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_approved: nextVal })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestimoniesList(prev => prev.map(t => t.id === id ? { ...t, is_approved: nextVal } : t));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteTestimony = async (id) => {
+    if (!window.confirm('¿Deseas eliminar este testimonio?')) return;
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/testimonies/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setTestimoniesList(prev => prev.filter(t => t.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const initializeDefaultSectionsForPath = (path) => {
     if (path === '/modelo') {
       return [
@@ -900,6 +994,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
     if (adminUser && activeTab === 'zones_seating') {
       fetchZoneAnalytics();
+    }
+    if (adminUser && activeTab === 'oracion_admin') {
+      fetchAdminPrayers();
+      fetchAdminTestimonies();
     }
   }, [adminUser, activeTab]);
 
@@ -1843,6 +1941,33 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           >
             <Globe size={18} />
             Diseño Web Iglesia
+          </button>
+        )}
+
+        {/* Oración y Testimonios Management Tab */}
+        {adminUser.role === 'admin' && (
+          <button
+            onClick={() => {
+              setActiveTab('oracion_admin');
+              fetchAdminPrayers();
+              fetchAdminTestimonies();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'oracion_admin' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
+              color: activeTab === 'oracion_admin' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '1rem',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Heart size={18} />
+            Oración & Testimonios
           </button>
         )}
 
@@ -5021,6 +5146,259 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: ORACIÓN & TESTIMONIOS (Admin) */}
+      {activeTab === 'oracion_admin' && adminUser.role === 'admin' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {/* PETICIONES DE ORACIÓN */}
+          <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Heart size={22} color="#EF4444" />
+                  Peticiones de Oración Recibidas
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                  Gestión e intercesión pastoral. Marca las peticiones listas para llevar al altar en los servicios de Mateo 18:19.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchAdminPrayers}
+                className="btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <RefreshCw size={14} className={loadingPrayers ? 'animate-spin' : ''} />
+                Actualizar Lista
+              </button>
+            </div>
+
+            {/* FILTROS DE PETICIONES */}
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '20px', backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Filtrar por Tipo</label>
+                <select
+                  value={prayerFilterType}
+                  onChange={(e) => setPrayerFilterType(e.target.value)}
+                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+                >
+                  <option value="all">Todas las Categorías</option>
+                  <option value="Sanidad">Sanidad Física / Divina</option>
+                  <option value="Familia">Familia y Matrimonios</option>
+                  <option value="Finanzas">Finanzas y Provisión</option>
+                  <option value="Salvación">Salvación de Almas</option>
+                  <option value="Proceso Personal">Proceso Personal / Fe</option>
+                  <option value="Otros">Otros Motivos</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Filtrar por Estado</label>
+                <select
+                  value={prayerFilterStatus}
+                  onChange={(e) => setPrayerFilterStatus(e.target.value)}
+                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+                >
+                  <option value="all">Todos los Estados</option>
+                  <option value="pendiente">Pendientes</option>
+                  <option value="en_oracion">En Oración</option>
+                  <option value="altar">Impresa / En Altar</option>
+                  <option value="atendido">Atendido / Respondido</option>
+                </select>
+              </div>
+            </div>
+
+            {/* TABLA DE PETICIONES */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#FAF8F5', borderBottom: '2px solid var(--accent-beige-border)', textAlign: 'left', color: 'var(--accent-coffee)' }}>
+                    <th style={{ padding: '12px 14px' }}>Fecha</th>
+                    <th style={{ padding: '12px 14px' }}>Nombre</th>
+                    <th style={{ padding: '12px 14px' }}>Contacto</th>
+                    <th style={{ padding: '12px 14px' }}>Categoría</th>
+                    <th style={{ padding: '12px 14px' }}>Petición de Oración</th>
+                    <th style={{ padding: '12px 14px' }}>Estado Intercesión</th>
+                    <th style={{ padding: '12px 14px' }}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prayersList
+                    .filter(p => prayerFilterType === 'all' || p.request_type === prayerFilterType)
+                    .filter(p => prayerFilterStatus === 'all' || (p.status || 'pendiente') === prayerFilterStatus)
+                    .map((prayer) => (
+                      <tr key={prayer.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                          {new Date(prayer.created_at).toLocaleDateString('es-CR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--accent-coffee)' }}>
+                          {prayer.name}
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          {prayer.phone ? (
+                            <a href={`https://wa.me/506${prayer.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ color: '#25D366', fontWeight: 700, textDecoration: 'none' }}>
+                              📱 {prayer.phone}
+                            </a>
+                          ) : (
+                            <span style={{ color: '#94A3B8' }}>Sin número</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{
+                            backgroundColor: prayer.request_type === 'Sanidad' ? '#FEF2F2' : prayer.request_type === 'Familia' ? '#EFF6FF' : '#F0FDF4',
+                            color: prayer.request_type === 'Sanidad' ? '#EF4444' : prayer.request_type === 'Familia' ? '#3B82F6' : '#10B981',
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            fontWeight: 800,
+                            fontSize: '0.75rem'
+                          }}>
+                            {prayer.request_type}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', maxWidth: '300px', lineHeight: 1.5 }}>
+                          {prayer.request_text}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <select
+                            value={prayer.status || 'pendiente'}
+                            onChange={(e) => handleUpdatePrayerStatus(prayer.id, e.target.value)}
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              border: '1px solid #CBD5E1',
+                              backgroundColor: (prayer.status === 'altar') ? '#F0FDF4' : (prayer.status === 'en_oracion') ? '#EFF6FF' : '#FFF'
+                            }}
+                          >
+                            <option value="pendiente">⏳ Pendiente</option>
+                            <option value="en_oracion">🙏 En Oración</option>
+                            <option value="altar">✝️ Impresa en Altar</option>
+                            <option value="atendido">✅ Atendido / Testimonio</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <button
+                            onClick={() => handleDeletePrayer(prayer.id)}
+                            style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                            title="Eliminar petición"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  {prayersList.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        No hay peticiones de oración registradas por el momento.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* MURO DE TESTIMONIOS */}
+          <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={22} color="#977DFF" />
+                  Muro de Testimonios y Milagros
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                  Aprueba o modera los milagros que las personas comparten para ser publicados públicamente en el Muro de Testimonios.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchAdminTestimonies}
+                className="btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <RefreshCw size={14} className={loadingTestimonies ? 'animate-spin' : ''} />
+                Actualizar Testimonios
+              </button>
+            </div>
+
+            {/* FILTROS TESTIMONIOS */}
+            <div style={{ marginBottom: '20px', backgroundColor: '#FAF8F5', padding: '16px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Filtrar Estado Publicación</label>
+              <select
+                value={testimonyFilterApproved}
+                onChange={(e) => setTestimonyFilterApproved(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+              >
+                <option value="all">Todos los Testimonios</option>
+                <option value="approved">Publicados en el Muro (Aprobados)</option>
+                <option value="pending">Pendientes de Revisión</option>
+              </select>
+            </div>
+
+            {/* GRID DE TESTIMONIOS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+              {testimoniesList
+                .filter(t => testimonyFilterApproved === 'all' || (testimonyFilterApproved === 'approved' ? t.is_approved === 1 : t.is_approved !== 1))
+                .map((t) => (
+                  <div key={t.id} style={{
+                    backgroundColor: '#FAF8F5',
+                    border: '1px solid var(--accent-beige-border)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justify: 'space-between',
+                    gap: '14px'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--accent-coffee)' }}>{t.name}</span>
+                        <span style={{
+                          backgroundColor: t.is_approved ? '#F0FDF4' : '#FFFBEB',
+                          color: t.is_approved ? '#166534' : '#B45309',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.72rem',
+                          fontWeight: 800
+                        }}>
+                          {t.is_approved ? '✅ PUBLICADO' : '⏳ PENDIENTE'}
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#3B82F6', margin: '0 0 8px' }}>{t.title}</h4>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
+                        "{t.story}"
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px', borderTop: '1px solid #E2E8F0', paddingTop: '12px' }}>
+                      <button
+                        onClick={() => handleToggleTestimonyApproval(t.id, t.is_approved)}
+                        className={t.is_approved ? 'btn-secondary' : 'btn-primary'}
+                        style={{ flex: 1, padding: '8px', fontSize: '0.82rem', fontWeight: 800, borderRadius: '8px' }}
+                      >
+                        {t.is_approved ? 'Ocultar del Muro' : 'Aprobar y Publicar'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTestimony(t.id)}
+                        style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#EF4444', borderRadius: '8px', padding: '8px 12px', cursor: 'pointer', fontWeight: 800 }}
+                        title="Eliminar testimonio"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {testimoniesList.length === 0 && (
+                <div style={{ gridColumn: '1 / -1', padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No se han registrado testimonios todavía.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
