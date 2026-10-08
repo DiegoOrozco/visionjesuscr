@@ -1,0 +1,17 @@
+{
+  "delay_min_minutos": 7,
+  "delay_max_minutos": 15,
+  "mensajes_por_hora": 6,
+  "default_country_code": "506",
+  "velocidad_tipeo_min_ms": 35,
+  "velocidad_tipeo_max_ms": 110,
+  "default_numbers_file": "../numeros-formato-whatsapp.txt",
+  "default_message_file": "../mensaje-whatsapp.txt",
+  "default_image_file": "../media/imagen-whatsapp.jpg",
+  "logs_file": "logs/sent_log.json",
+  "session_dir": "whatsapp_session",
+  "headless": false,
+  "solo_horario_oficina": true,
+  "hora_inicio": 8,
+  "hora_fin": 20
+}

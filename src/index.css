@@ -691,36 +691,44 @@ body {
    ========================================================================== */
 .apple-checkout-card {
   background: #0E0E14;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 32px 28px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 36px 30px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
   font-family: var(--apple-font);
-  color: var(--apple-text-primary);
+  color: #FFFFFF;
 }
 
 .apple-input, .apple-select {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: #1C1F2E;
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  padding: 14px 16px;
   color: #FFFFFF;
   font-family: var(--apple-font);
-  font-size: 0.92rem;
+  font-size: 0.98rem;
+  font-weight: 500;
   transition: all 0.2s var(--apple-ease);
   outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.apple-input:hover, .apple-select:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: #222638;
 }
 
 .apple-input:focus, .apple-select:focus {
-  border-color: var(--apple-blue);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25);
+  border-color: #0071E3;
+  background: #252A40;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .apple-input::placeholder {
-  color: #6E6E73;
+  color: #94A3B8;
+  font-weight: 400;
 }
 
 .apple-select option {
@@ -730,12 +738,12 @@ body {
 
 .apple-label {
   display: block;
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--apple-text-secondary);
-  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  margin-bottom: 8px;
 }
 
 .apple-timer-pill {

@@ -373,41 +373,41 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
         <ArrowLeft size={16} /> Volver a selección de zona
       </button>
 
-      {/* 5-MINUTE COUNTDOWN BANNER (Apple Capsule) */}
+      {/* 5-MINUTE COUNTDOWN BANNER (Apple Capsule - High Contrast) */}
       <div style={{
-        backgroundColor: remainingSeconds <= 60 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-        color: remainingSeconds <= 60 ? '#F87171' : '#FBBF24',
-        border: `1px solid ${remainingSeconds <= 60 ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+        backgroundColor: remainingSeconds <= 60 ? '#260B0B' : '#221603',
+        color: '#FFFFFF',
+        border: `2px solid ${remainingSeconds <= 60 ? '#EF4444' : '#F59E0B'}`,
         borderRadius: '20px',
-        padding: '14px 20px',
+        padding: '16px 22px',
         marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        fontWeight: 600,
-        fontSize: '0.9rem',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        fontWeight: 700,
+        fontSize: '0.95rem',
         flexWrap: 'wrap',
         gap: '12px',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)'
+        boxShadow: remainingSeconds <= 60 ? '0 8px 30px rgba(239, 68, 68, 0.3)' : '0 8px 30px rgba(245, 158, 11, 0.3)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Clock size={20} />
-          <span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Clock size={22} color={remainingSeconds <= 60 ? '#EF4444' : '#F59E0B'} strokeWidth={2.5} />
+          <span style={{ color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}>
             {remainingSeconds <= 60 
               ? '¡Menos de 1 minuto! Completa los datos antes de que se liberen tus asientos.' 
               : 'Tus asientos están apartados temporalmente. Completa los datos para confirmar.'}
           </span>
         </div>
         <div style={{
-          backgroundColor: remainingSeconds <= 60 ? '#DC2626' : 'rgba(255, 255, 255, 0.12)',
-          color: '#FFFFFF',
-          padding: '4px 14px',
+          backgroundColor: remainingSeconds <= 60 ? '#EF4444' : '#F59E0B',
+          color: '#000000',
+          padding: '6px 16px',
           borderRadius: '999px',
           fontFamily: 'monospace',
-          fontSize: '1.15rem',
-          fontWeight: 800
+          fontSize: '1.25rem',
+          fontWeight: 900,
+          letterSpacing: '0.04em',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
         }}>
           {formatTime(remainingSeconds)}
         </div>
@@ -591,14 +591,15 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                             <label key={ans} style={{
                               flex: 1,
                               textAlign: 'center',
-                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.05)',
-                              color: isSelected ? '#FFFFFF' : '#A1A1A6',
-                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
-                              padding: '10px',
-                              borderRadius: '12px',
+                              backgroundColor: isSelected ? '#0071E3' : '#1C1F2E',
+                              color: '#FFFFFF',
+                              border: isSelected ? '2px solid #60A5FA' : '1.5px solid rgba(255, 255, 255, 0.22)',
+                              padding: '12px',
+                              borderRadius: '14px',
                               cursor: 'pointer',
-                              fontWeight: 700,
-                              fontSize: '0.9rem',
+                              fontWeight: 800,
+                              fontSize: '0.92rem',
+                              boxShadow: isSelected ? '0 0 16px rgba(0, 113, 227, 0.45)' : 'none',
                               transition: 'all 0.2s var(--apple-ease)'
                             }}>
                               <input 
@@ -627,14 +628,15 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                               display: 'flex',
                               alignItems: 'center',
                               gap: '8px',
-                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.04)',
-                              color: isSelected ? '#FFFFFF' : '#D2D2D7',
-                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
-                              padding: '10px 14px',
-                              borderRadius: '12px',
+                              backgroundColor: isSelected ? '#0071E3' : '#1C1F2E',
+                              color: '#FFFFFF',
+                              border: isSelected ? '2px solid #60A5FA' : '1.5px solid rgba(255, 255, 255, 0.22)',
+                              padding: '12px 14px',
+                              borderRadius: '14px',
                               cursor: 'pointer',
-                              fontSize: '0.84rem',
-                              fontWeight: 600,
+                              fontSize: '0.86rem',
+                              fontWeight: 700,
+                              boxShadow: isSelected ? '0 0 16px rgba(0, 113, 227, 0.45)' : 'none',
                               transition: 'all 0.2s var(--apple-ease)'
                             }}>
                               <input 
@@ -675,14 +677,15 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                             <label key={ans} style={{
                               flex: 1,
                               textAlign: 'center',
-                              backgroundColor: isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.05)',
-                              color: isSelected ? '#FFFFFF' : '#A1A1A6',
-                              border: `1px solid ${isSelected ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
-                              padding: '10px',
-                              borderRadius: '12px',
+                              backgroundColor: isSelected ? '#0071E3' : '#1C1F2E',
+                              color: '#FFFFFF',
+                              border: isSelected ? '2px solid #60A5FA' : '1.5px solid rgba(255, 255, 255, 0.22)',
+                              padding: '12px',
+                              borderRadius: '14px',
                               cursor: 'pointer',
-                              fontWeight: 700,
-                              fontSize: '0.9rem',
+                              fontWeight: 800,
+                              fontSize: '0.92rem',
+                              boxShadow: isSelected ? '0 0 16px rgba(0, 113, 227, 0.45)' : 'none',
                               transition: 'all 0.2s var(--apple-ease)'
                             }}>
                               <input 
@@ -781,9 +784,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 <div 
                   onClick={() => setPaymentMethod('paypal')}
                   style={{
-                    border: `1px solid ${paymentMethod === 'paypal' ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
-                    backgroundColor: paymentMethod === 'paypal' ? 'rgba(0, 113, 227, 0.08)' : '#14141E',
-                    boxShadow: paymentMethod === 'paypal' ? '0 0 25px rgba(0, 113, 227, 0.2)' : 'none',
+                    border: paymentMethod === 'paypal' ? '2px solid #0071E3' : '1.5px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: paymentMethod === 'paypal' ? 'rgba(0, 113, 227, 0.18)' : '#1C1F2E',
+                    boxShadow: paymentMethod === 'paypal' ? '0 0 25px rgba(0, 113, 227, 0.35)' : 'none',
                     borderRadius: '20px',
                     padding: '20px',
                     cursor: 'pointer',
@@ -791,14 +794,14 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <CreditCard size={22} color="var(--apple-blue)" />
-                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#F5F5F7' }}>
+                    <CreditCard size={22} color="#60A5FA" />
+                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#FFFFFF' }}>
                       PayPal / Tarjeta
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                  <p style={{ fontSize: '0.85rem', color: '#94A3B8', margin: 0, lineHeight: 1.45 }}>
                     Paga con Tarjeta o saldo PayPal. 
-                    <strong style={{ display: 'block', color: '#34D399', marginTop: '4px' }}>Aprobación y QR instantáneo</strong>
+                    <strong style={{ display: 'block', color: '#34D399', marginTop: '4px', fontWeight: 700 }}>Aprobación y QR instantáneo</strong>
                   </p>
                 </div>
               )}
@@ -807,9 +810,9 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
               <div 
                 onClick={() => setPaymentMethod('sinpe')}
                 style={{
-                  border: `1px solid ${paymentMethod === 'sinpe' ? 'var(--apple-blue)' : 'rgba(255, 255, 255, 0.1)'}`,
-                  backgroundColor: paymentMethod === 'sinpe' ? 'rgba(0, 113, 227, 0.08)' : '#14141E',
-                  boxShadow: paymentMethod === 'sinpe' ? '0 0 25px rgba(0, 113, 227, 0.2)' : 'none',
+                  border: paymentMethod === 'sinpe' ? '2px solid #0071E3' : '1.5px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: paymentMethod === 'sinpe' ? 'rgba(0, 113, 227, 0.18)' : '#1C1F2E',
+                  boxShadow: paymentMethod === 'sinpe' ? '0 0 25px rgba(0, 113, 227, 0.35)' : 'none',
                   borderRadius: '20px',
                   padding: '20px',
                   cursor: 'pointer',
@@ -817,14 +820,14 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <Landmark size={22} color="var(--apple-blue)" />
-                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#F5F5F7' }}>
+                  <Landmark size={22} color="#60A5FA" />
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#FFFFFF' }}>
                     SINPE Móvil
                   </span>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: 'var(--apple-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                <p style={{ fontSize: '0.85rem', color: '#94A3B8', margin: 0, lineHeight: 1.45 }}>
                   Transferencia bancaria al 60121225. 
-                  <span style={{ display: 'block', marginTop: '4px' }}>Adjunta tu comprobante para validación.</span>
+                  <span style={{ display: 'block', marginTop: '4px', color: '#CBD5E1' }}>Adjunta tu comprobante para validación.</span>
                 </p>
               </div>
             </div>
@@ -879,20 +882,21 @@ export default function AttendeeForm({ zone, quantity, chosenSeatCodes = [], ses
             ) : (
               /* SINPE CONTENT */
               <div>
-                <p style={{ fontSize: '0.92rem', color: 'var(--apple-text-secondary)', marginBottom: '16px', lineHeight: 1.6 }}>
-                  Transfiere por SINPE Móvil al número <strong style={{ fontSize: '1.15rem', color: '#60A5FA' }}>60121225</strong> la cantidad total de <strong style={{ color: '#34D399' }}>{totalPrice}</strong> y sube el comprobante.
+                <p style={{ fontSize: '0.95rem', color: '#CBD5E1', marginBottom: '16px', lineHeight: 1.6 }}>
+                  Transfiere por SINPE Móvil al número <strong style={{ fontSize: '1.2rem', color: '#60A5FA' }}>60121225</strong> la cantidad total de <strong style={{ color: '#34D399', fontSize: '1.2rem' }}>{totalPrice}</strong> y sube el comprobante.
                 </p>
 
                 <div style={{
-                  border: '2px dashed rgba(255, 255, 255, 0.16)',
+                  border: '2px dashed rgba(255, 255, 255, 0.35)',
                   borderRadius: '20px',
-                  padding: '28px 20px',
+                  padding: '32px 20px',
                   textAlign: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                  backgroundColor: '#1C1F2E',
                   cursor: 'pointer',
                   position: 'relative',
                   marginBottom: '24px',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
                 }}>
                   <input 
                     type="file"

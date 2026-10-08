@@ -17,6 +17,7 @@ import CongresosPage from './components/CongresosPage';
 import OracionPage from './components/OracionPage';
 import GruposAmistadPage from './components/GruposAmistadPage';
 import DonacionesPage from './components/DonacionesPage';
+import NosotrosPage from './components/NosotrosPage';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -35,10 +36,8 @@ const getInitialView = () => {
   if (path === '/modelo') return 'modelo-promo';
   if (path === '/oracion' || path === '/peticiones') return 'oracion';
   if (path === '/grupos-de-amistad' || path === '/casas-de-paz') return 'grupos-amistad';
-  if (path === '/donar' || path === '/ofrendas') return 'donaciones';
-  if (path === '/congresos' || path === '/eventos') return 'congresos';
-  if (path === '/politicas') return 'politicas';
-  if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
+  if (path === '/nosotros') return 'nosotros';
+  if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision'].includes(path)) return 'under-construction';
   return 'not-found';
 };
 
@@ -158,7 +157,9 @@ export default function App() {
       setCurrentView('congresos');
     } else if (path === '/politicas') {
       setCurrentView('politicas');
-    } else if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) {
+    } else if (path === '/nosotros') {
+      setCurrentView('nosotros');
+    } else if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision'].includes(path)) {
       setConstructionPage(path.replace('/', ''));
       setCurrentView('under-construction');
     } else if (path === '/') {
@@ -310,6 +311,17 @@ export default function App() {
         {/* VIEW DONACIONES & OFRENDAS */}
         {currentView === 'donaciones' && (
           <DonacionesPage 
+            config={homepageConfig} 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+            }}
+          />
+        )}
+
+        {/* VIEW NOSOTROS */}
+        {currentView === 'nosotros' && (
+          <NosotrosPage 
             config={homepageConfig} 
             onGoHome={() => {
               window.history.pushState({}, '', '/');

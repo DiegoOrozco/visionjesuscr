@@ -1,0 +1,6 @@
+2026/09/07-12:39:43.567 71fdb Reusing MANIFEST /Users/diegorozco/Documents/visionjesus/modulo_whatsapp/whatsapp_session/Default/Local Storage/leveldb/MANIFEST-000001
+2026/09/07-12:39:43.574 71fdb Recovering log #4
+2026/09/07-12:39:43.575 71fdb Reusing old log /Users/diegorozco/Documents/visionjesus/modulo_whatsapp/whatsapp_session/Default/Local Storage/leveldb/000004.log 
+2026/09/07-12:39:54.851 71fe0 Level-0 table #8: started
+2026/09/07-12:39:54.853 71fe0 Level-0 table #8: 16575 bytes OK
+2026/09/07-12:39:54.856 71fe0 Delete type=0 #4

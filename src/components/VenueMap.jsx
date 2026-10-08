@@ -386,24 +386,26 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
         height: '42px',
         borderRadius: '11px',
         border: isOccupied 
-          ? '1px solid rgba(255, 255, 255, 0.04)' 
-          : isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.12)',
+          ? '1.5px solid #2D3748' 
+          : isSelected ? '2.5px solid #FFFFFF' : '2px solid #E2E8F0',
         backgroundColor: isOccupied 
-          ? 'rgba(255, 255, 255, 0.03)' 
-          : isSelected ? selectedZone.hoverColor : 'rgba(255, 255, 255, 0.07)',
+          ? '#1A202C' 
+          : isSelected ? selectedZone.hoverColor : '#FFFFFF',
         color: isOccupied 
-          ? 'rgba(255, 255, 255, 0.2)' 
-          : isSelected ? '#FFFFFF' : '#F5F5F7',
+          ? '#718096' 
+          : isSelected ? '#FFFFFF' : '#0F172A',
         fontWeight: 800,
-        fontSize: '0.85rem',
-        boxShadow: isSelected ? `0 0 16px ${selectedZone.hoverColor}` : 'none',
-        transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+        fontSize: '0.9rem',
+        boxShadow: isSelected 
+          ? `0 0 20px ${selectedZone.hoverColor}, 0 4px 12px rgba(0,0,0,0.5)` 
+          : isOccupied ? 'none' : '0 2px 8px rgba(255, 255, 255, 0.15)',
+        transform: isSelected ? 'scale(1.12)' : 'scale(1)',
         transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
         cursor: isOccupied ? 'not-allowed' : 'pointer',
-        opacity: isOccupied ? 0.45 : 1
+        opacity: isOccupied ? 0.6 : 1
       }}
     >
-      {isOccupied ? '—' : seatNum}
+      {isOccupied ? '✕' : seatNum}
     </button>
   );
 
@@ -629,14 +631,14 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
               }}>
                 Zona Seleccionada
               </span>
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#F5F5F7', marginTop: '6px', letterSpacing: '-0.02em' }}>
-                {selectedZone.label} <span style={{ color: 'var(--apple-text-secondary)', fontSize: '1rem', fontWeight: 500 }}>({formatCRC(selectedZone.data.price)} / boleto)</span>
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#FFFFFF', marginTop: '6px', letterSpacing: '-0.02em' }}>
+                {selectedZone.label} <span style={{ color: '#CBD5E1', fontSize: '1rem', fontWeight: 600 }}>({formatCRC(selectedZone.data.price)} / boleto)</span>
               </h3>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--apple-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Total Estimado:</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#34D399', letterSpacing: '-0.02em' }}>
+              <div style={{ fontSize: '0.82rem', color: '#CBD5E1', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>Total Estimado:</div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#34D399', letterSpacing: '-0.02em' }}>
                 {formatCRC((selectedSeats.length > 0 ? selectedSeats.length : 1) * selectedZone.data.price)}
               </div>
             </div>
@@ -645,25 +647,25 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
           {/* Seat Legend */}
           <div style={{
             display: 'flex',
-            gap: '20px',
-            marginBottom: '20px',
-            fontSize: '0.82rem',
-            fontWeight: 600,
+            gap: '24px',
+            marginBottom: '22px',
+            fontSize: '0.88rem',
+            fontWeight: 700,
             alignItems: 'center',
-            color: 'var(--apple-text-secondary)',
+            color: '#FFFFFF',
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.18)' }} />
-              <span>Disponible</span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '7px', backgroundColor: '#FFFFFF', border: '2px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A', fontSize: '11px', fontWeight: 900 }}>1</div>
+              <span style={{ color: '#FFFFFF' }}>Disponible</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: selectedZone.hoverColor, border: '1px solid #FFFFFF' }} />
-              <span style={{ color: '#F5F5F7' }}>Seleccionado</span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '7px', backgroundColor: selectedZone.hoverColor, border: '2px solid #FFFFFF', boxShadow: `0 0 10px ${selectedZone.hoverColor}` }} />
+              <span style={{ color: '#FFFFFF' }}>Seleccionado</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '6px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)' }} />
-              <span>Ocupado</span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '7px', backgroundColor: '#1A202C', border: '1.5px solid #2D3748', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#718096', fontSize: '11px', fontWeight: 900 }}>✕</div>
+              <span style={{ color: '#94A3B8' }}>Ocupado</span>
             </div>
           </div>
 
@@ -749,7 +751,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
 
                   return (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
+                      <span style={{ width: '64px', fontWeight: 800, fontSize: '0.9rem', color: '#FFFFFF', letterSpacing: '0.02em' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -771,7 +773,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 if (selectedZone.data.id === 'vip_central') {
                   return seatLayouts.vip_central.map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
+                      <span style={{ width: '64px', fontWeight: 800, fontSize: '0.9rem', color: '#FFFFFF', letterSpacing: '0.02em' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -788,7 +790,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 } else {
                   return seatLayouts[selectedZone.data.id].filter((r, rIdx) => isRowVisible(r.rowLabel, rIdx)).map((r, rIdx) => (
                     <div key={r.rowLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
+                      <span style={{ width: '64px', fontWeight: 800, fontSize: '0.9rem', color: '#FFFFFF', letterSpacing: '0.02em' }}>
                         {r.rowLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '6px' }}>
@@ -813,7 +815,7 @@ export default function VenueMap({ zones, occupiedSeats = [], onSelectZone, onRe
                 const cols = selectedZone.data.id === 'central_atras' ? 15 : 10;
                 return (
                   <div key={rLabel} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ width: '60px', fontWeight: 700, fontSize: '0.84rem', color: 'var(--apple-text-secondary)' }}>
+                    <span style={{ width: '64px', fontWeight: 800, fontSize: '0.9rem', color: '#FFFFFF', letterSpacing: '0.02em' }}>
                       {rLabel}
                     </span>
                     <div style={{ display: 'flex', gap: '6px' }}>

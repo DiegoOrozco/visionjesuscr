@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, AlertTriangle } from 'lucide-react';
+import { Home, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 export default function NotFound404({ onGoHome }) {
   const handleHomeClick = () => {
@@ -12,79 +12,69 @@ export default function NotFound404({ onGoHome }) {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#030812',
-      color: '#FFFFFF',
+      backgroundColor: '#000000',
+      color: '#F5F5F7',
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: "'Outfit', 'Inter', sans-serif"
+      fontFamily: 'var(--apple-font)',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      {/* OFFICIAL VISIÓN JESÚS HEADER */}
-      <header style={{
-        padding: '20px 40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(3, 8, 18, 0.95)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(12px)',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
-        {/* LOGO */}
-        <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          onClick={handleHomeClick}
-        >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
-        </div>
+      {/* Subtle Apple Ambient Glow */}
+      <div className="apple-ambient-glow" style={{
+        top: '-150px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'radial-gradient(circle, rgba(0, 113, 227, 0.18) 0%, transparent 70%)'
+      }} />
 
-        {/* MENU LINKS */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <a 
-            href="/" 
-            onClick={(e) => { e.preventDefault(); handleHomeClick(); }} 
-            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer' }}
+      {/* APPLE FROSTED GLASS HEADER */}
+      <div className="apple-nav-wrapper">
+        <header className="apple-nav-bar">
+          <div 
+            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            onClick={handleHomeClick}
           >
-            INICIO
-          </a>
-          <a 
-            href="/nosotros" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            NOSOTROS
-          </a>
-          <a 
-            href="/#vision-section" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/#vision-section'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONOCÉ LA VISIÓN
-          </a>
-          <a 
-            href="/#horarios-section" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/#horarios-section'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            PRÉDICAS Y HORARIOS
-          </a>
-          <a 
-            href="/#contacto-section" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONTACTO
-          </a>
-        </nav>
-      </header>
+            <img 
+              src="/logo_oficial_transparente.png" 
+              alt="Visión Jesús Logo" 
+              style={{ height: '46px', objectFit: 'contain' }} 
+            />
+          </div>
+
+          <nav className="apple-nav-links">
+            <a 
+              href="/" 
+              onClick={(e) => { e.preventDefault(); handleHomeClick(); }} 
+              className="apple-nav-link"
+              style={{ color: '#FFFFFF' }}
+            >
+              Inicio
+            </a>
+            <a 
+              href="/congresos" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
+              className="apple-nav-link"
+            >
+              Eventos
+            </a>
+            <a 
+              href="/#horarios-section" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/#horarios-section'; }} 
+              className="apple-nav-link"
+            >
+              Horarios
+            </a>
+            <a 
+              href="/#contacto-section" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
+              className="apple-nav-link"
+            >
+              Contacto
+            </a>
+          </nav>
+        </header>
+      </div>
 
       {/* MAIN 404 CONTENT */}
       <div style={{
@@ -92,99 +82,87 @@ export default function NotFound404({ onGoHome }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '60px 20px',
-        textAlign: 'center'
+        padding: '120px 20px 60px',
+        textAlign: 'center',
+        position: 'relative',
+        zIndex: 1
       }}>
         <div style={{
-          maxWidth: '560px',
+          maxWidth: '520px',
           width: '100%',
-          backgroundColor: 'rgba(15, 23, 42, 0.75)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '24px',
+          backgroundColor: '#0E0E14',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '28px',
           padding: '48px 32px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(16px)'
+          boxShadow: '0 30px 70px rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(24px)'
         }}>
           
           {/* Badge 404 */}
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '6px 16px',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            gap: '6px',
+            padding: '5px 14px',
+            backgroundColor: 'rgba(239, 68, 68, 0.12)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '30px',
+            borderRadius: '999px',
             color: '#F87171',
-            fontSize: '0.85rem',
-            fontWeight: 800,
-            letterSpacing: '1px',
-            marginBottom: '24px'
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            marginBottom: '20px'
           }}>
-            <AlertTriangle size={16} />
-            ERROR 404 • PÁGINA NO ENCONTRADA
+            <AlertTriangle size={14} />
+            Error 404 • Página No Encontrada
           </div>
 
-          {/* 404 Header */}
-          <h1 style={{
-            fontSize: '5rem',
+          {/* 404 Headline */}
+          <h1 className="apple-hero-headline apple-gradient-text" style={{
+            fontSize: 'clamp(4.5rem, 9vw, 6.5rem)',
             fontWeight: 900,
-            margin: '0 0 12px 0',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            margin: '0 0 10px 0',
             lineHeight: 1
           }}>
             404
           </h1>
 
           <h2 style={{
-            fontSize: '1.5rem',
+            fontSize: '1.4rem',
             fontWeight: 800,
-            color: '#FFFFFF',
-            marginBottom: '16px'
+            color: '#F5F5F7',
+            letterSpacing: '-0.02em',
+            marginBottom: '12px'
           }}>
-            Parece que te has desviado del camino
+            Página fuera del radar
           </h2>
 
           <p style={{
-            fontSize: '1rem',
-            color: '#94A3B8',
-            lineHeight: 1.6,
-            marginBottom: '36px',
-            maxWidth: '440px',
-            margin: '0 auto 36px auto'
+            fontSize: '0.94rem',
+            color: 'var(--apple-text-secondary)',
+            lineHeight: 1.5,
+            maxWidth: '400px',
+            margin: '0 auto 32px'
           }}>
-            La página que buscas no existe, ha sido movida o la dirección ingresada es incorrecta.
+            La página que buscas no existe o ha sido trasladada a una nueva dirección.
           </p>
 
-          {/* Action Button - ONLY HOME */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
+          {/* Action Button */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <button
               onClick={handleHomeClick}
+              className="apple-btn apple-btn-primary"
               style={{
-                padding: '14px 32px',
-                backgroundColor: '#0033FF',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '50px',
-                fontWeight: 800,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
-                transition: 'all 0.25s ease',
-                boxShadow: '0 6px 20px rgba(0, 51, 255, 0.4)'
+                gap: '8px',
+                padding: '14px 28px',
+                fontSize: '0.95rem'
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
               <Home size={18} />
-              Volver al Inicio
+              <span>Volver al Inicio</span>
             </button>
           </div>
 
