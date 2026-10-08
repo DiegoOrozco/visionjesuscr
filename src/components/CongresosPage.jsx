@@ -15,26 +15,36 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const allEvents = [
-    {
-      id: 'autenticas',
-      year: '2026',
-      category: 'Congresos',
-      title: 'Congreso Mujeres Auténticas 2026',
-      subtitle: 'Edición Especial • Sanidad & Dignidad',
-      status: 'Entradas Disponibles',
-      statusColor: '#10B981',
-      date: 'Viernes 18 y Sábado 19 de Noviembre, 2026',
-      time: '7:00 PM',
-      location: 'Auditorio Visión Jesús, Desamparados, CR',
-      image: config.autenticas_hero_bg || '/logo_oficial_transparente.png',
-      description: 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada cicatriz.',
-      url: '/autenticas',
-      featured: true,
-      priceInfo: 'Gold: ₡12.000 / General: ₡7.500'
-    },
-    {
-      id: 'sanados',
+  let allEvents = [];
+  try {
+    if (config.events_list) {
+      allEvents = typeof config.events_list === 'string' ? JSON.parse(config.events_list) : config.events_list;
+    }
+  } catch (e) {
+    console.error('Error parsing events_list:', e);
+  }
+
+  if (!allEvents || allEvents.length === 0) {
+    allEvents = [
+      {
+        id: 'autenticas',
+        year: '2026',
+        category: 'Congresos',
+        title: 'Congreso Mujeres Auténticas 2026',
+        subtitle: 'Edición Especial • Sanidad & Dignidad',
+        status: 'Entradas Disponibles',
+        statusColor: '#10B981',
+        date: 'Viernes 18 y Sábado 19 de Noviembre, 2026',
+        time: '7:00 PM',
+        location: 'Auditorio Visión Jesús, Desamparados, CR',
+        image: config.autenticas_hero_bg || '/logo_oficial_transparente.png',
+        description: 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada cicatriz.',
+        url: '/autenticas',
+        featured: true,
+        priceInfo: 'Gold: ₡12.000 / General: ₡7.500'
+      },
+      {
+        id: 'sanados',
       year: '2026',
       category: 'Adoración',
       title: 'Noche de Milagros - Sanados para Sanar 2026',
@@ -119,6 +129,7 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
       priceInfo: 'Próximamente'
     }
   ];
+}
 
   const handleEventClick = (evt) => {
     if (evt.id === 'autenticas') {

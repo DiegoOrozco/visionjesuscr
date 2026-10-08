@@ -156,6 +156,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [localAutenticasGallery, setLocalAutenticasGallery] = useState([]);
   const [localAutenticasSpeakers, setLocalAutenticasSpeakers] = useState([]);
   const [localModeloNetworks, setLocalModeloNetworks] = useState([]);
+  const [localEventsList, setLocalEventsList] = useState([]);
   const [uploadingSpeakerImage, setUploadingSpeakerImage] = useState(null);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingAutenticasHero, setUploadingAutenticasHero] = useState(false);
@@ -1331,6 +1332,24 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         ];
       }
       setLocalModeloNetworks(parsedModelo);
+
+      // Parse Events List
+      let parsedEvents = [];
+      try {
+        if (homepageConfig.events_list) {
+          parsedEvents = typeof homepageConfig.events_list === 'string' ? JSON.parse(homepageConfig.events_list) : homepageConfig.events_list;
+        }
+      } catch (e) {
+        console.error('Error parsing events_list in admin:', e);
+      }
+      if (!parsedEvents || parsedEvents.length === 0) {
+        parsedEvents = [
+          { id: 'autenticas', year: '2026', category: 'Congresos', title: 'Congreso Mujeres Auténticas 2026', subtitle: 'Edición Especial • Sanidad & Dignidad', status: 'Entradas Disponibles', date: 'Viernes 18 y Sábado 19 de Noviembre, 2026', time: '7:00 PM', location: 'Auditorio Visión Jesús, Desamparados, CR', image: homepageConfig.autenticas_hero_bg || '/logo_oficial_transparente.png', description: 'El congreso anual para mujeres que deciden sanar sus heridas.', url: '/autenticas', priceInfo: 'Gold: ₡12.000 / General: ₡7.500' },
+          { id: 'sanados', year: '2026', category: 'Adoración', title: 'Noche de Milagros - Sanados para Sanar 2026', subtitle: 'Unción, Sanidad Interior y Restauración', status: 'Entrada Libre', date: 'Sábado 28 de Noviembre, 2026', time: '6:30 PM', location: 'Auditorio Principal Visión Jesús', image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1000', description: 'Un tiempo especial consagrado para la intercesión.', url: '/oracion', priceInfo: 'Entrada Gratuita' },
+          { id: 'liderazgo2027', year: '2027', category: 'Congresos', title: 'Congreso Internacional de Liderazgo 2027', subtitle: 'Equipamiento & Visión del Reino', status: 'Proyección 2027', date: 'Febrero 2027', time: 'Por Confirmar', location: 'Auditorio Principal Visión Jesús', image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000', description: 'Capacitación intensiva para pastores y servidores.', url: '/modelo', priceInfo: 'Inscripciones en Enero 2027' }
+        ];
+      }
+      setLocalEventsList(parsedEvents);
     }
   }, [homepageConfig]);
 
@@ -1590,7 +1609,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setConstructionSuccessMsg('');
     const updatedConfig = {
       ...configFields,
-      modelo_networks: JSON.stringify(localModeloNetworks)
+      modelo_networks: JSON.stringify(localModeloNetworks),
+      events_list: JSON.stringify(localEventsList)
     };
     try {
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
@@ -2029,61 +2049,276 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         </div>
       </div>
 
-      {/* Tabs Switcher */}
+      {/* MODULE SUITE SWITCHER (NIVEL 1: AGRUPACIÓN PRINCIPAL) */}
       <div style={{
         display: 'flex',
-        borderBottom: '2px solid var(--accent-beige-border)',
-        marginBottom: '24px',
-        gap: '20px',
-        flexWrap: 'wrap'
+        gap: '12px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+        backgroundColor: 'rgba(255, 255, 255, 0.04)',
+        padding: '8px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.08)'
       }}>
-        {(adminUser.role === 'admin' || adminUser.role === 'tickets' || adminUser.role === 'tickets_readonly') && (
+        <button
+          onClick={() => {
+            setActiveSuite('tickets');
+            if (!['reservations', 'pricing', 'zones_seating'].includes(activeTab)) {
+              setActiveTab('reservations');
+            }
+          }}
+          style={{
+            flex: '1 1 auto',
+            minWidth: '200px',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            border: activeSuite === 'tickets' ? '2px solid #0071E3' : '1px solid transparent',
+            backgroundColor: activeSuite === 'tickets' ? 'rgba(0, 113, 227, 0.2)' : 'transparent',
+            color: activeSuite === 'tickets' ? '#FFFFFF' : 'var(--text-muted)',
+            fontWeight: 800,
+            fontSize: '0.96rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            transition: 'all 0.2s ease',
+            boxShadow: activeSuite === 'tickets' ? '0 4px 16px rgba(0, 113, 227, 0.3)' : 'none'
+          }}
+        >
+          <Ticket size={20} color={activeSuite === 'tickets' ? '#60A5FA' : 'currentColor'} />
+          <span>🎟️ Tiquetera & Eventos</span>
+        </button>
+
+        {adminUser.role === 'admin' && (
           <button
-            onClick={() => setActiveTab('reservations')}
+            onClick={() => {
+              setActiveSuite('web');
+              if (!['church_web', 'oracion_admin', 'grupos_admin'].includes(activeTab)) {
+                setActiveTab('church_web');
+              }
+            }}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'reservations' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'reservations' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              flex: '1 1 auto',
+              minWidth: '200px',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: activeSuite === 'web' ? '2px solid #977DFF' : '1px solid transparent',
+              backgroundColor: activeSuite === 'web' ? 'rgba(151, 125, 255, 0.2)' : 'transparent',
+              color: activeSuite === 'web' ? '#FFFFFF' : 'var(--text-muted)',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.96rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'all 0.2s ease',
+              boxShadow: activeSuite === 'web' ? '0 4px 16px rgba(151, 125, 255, 0.3)' : 'none'
             }}
           >
-            <LayoutGrid size={18} />
-            Reservaciones Congreso
+            <Globe size={20} color={activeSuite === 'web' ? '#C4B5FD' : 'currentColor'} />
+            <span>🌐 Web & Ministerio</span>
           </button>
         )}
 
-        {/* Only admin role can edit website */}
         {adminUser.role === 'admin' && (
+          <button
+            onClick={() => {
+              setActiveSuite('system');
+              if (!['users', 'activity_log'].includes(activeTab)) {
+                setActiveTab('users');
+                fetchAdminUsers();
+              }
+            }}
+            style={{
+              flex: '1 1 auto',
+              minWidth: '200px',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: activeSuite === 'system' ? '2px solid #10B981' : '1px solid transparent',
+              backgroundColor: activeSuite === 'system' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+              color: activeSuite === 'system' ? '#FFFFFF' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '0.96rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'all 0.2s ease',
+              boxShadow: activeSuite === 'system' ? '0 4px 16px rgba(16, 185, 129, 0.3)' : 'none'
+            }}
+          >
+            <ShieldCheck size={20} color={activeSuite === 'system' ? '#6EE7B7' : 'currentColor'} />
+            <span>⚙️ Sistema & Usuarios</span>
+          </button>
+        )}
+      </div>
+
+      {/* NIVEL 2: HERRAMIENTAS ESPECÍFICAS SEGÚN LA SUITE SELECCIONADA */}
+      {activeSuite === 'tickets' && (
+        <div style={{
+          backgroundColor: '#121624',
+          border: '1.5px solid rgba(0, 113, 227, 0.35)',
+          borderRadius: '20px',
+          padding: '18px 22px',
+          marginBottom: '26px',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)'
+        }}>
+          {/* SELECTOR DE EVENTO ACTIVO (PREPARADO PARA MULTI-EVENTO SIMULTÁNEO) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            marginBottom: '16px',
+            paddingBottom: '14px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#93C5FD', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Ticket size={16} /> EVENTO ACTIVO:
+              </span>
+              <select
+                value={activeEventId}
+                onChange={(e) => setActiveEventId(e.target.value)}
+                style={{
+                  backgroundColor: '#1C2237',
+                  border: '2px solid #3B82F6',
+                  color: '#FFFFFF',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  boxShadow: '0 2px 8px rgba(0, 113, 227, 0.25)'
+                }}
+              >
+                {availableEvents.map(evt => (
+                  <option key={evt.id} value={evt.id}>
+                    {evt.name} — [{evt.status}]
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ fontSize: '0.84rem', color: '#94A3B8' }}>
+              Configuración y taquilla asignada a: <strong style={{ color: '#38BDF8' }}>{availableEvents.find(e => e.id === activeEventId)?.name}</strong>
+            </div>
+          </div>
+
+          {/* SUB-BOTONES DE LA TIQUETERA PARA EL EVENTO SELECCIONADO */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setActiveTab('reservations')}
+              style={{
+                backgroundColor: activeTab === 'reservations' ? '#0071E3' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'reservations' ? '1.5px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'reservations' ? '0 4px 14px rgba(0, 113, 227, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <LayoutGrid size={16} />
+              <span>Reservaciones & Asistentes</span>
+            </button>
+
+            {adminUser.role === 'admin' && (
+              <button
+                onClick={() => setActiveTab('pricing')}
+                style={{
+                  backgroundColor: activeTab === 'pricing' ? '#0071E3' : 'rgba(255, 255, 255, 0.06)',
+                  color: '#FFFFFF',
+                  border: activeTab === 'pricing' ? '1.5px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.12)',
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: activeTab === 'pricing' ? '0 4px 14px rgba(0, 113, 227, 0.4)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Tag size={16} />
+                <span>Precios y Preventa</span>
+              </button>
+            )}
+
+            {adminUser.role === 'admin' && (
+              <button
+                onClick={() => { setActiveTab('zones_seating'); fetchZoneAnalytics(); }}
+                style={{
+                  backgroundColor: activeTab === 'zones_seating' ? '#0071E3' : 'rgba(255, 255, 255, 0.06)',
+                  color: '#FFFFFF',
+                  border: activeTab === 'zones_seating' ? '1.5px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.12)',
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: activeTab === 'zones_seating' ? '0 4px 14px rgba(0, 113, 227, 0.4)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Armchair size={16} />
+                <span>Zonas y Croquis de Asientos</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeSuite === 'web' && (
+        <div style={{
+          backgroundColor: '#181424',
+          border: '1.5px solid rgba(151, 125, 255, 0.35)',
+          borderRadius: '20px',
+          padding: '18px 22px',
+          marginBottom: '26px',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          gap: '12px',
+          flexWrap: 'wrap'
+        }}>
           <button
             onClick={() => setActiveTab('church_web')}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'church_web' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'church_web' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'church_web' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'church_web' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'church_web' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Globe size={18} />
-            Diseño Web Iglesia
+            <Globe size={16} />
+            <span>Diseño Web Iglesia</span>
           </button>
-        )}
 
-        {/* Oración y Testimonios Management Tab */}
-        {adminUser.role === 'admin' && (
           <button
             onClick={() => {
               setActiveTab('oracion_admin');
@@ -2091,26 +2326,25 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               fetchAdminTestimonies();
             }}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'oracion_admin' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'oracion_admin' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'oracion_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'oracion_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'oracion_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Heart size={18} />
-            Oración & Testimonios
+            <Heart size={16} />
+            <span>Oración & Testimonios</span>
           </button>
-        )}
 
-        {/* Grupos de Amistad & Lead Requests Tab */}
-        {adminUser.role === 'admin' && (
           <button
             onClick={() => {
               setActiveTab('grupos_admin');
@@ -2118,118 +2352,108 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               fetchAdminGroupContacts();
             }}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'grupos_admin' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'grupos_admin' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'grupos_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'grupos_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'grupos_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Users size={18} />
-            Grupos de Amistad & Contactos
+            <Users size={16} />
+            <span>Grupos de Amistad</span>
           </button>
-        )}
 
-        {/* Only admin role can edit pricing & presale */}
-        {adminUser.role === 'admin' && (
           <button
-            onClick={() => setActiveTab('pricing')}
+            onClick={() => {
+              setActiveTab('events_admin');
+            }}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'pricing' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'pricing' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'events_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'events_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'events_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Tag size={18} />
-            Precios y Preventa
+            <Calendar size={16} />
+            <span>Cartelera de Eventos</span>
           </button>
-        )}
+        </div>
+      )}
 
-        {/* Only admin role can manage zone layouts & seat mapping */}
-        {adminUser.role === 'admin' && (
-          <button
-            onClick={() => { setActiveTab('zones_seating'); fetchZoneAnalytics(); }}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'zones_seating' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'zones_seating' ? 'var(--accent-coffee)' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Armchair size={18} />
-            Zonas y Asientos
-          </button>
-        )}
-
-
-
-        {/* Only admin role can manage users */}
-        {adminUser.role === 'admin' && (
+      {activeSuite === 'system' && (
+        <div style={{
+          backgroundColor: '#121F1B',
+          border: '1.5px solid rgba(16, 185, 129, 0.35)',
+          borderRadius: '20px',
+          padding: '18px 22px',
+          marginBottom: '26px',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          gap: '12px',
+          flexWrap: 'wrap'
+        }}>
           <button
             onClick={() => { setActiveTab('users'); fetchAdminUsers(); }}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'users' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'users' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'users' ? '#10B981' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'users' ? '1.5px solid #6EE7B7' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'users' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Users size={18} />
-            Gestión de Usuarios
+            <Users size={16} />
+            <span>Gestión de Usuarios</span>
           </button>
-        )}
 
-        {/* Only admin role can view logs */}
-        {adminUser.role === 'admin' && (
           <button
             onClick={() => setActiveTab('activity_log')}
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'activity_log' ? '3px solid var(--accent-coffee)' : '3px solid transparent',
-              color: activeTab === 'activity_log' ? 'var(--accent-coffee)' : 'var(--text-muted)',
+              backgroundColor: activeTab === 'activity_log' ? '#10B981' : 'rgba(255, 255, 255, 0.06)',
+              color: '#FFFFFF',
+              border: activeTab === 'activity_log' ? '1.5px solid #6EE7B7' : '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '10px 18px',
+              borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
-              padding: '10px 16px',
+              fontSize: '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: activeTab === 'activity_log' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
-            <History size={18} />
-            Bitácora de Actividad
+            <History size={16} />
+            <span>Bitácora de Actividad</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* TAB 1: RESERVATIONS MANAGER */}
       {activeTab === 'reservations' && (
@@ -5987,6 +6211,286 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* TAB: CARTELERA GLOBAL DE EVENTOS (Admin) */}
+      {activeTab === 'events_admin' && adminUser.role === 'admin' && (
+        <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={22} color="#977DFF" />
+                Cartelera Global de Eventos & Congresos (2026 vs Proyección 2027)
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                Administra las fichas de eventos, fechas, insignias de inscripción y enlaces de acceso.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const newId = `evt_${Date.now()}`;
+                setLocalEventsList([
+                  ...localEventsList,
+                  {
+                    id: newId,
+                    year: '2026',
+                    category: 'Congresos',
+                    title: 'Nuevo Evento 2026',
+                    subtitle: 'Subtítulo del evento',
+                    status: 'Próximamente',
+                    date: 'Fecha por confirmar',
+                    time: '7:00 PM',
+                    location: 'Auditorio Principal Visión Jesús',
+                    image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+                    description: 'Descripción detallada del evento.',
+                    url: '/#horarios-section',
+                    priceInfo: 'Entrada Gratuita'
+                  }
+                ]);
+              }}
+              className="btn-primary"
+              style={{ padding: '10px 20px', fontSize: '0.88rem', fontWeight: 800, borderRadius: '20px' }}
+            >
+              + Agregar Nuevo Evento
+            </button>
+          </div>
+
+          {constructionSuccessMsg && (
+            <div style={{ backgroundColor: 'var(--color-green-light)', color: 'var(--color-green)', padding: '14px', borderRadius: '10px', marginBottom: '20px', fontWeight: 700 }}>
+              {constructionSuccessMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSaveConstructionSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+              {localEventsList.map((evt, idx) => (
+                <div key={evt.id || idx} style={{
+                  backgroundColor: '#FAF8F5',
+                  border: '1px solid var(--accent-beige-border)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 850, color: 'var(--accent-coffee)', textTransform: 'uppercase' }}>
+                      Evento #{idx + 1}: {evt.title || 'Sin Título'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = localEventsList.filter((_, i) => i !== idx);
+                        setLocalEventsList(updated);
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                      title="Eliminar evento"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Año de Proyección</label>
+                      <select
+                        value={evt.year || '2026'}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].year = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+                      >
+                        <option value="2026">Cierre 2026</option>
+                        <option value="2027">Proyección 2027</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Categoría</label>
+                      <select
+                        value={evt.category || 'Congresos'}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].category = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      >
+                        <option value="Congresos">Congresos</option>
+                        <option value="Adoración">Adoración / Noches de Milagros</option>
+                        <option value="Jóvenes">MOVE (Jóvenes)</option>
+                        <option value="Congregacional">Congregacional</option>
+                        <option value="Talleres">Talleres y Discipulado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Título del Evento</label>
+                    <input
+                      type="text"
+                      value={evt.title || ''}
+                      onChange={(e) => {
+                        const updated = [...localEventsList];
+                        updated[idx].title = e.target.value;
+                        setLocalEventsList(updated);
+                      }}
+                      style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700 }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Subtítulo / Tagline</label>
+                      <input
+                        type="text"
+                        value={evt.subtitle || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].subtitle = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Estado / Badge</label>
+                      <input
+                        type="text"
+                        value={evt.status || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].status = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        placeholder="ej: Entradas Disponibles, Entrada Libre"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Fecha</label>
+                      <input
+                        type="text"
+                        value={evt.date || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].date = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        placeholder="ej: Sábado 18 de Noviembre"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Hora</label>
+                      <input
+                        type="text"
+                        value={evt.time || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].time = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        placeholder="ej: 7:00 PM"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Lugar / Auditorio</label>
+                    <input
+                      type="text"
+                      value={evt.location || ''}
+                      onChange={(e) => {
+                        const updated = [...localEventsList];
+                        updated[idx].location = e.target.value;
+                        setLocalEventsList(updated);
+                      }}
+                      style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Descripción</label>
+                    <textarea
+                      rows={2}
+                      value={evt.description || ''}
+                      onChange={(e) => {
+                        const updated = [...localEventsList];
+                        updated[idx].description = e.target.value;
+                        setLocalEventsList(updated);
+                      }}
+                      style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Enlace URL Destino</label>
+                      <input
+                        type="text"
+                        value={evt.url || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].url = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        placeholder="ej: /autenticas o /oracion"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Precios / Cupo</label>
+                      <input
+                        type="text"
+                        value={evt.priceInfo || ''}
+                        onChange={(e) => {
+                          const updated = [...localEventsList];
+                          updated[idx].priceInfo = e.target.value;
+                          setLocalEventsList(updated);
+                        }}
+                        placeholder="ej: Entrada Gratuita"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Imagen de Portada (URL)</label>
+                    <input
+                      type="text"
+                      value={evt.image || ''}
+                      onChange={(e) => {
+                        const updated = [...localEventsList];
+                        updated[idx].image = e.target.value;
+                        setLocalEventsList(updated);
+                      }}
+                      style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              disabled={saveLoading}
+              className="btn-primary"
+              style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}
+            >
+              {saveLoading ? 'Guardando Cartelera...' : 'Guardar Toda la Cartelera de Eventos'}
+            </button>
+          </form>
         </div>
       )}
 
