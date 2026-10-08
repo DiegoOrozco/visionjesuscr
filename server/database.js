@@ -116,6 +116,25 @@ function initDb() {
       page_path TEXT DEFAULT '/'
     );
 
+    CREATE TABLE IF NOT EXISTS prayer_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      phone TEXT,
+      request_type TEXT NOT NULL,
+      request_text TEXT NOT NULL,
+      status TEXT DEFAULT 'pendiente',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS testimonies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      title TEXT NOT NULL,
+      story TEXT NOT NULL,
+      is_approved INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);

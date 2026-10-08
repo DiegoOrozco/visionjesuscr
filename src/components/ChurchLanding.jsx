@@ -963,6 +963,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             >
               Eventos
             </a>
+            <a 
+              href="/oracion" 
+              className={`apple-nav-link ${window.location.pathname === '/oracion' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/oracion';
+              }}
+            >
+              Oración & Testimonios
+            </a>
             <button 
               onClick={() => {
                 const contactEl = document.getElementById('contacto-section');

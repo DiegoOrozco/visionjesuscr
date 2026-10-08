@@ -2094,6 +2094,57 @@ setInterval(() => {
   }
 }, 60 * 1000); // Check once every minute
 
+// API Endpoints for Prayers & Testimonies
+app.post('/api/prayers', (req, res) => {
+  try {
+    const { name, phone, requestType, requestText } = req.body;
+    if (!name || !requestText) {
+      return res.status(400).json({ success: false, message: 'Nombre y petición son obligatorios.' });
+    }
+    const stmt = db.prepare('INSERT INTO prayer_requests (name, phone, request_type, request_text) VALUES (?, ?, ?, ?)');
+    const result = stmt.run(name, phone || '', requestType || 'Sanidad', requestText);
+    res.json({ success: true, message: 'Petición recibida con fe.', id: result.lastInsertRowid });
+  } catch (e) {
+    console.error('Error saving prayer request:', e);
+    res.status(500).json({ success: false, message: 'Error interno guardando la petición.' });
+  }
+});
+
+app.get('/api/prayers', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM prayer_requests ORDER BY created_at DESC').all();
+    res.json({ success: true, prayers: rows });
+  } catch (e) {
+    console.error('Error fetching prayers:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.post('/api/testimonies', (req, res) => {
+  try {
+    const { name, title, story } = req.body;
+    if (!name || !story) {
+      return res.status(400).json({ success: false, message: 'Nombre e historia son obligatorios.' });
+    }
+    const stmt = db.prepare('INSERT INTO testimonies (name, title, story) VALUES (?, ?, ?)');
+    const result = stmt.run(name, title || 'Dios es Fiel', story);
+    res.json({ success: true, message: 'Testimonio recibido con éxito.', id: result.lastInsertRowid });
+  } catch (e) {
+    console.error('Error saving testimony:', e);
+    res.status(500).json({ success: false, message: 'Error interno guardando el testimonio.' });
+  }
+});
+
+app.get('/api/testimonies', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM testimonies WHERE is_approved = 1 ORDER BY created_at DESC').all();
+    res.json({ success: true, testimonies: rows });
+  } catch (e) {
+    console.error('Error fetching testimonies:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Express API Server listening on port ${PORT}`);
 });

@@ -14,6 +14,7 @@ import ModeloDeJesus from './components/ModeloDeJesus';
 import LegalPolicies from './components/LegalPolicies';
 import NotFound404 from './components/NotFound404';
 import CongresosPage from './components/CongresosPage';
+import OracionPage from './components/OracionPage';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -30,6 +31,7 @@ const getInitialView = () => {
   if (path === '/escanear') return 'scanner';
   if (path === '/autenticas') return 'autenticas-promo';
   if (path === '/modelo') return 'modelo-promo';
+  if (path === '/oracion' || path === '/peticiones') return 'oracion';
   if (path === '/congresos' || path === '/eventos') return 'congresos';
   if (path === '/politicas') return 'politicas';
   if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
@@ -142,6 +144,8 @@ export default function App() {
       setCurrentView('autenticas-promo');
     } else if (path === '/modelo') {
       setCurrentView('modelo-promo');
+    } else if (path === '/oracion' || path === '/peticiones') {
+      setCurrentView('oracion');
     } else if (path === '/congresos' || path === '/eventos') {
       setCurrentView('congresos');
     } else if (path === '/politicas') {
@@ -216,7 +220,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: (window.location.pathname === '/autenticas' || currentView === 'autenticas-promo') ? 'var(--bg-primary)' : '#030812' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#07070B', color: '#FFFFFF' }}>
       {!['landing', 'under-construction', 'politicas', 'modelo-promo', 'not-found', 'congresos'].includes(currentView) && (
         <Navbar 
           currentView={currentView} 
@@ -265,6 +269,17 @@ export default function App() {
         {/* VIEW 1B: MODELO DE JESÚS PROMO PAGE */}
         {currentView === 'modelo-promo' && (
           <ModeloDeJesus 
+            config={homepageConfig} 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+            }}
+          />
+        )}
+
+        {/* VIEW ORACION: PETICIONES & TESTIMONIOS */}
+        {currentView === 'oracion' && (
+          <OracionPage 
             config={homepageConfig} 
             onGoHome={() => {
               window.history.pushState({}, '', '/');
