@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Heart, Sparkles, ChevronRight, MessageCircle, Instagram, Facebook, ArrowRight } from 'lucide-react';
+import { Users, Heart, Sparkles, ChevronRight, MessageCircle, Instagram, Facebook, ArrowRight, Flame, Shield, Gem, Award, Calendar } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -37,6 +37,15 @@ const AnimatedSection = ({ children, className = '', style = {}, delay = 0, id }
   );
 };
 
+const renderNetworkIcon = (iconName, netId) => {
+  if (iconName === 'Gem' || netId === 'diamante') return <Gem size={20} />;
+  if (iconName === 'Heart' || netId === 'vj-kids') return <Heart size={20} />;
+  if (iconName === 'Flame' || netId === 'prejuz-move') return <Flame size={20} />;
+  if (iconName === 'Shield' || netId === 'fuxion') return <Shield size={20} />;
+  if (iconName === 'Award' || netId === 'move-plus') return <Award size={20} />;
+  return <Sparkles size={20} />;
+};
+
 export default function ModeloDeJesus({ config = {}, onGoHome }) {
   const title = config.modelo_title || 'MODELO DE JESÚS';
   const subtitle = config.modelo_subtitle || 'Trabajamos con redes y grupos organizados que cuidan de las personas en cada etapa de su vida, formando líderes con carácter y corazón de servicio.';
@@ -61,6 +70,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         name: 'VJ Kids',
         badge: 'Red de Niños',
         age: 'De 0 a 9 años',
+        iconName: 'Heart',
+        logo: '',
         description: 'Trabajamos con niños en grupos de acuerdo a sus edades. Nuestras enseñanzas para los más pequeños están basadas en Principios y Valores del Reino donde no solo formamos, sino que también pastoreamos con amor y dedicación.',
         image: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?q=80&w=1000',
         instagram: '',
@@ -72,6 +83,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         name: 'PreJuzMOVE',
         badge: 'Red de Preadolescentes',
         age: 'De 10 a 12 años',
+        iconName: 'Flame',
+        logo: '',
         description: 'Un espacio dinámico e interactivo diseñado especialmente para preadolescentes. Guiamos a los chicos en la transición clave hacia la juventud, cimentando principios bíblicos, valor propio y verdaderas amistades.',
         image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000',
         instagram: '',
@@ -83,6 +96,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         name: 'MOVE',
         badge: 'Red de Adolescentes',
         age: 'De 13 a 17 años',
+        iconName: 'Sparkles',
+        logo: '',
         description: 'Somos el espacio donde los adolescentes encuentran propósito, pertenencia y una relación sana con Dios. Un ambiente libre de señalamientos y críticas, enfocado en guiarles con amor perfecto a una vida transformadora.',
         image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000',
         instagram: '',
@@ -94,6 +109,8 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         name: 'MOVE PLUS',
         badge: 'Red de Jóvenes Adultos',
         age: 'De 18 en adelante',
+        iconName: 'Award',
+        logo: '',
         description: 'Una generación determinada a dejar huella en nuestro país y fronteras. Formamos jóvenes con identidad, carácter y crecimiento integral en sus áreas espiritual, profesional y personal para ser de alta influencia.',
         image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000',
         instagram: '',
@@ -105,8 +122,23 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         name: 'FUXION',
         badge: 'Red de Adultos',
         age: 'Adultos y Familias',
+        iconName: 'Shield',
+        logo: '',
         description: 'Unidos en fe, familia y propósito. Nos enfocamos en consolidar la unidad familiar, matrimonios fuertes y el crecimiento espiritual de cada hombre y mujer sobre los fundamentos firmes del Evangelio de Jesucristo.',
         image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000',
+        instagram: '',
+        facebook: '',
+        whatsapp: ''
+      },
+      {
+        id: 'diamante',
+        name: 'DIAMANTE',
+        badge: 'Red de Adultos Mayores',
+        age: 'Adultos Mayores / Plenitud',
+        iconName: 'Gem',
+        logo: '',
+        description: 'Un espacio de honra, fraternidad y legado. Promovemos una plenitud activa en fe, compartiendo la sabiduría acumulada, la oración continua y el gozo en cada reunión y actividad especial.',
+        image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=1000',
         instagram: '',
         facebook: '',
         whatsapp: ''
@@ -149,102 +181,62 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
         }
       `}</style>
 
-      {/* HEADER OFFICIAL VISIÓN JESÚS */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        padding: '16px 40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(3, 8, 18, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
-        {/* LOGO */}
-        <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          onClick={() => window.location.href = '/'}
-        >
-          <img src="/logo_oficial_transparente.png" alt="Visión Jesús Logo" style={{ height: '80px', objectFit: 'contain' }} />
-        </div>
-
-        {/* MENU LINKS */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <a 
-            href="/" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
+      {/* APPLE FLOATING FROSTED GLASS HEADER */}
+      <div className="apple-nav-wrapper">
+        <header className="apple-nav-bar">
+          <div 
+            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            onClick={() => window.location.href = '/'}
           >
-            INICIO
-          </a>
+            <img 
+              src="/logo_oficial_transparente.png" 
+              alt="Visión Jesús Logo" 
+              style={{ height: '46px', objectFit: 'contain' }} 
+            />
+          </div>
 
-          <a 
-            href="/nosotros" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            NOSOTROS
-          </a>
+          <nav className="apple-nav-links">
+            <a 
+              href="/" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} 
+              className="apple-nav-link"
+            >
+              Inicio
+            </a>
 
-          <a 
-            href="/modelo" 
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-            style={{ color: '#977DFF', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-          >
-            MODELO DE JESÚS
-          </a>
+            <a 
+              href="/nosotros" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} 
+              className="apple-nav-link"
+            >
+              Nosotros
+            </a>
 
-          <a 
-            href="/congresos" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONGRESOS
-          </a>
+            <a 
+              href="/modelo" 
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+              className="apple-nav-link"
+              style={{ color: '#FFFFFF' }}
+            >
+              Modelo de Jesús
+            </a>
 
-          <a 
-            href="/#contacto-section" 
-            onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
-            style={{ color: '#EAEDF8', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#977DFF'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#EAEDF8'}
-          >
-            CONTACTO
-          </a>
+            <a 
+              href="/congresos" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
+              className="apple-nav-link"
+            >
+              Eventos
+            </a>
 
-          <button 
-            onClick={() => window.location.href = '/autenticas'}
-            style={{
-              background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '10px 24px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              boxShadow: '0 4px 15px rgba(0, 51, 255, 0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            🎟️ CONGRESO 2026
-          </button>
+            <a 
+              href="/#contacto-section" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/#contacto-section'; }} 
+              className="apple-nav-link"
+            >
+              Contacto
+            </a>
+          </nav>
 
           {/* Admin Profile Controls */}
           {(() => {
@@ -303,8 +295,17 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
               </div>
             );
           })()}
-        </nav>
-      </header>
+
+          <button 
+            onClick={() => window.location.href = '/eventos'}
+            className="apple-btn apple-btn-primary"
+            style={{ padding: '8px 18px', fontSize: '0.84rem' }}
+          >
+            <Calendar size={14} />
+            <span>Eventos</span>
+          </button>
+        </header>
+      </div>
 
       {/* HERO SECTION */}
       <div style={{
@@ -465,15 +466,51 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
 
                   {/* Body Content */}
                   <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    <h3 style={{
-                      fontSize: '1.6rem',
-                      fontWeight: 800,
-                      color: '#FFFFFF',
-                      marginBottom: '12px',
-                      letterSpacing: '-0.5px'
-                    }}>
-                      {net.name}
-                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '12px' }}>
+                      <h3 style={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: '#FFFFFF',
+                        margin: 0,
+                        letterSpacing: '-0.5px'
+                      }}>
+                        {net.name}
+                      </h3>
+
+                      {net.logo ? (
+                        <div style={{
+                          padding: '6px 12px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img
+                            src={net.logo.startsWith('http') || net.logo.startsWith('/') ? (net.logo.startsWith('/') ? `${API_URL}${net.logo}` : net.logo) : `${API_URL}/${net.logo}`}
+                            alt={`Logo ${net.name}`}
+                            style={{ height: '32px', maxWidth: '90px', objectFit: 'contain' }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '14px',
+                          background: 'linear-gradient(135deg, rgba(0, 51, 255, 0.25) 0%, rgba(151, 125, 255, 0.2) 100%)',
+                          border: '1px solid rgba(151, 125, 255, 0.35)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#977DFF',
+                          boxShadow: '0 4px 12px rgba(0, 51, 255, 0.2)',
+                          flexShrink: 0
+                        }}>
+                          {renderNetworkIcon(net.iconName, net.id)}
+                        </div>
+                      )}
+                    </div>
 
                     <p style={{
                       color: '#94A3B8',
