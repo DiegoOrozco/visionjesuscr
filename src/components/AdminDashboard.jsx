@@ -123,6 +123,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [localNewsItems, setLocalNewsItems] = useState([]);
   const [localAutenticasGallery, setLocalAutenticasGallery] = useState([]);
   const [localAutenticasSpeakers, setLocalAutenticasSpeakers] = useState([]);
+  const [localModeloNetworks, setLocalModeloNetworks] = useState([]);
   const [uploadingSpeakerImage, setUploadingSpeakerImage] = useState(null);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingAutenticasHero, setUploadingAutenticasHero] = useState(false);
@@ -1073,6 +1074,27 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         general_presale_price: homepageConfig.general_presale_price || '7500',
         general_regular_price: homepageConfig.general_regular_price || '10000'
       });
+
+      // Parse Modelo Networks
+      let parsedModelo = [];
+      try {
+        if (homepageConfig.modelo_networks) {
+          parsedModelo = typeof homepageConfig.modelo_networks === 'string' ? JSON.parse(homepageConfig.modelo_networks) : homepageConfig.modelo_networks;
+        }
+      } catch (e) {
+        console.error('Error parsing modelo_networks in admin:', e);
+      }
+      if (!parsedModelo || parsedModelo.length === 0) {
+        parsedModelo = [
+          { id: 'vj-kids', name: 'VJ Kids', badge: 'Red de Niños', age: 'De 0 a 9 años', iconName: 'Heart', logo: '', description: 'Trabajamos con niños en grupos de acuerdo a sus edades. Nuestras enseñanzas para los más pequeños están basadas en Principios y Valores del Reino.', image: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?q=80&w=1000' },
+          { id: 'prejuz-move', name: 'PreJuzMOVE', badge: 'Red de Preadolescentes', age: 'De 10 a 12 años', iconName: 'Flame', logo: '', description: 'Un espacio dinámico e interactivo diseñado especialmente para preadolescentes. Guiamos a los chicos en la transición clave hacia la juventud.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000' },
+          { id: 'move-teens', name: 'MOVE', badge: 'Red de Adolescentes', age: 'De 13 a 17 años', iconName: 'Sparkles', logo: '', description: 'Somos el espacio donde los adolescentes encuentran propósito, pertenencia y una relación sana con Dios.', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000' },
+          { id: 'move-plus', name: 'MOVE PLUS', badge: 'Red de Jóvenes Adultos', age: 'De 18 en adelante', iconName: 'Award', logo: '', description: 'Una generación determinada a dejar huella en nuestro país y fronteras. Formamos jóvenes con identidad, carácter y crecimiento integral.', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000' },
+          { id: 'fuxion', name: 'FUXION', badge: 'Red de Adultos', age: 'Adultos y Familias', iconName: 'Shield', logo: '', description: 'Unidos en fe, familia y propósito. Nos enfocamos en consolidar la unidad familiar, matrimonios fuertes y el crecimiento espiritual.', image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000' },
+          { id: 'diamante', name: 'DIAMANTE', badge: 'Red de Adultos Mayores', age: 'Adultos Mayores / Plenitud', iconName: 'Gem', logo: '', description: 'Un espacio de honra, fraternidad y legado. Promovemos una plenitud activa en fe, compartiendo la sabiduría acumulada y el gozo.', image: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=1000' }
+        ];
+      }
+      setLocalModeloNetworks(parsedModelo);
     }
   }, [homepageConfig]);
 
@@ -1330,16 +1352,20 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     e.preventDefault();
     setSaveLoading(true);
     setConstructionSuccessMsg('');
+    const updatedConfig = {
+      ...configFields,
+      modelo_networks: JSON.stringify(localModeloNetworks)
+    };
     try {
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config: configFields })
+        body: JSON.stringify({ config: updatedConfig })
       });
       const data = await res.json();
       if (data.success) {
-        setConstructionSuccessMsg('¡Cambios guardados con éxito!');
-        if (onSaveConfig) onSaveConfig(configFields);
+        setConstructionSuccessMsg('¡Configuración guardada con éxito!');
+        if (onSaveConfig) onSaveConfig(updatedConfig);
       } else {
         alert(data.message || 'Error al guardar la configuración.');
       }
@@ -4296,8 +4322,176 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 </div>
               </div>
             </div>
+            {/* GESTOR DE REDES OFICIALES DE MODELO DE JESÚS */}
+            <div style={{ marginTop: '40px', borderTop: '2px dashed var(--accent-beige-border)', paddingTop: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h4 style={{ fontSize: '1.2rem', color: 'var(--accent-coffee)', margin: 0, fontWeight: 800 }}>
+                    Redes Oficiales del Modelo de Jesús (6 Redes + Plenitud)
+                  </h4>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '4px 0 0' }}>
+                    Edita el nombre, insignias, logotipos oficiales, imágenes de portada y descripciones de cada red.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newId = `net_${Date.now()}`;
+                    setLocalModeloNetworks([
+                      ...localModeloNetworks,
+                      { id: newId, name: 'Nueva Red', badge: 'Categoría', age: 'Todas las edades', iconName: 'Sparkles', logo: '', description: 'Descripción de la nueva red.', image: '' }
+                    ]);
+                  }}
+                  className="btn-primary"
+                  style={{ padding: '8px 18px', fontSize: '0.85rem', fontWeight: 800, borderRadius: '20px' }}
+                >
+                  + Agregar Nueva Red
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                {localModeloNetworks.map((net, idx) => (
+                  <div key={net.id || idx} style={{
+                    backgroundColor: '#FAF8F5',
+                    border: '1px solid var(--accent-beige-border)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '14px',
+                    position: 'relative'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 850, color: 'var(--accent-coffee)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Red #{idx + 1}: {net.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = localModeloNetworks.filter((_, i) => i !== idx);
+                          setLocalModeloNetworks(updated);
+                        }}
+                        style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                        title="Eliminar Red"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Nombre</label>
+                        <input
+                          type="text"
+                          value={net.name || ''}
+                          onChange={(e) => {
+                            const updated = [...localModeloNetworks];
+                            updated[idx].name = e.target.value;
+                            setLocalModeloNetworks(updated);
+                          }}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Insignia / Badge</label>
+                        <input
+                          type="text"
+                          value={net.badge || ''}
+                          onChange={(e) => {
+                            const updated = [...localModeloNetworks];
+                            updated[idx].badge = e.target.value;
+                            setLocalModeloNetworks(updated);
+                          }}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Rango de Edades</label>
+                        <input
+                          type="text"
+                          value={net.age || ''}
+                          onChange={(e) => {
+                            const updated = [...localModeloNetworks];
+                            updated[idx].age = e.target.value;
+                            setLocalModeloNetworks(updated);
+                          }}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Icono Lucide</label>
+                        <select
+                          value={net.iconName || 'Sparkles'}
+                          onChange={(e) => {
+                            const updated = [...localModeloNetworks];
+                            updated[idx].iconName = e.target.value;
+                            setLocalModeloNetworks(updated);
+                          }}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                        >
+                          <option value="Heart">Heart (Niños)</option>
+                          <option value="Flame">Flame (PreJuz / Fuego)</option>
+                          <option value="Sparkles">Sparkles (MOVE / Jóvenes)</option>
+                          <option value="Award">Award (Jóvenes Adultos)</option>
+                          <option value="Shield">Shield (Familias / Adultos)</option>
+                          <option value="Gem">Gem (Diamante / Adulto Mayor)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Descripción & Propósito</label>
+                      <textarea
+                        rows={3}
+                        value={net.description || ''}
+                        onChange={(e) => {
+                          const updated = [...localModeloNetworks];
+                          updated[idx].description = e.target.value;
+                          setLocalModeloNetworks(updated);
+                        }}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Imagen de Portada (URL)</label>
+                      <input
+                        type="text"
+                        value={net.image || ''}
+                        onChange={(e) => {
+                          const updated = [...localModeloNetworks];
+                          updated[idx].image = e.target.value;
+                          setLocalModeloNetworks(updated);
+                        }}
+                        placeholder="https://... o sube archivo"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Insignia de Logotipo Oficial (Drive / PNG)</label>
+                      <input
+                        type="text"
+                        value={net.logo || ''}
+                        onChange={(e) => {
+                          const updated = [...localModeloNetworks];
+                          updated[idx].logo = e.target.value;
+                          setLocalModeloNetworks(updated);
+                        }}
+                        placeholder="URL de insignia de logo oficial"
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <button type="submit" disabled={saveLoading} className="btn-primary" style={{ marginTop: '30px', width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 800 }}>
-              {saveLoading ? 'Guardando...' : 'Guardar Configuración Modelo'}
+              {saveLoading ? 'Guardando Redes...' : 'Guardar Toda la Configuración de Modelo'}
             </button>
           </form>
         </div>
