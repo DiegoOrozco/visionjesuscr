@@ -16,6 +16,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
     { label: 'GRUPOS DE AMISTAD', url: '/grupos-de-amistad' },
     { label: 'EVENTOS', url: '/eventos' },
     { label: 'ORACIÓN & TESTIMONIOS', url: '/oracion' },
+    { label: 'DONAR', url: '/donar' },
     { label: 'CONTACTO', url: '/#contacto-section' }
   ];
 

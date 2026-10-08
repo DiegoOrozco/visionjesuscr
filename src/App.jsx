@@ -16,6 +16,7 @@ import NotFound404 from './components/NotFound404';
 import CongresosPage from './components/CongresosPage';
 import OracionPage from './components/OracionPage';
 import GruposAmistadPage from './components/GruposAmistadPage';
+import DonacionesPage from './components/DonacionesPage';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -34,6 +35,7 @@ const getInitialView = () => {
   if (path === '/modelo') return 'modelo-promo';
   if (path === '/oracion' || path === '/peticiones') return 'oracion';
   if (path === '/grupos-de-amistad' || path === '/casas-de-paz') return 'grupos-amistad';
+  if (path === '/donar' || path === '/ofrendas') return 'donaciones';
   if (path === '/congresos' || path === '/eventos') return 'congresos';
   if (path === '/politicas') return 'politicas';
   if (['/sanados', '/move', '/tienda', '/acerca-de-la-vision', '/nosotros'].includes(path)) return 'under-construction';
@@ -150,6 +152,8 @@ export default function App() {
       setCurrentView('oracion');
     } else if (path === '/grupos-de-amistad' || path === '/casas-de-paz') {
       setCurrentView('grupos-amistad');
+    } else if (path === '/donar' || path === '/ofrendas') {
+      setCurrentView('donaciones');
     } else if (path === '/congresos' || path === '/eventos') {
       setCurrentView('congresos');
     } else if (path === '/politicas') {
@@ -295,6 +299,17 @@ export default function App() {
         {/* VIEW GRUPOS DE AMISTAD: BUSCADOR & CASAS DE PAZ */}
         {currentView === 'grupos-amistad' && (
           <GruposAmistadPage 
+            config={homepageConfig} 
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+            }}
+          />
+        )}
+
+        {/* VIEW DONACIONES & OFRENDAS */}
+        {currentView === 'donaciones' && (
+          <DonacionesPage 
             config={homepageConfig} 
             onGoHome={() => {
               window.history.pushState({}, '', '/');
