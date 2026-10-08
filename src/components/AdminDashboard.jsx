@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Check, CheckCircle2, Download, Eye, Filter, Lock, LogOut, Plus, RefreshCw, Search, ShieldCheck, Ticket, Trash2, UserCheck, UserPlus, Users, X, XCircle, LayoutGrid, Globe, Tag, Heart, History, ArrowUp, ArrowDown, Settings, Layers, Armchair, CreditCard, Calendar } from 'lucide-react';
 import AutenticasPromo from './AutenticasPromo';
 import ModeloDeJesus from './ModeloDeJesus';
@@ -1365,6 +1365,24 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   }, [homepageConfig]);
 
+  // Sincronizar precios específicos del evento activo seleccionado
+  useEffect(() => {
+    const prefix = activeEventId === 'autenticas-2026' ? '' : `${activeEventId}_`;
+    const defaultCutoff = activeEventId === 'autenticas-2026' ? '2026-08-15' : activeEventId === 'sanados-2026' ? '2026-11-15' : '2027-01-20';
+    const defaultVipPre = activeEventId === 'autenticas-2026' ? '12000' : activeEventId === 'sanados-2026' ? '10000' : '20000';
+    const defaultVipReg = activeEventId === 'autenticas-2026' ? '15000' : activeEventId === 'sanados-2026' ? '12000' : '25000';
+    const defaultGenPre = activeEventId === 'autenticas-2026' ? '7500' : activeEventId === 'sanados-2026' ? '5000' : '12000';
+    const defaultGenReg = activeEventId === 'autenticas-2026' ? '10000' : activeEventId === 'sanados-2026' ? '7000' : '15000';
+
+    setPricingFields({
+      presale_cutoff_date: configFields[`${prefix}presale_cutoff_date`] || homepageConfig[`${prefix}presale_cutoff_date`] || defaultCutoff,
+      vip_presale_price: configFields[`${prefix}vip_presale_price`] || homepageConfig[`${prefix}vip_presale_price`] || defaultVipPre,
+      vip_regular_price: configFields[`${prefix}vip_regular_price`] || homepageConfig[`${prefix}vip_regular_price`] || defaultVipReg,
+      general_presale_price: configFields[`${prefix}general_presale_price`] || homepageConfig[`${prefix}general_presale_price`] || defaultGenPre,
+      general_regular_price: configFields[`${prefix}general_regular_price`] || homepageConfig[`${prefix}general_regular_price`] || defaultGenReg
+    });
+  }, [activeEventId]);
+
   const handlePricingChange = (e) => {
     const { name, value } = e.target;
     setPricingFields(prev => ({ ...prev, [name]: value }));
@@ -1375,18 +1393,39 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setSavingPricing(true);
     setPricingSuccessMsg('');
     try {
-      const res = await authFetch(`${API_URL}/api/admin/pricing`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pricingFields)
-      });
-      const data = await res.json();
-      if (data.success) {
-        setPricingSuccessMsg('¡Precios y fecha de preventa guardados con éxito!');
-        if (onSaveConfig) onSaveConfig(pricingFields);
+      const prefix = activeEventId === 'autenticas-2026' ? '' : `${activeEventId}_`;
+      const updatedConfig = {
+        ...configFields,
+        [`${prefix}presale_cutoff_date`]: pricingFields.presale_cutoff_date,
+        [`${prefix}vip_presale_price`]: pricingFields.vip_presale_price,
+        [`${prefix}vip_regular_price`]: pricingFields.vip_regular_price,
+        [`${prefix}general_presale_price`]: pricingFields.general_presale_price,
+        [`${prefix}general_regular_price`]: pricingFields.general_regular_price
+      };
+      setConfigFields(updatedConfig);
+
+      if (activeEventId === 'autenticas-2026') {
+        const res = await authFetch(`${API_URL}/api/admin/pricing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pricingFields)
+        });
+        const data = await res.json();
+        if (!data.success) {
+          alert(data.message || 'Error al guardar configuración de precios.');
+          return;
+        }
       } else {
-        alert(data.message || 'Error al guardar configuración de precios.');
+        await authFetch(`${API_URL}/api/admin/homepage/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedConfig)
+        });
       }
+
+      const eventName = availableEvents.find(ev => ev.id === activeEventId)?.name || activeEventId;
+      setPricingSuccessMsg(`¡Precios de "${eventName}" guardados con éxito!`);
+      if (onSaveConfig) onSaveConfig(updatedConfig);
     } catch (err) {
       alert('Error de red al guardar precios.');
     } finally {
@@ -1741,7 +1780,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   // --- CSV EXPORT ---
   const handleExportCSV = async () => {
     try {
-      const res = await authFetch(`${API_URL}/api/admin/export/csv`);
+      const res = await authFetch(`${API_URL}/api/admin/export/csv?event_id=${encodeURIComponent(activeEventId)}`);
       if (!res.ok) {
         alert('Error al descargar el reporte CSV. Asegúrate de tener permisos.');
         return;
@@ -1750,7 +1789,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'reservaciones_autenticas.csv';
+      a.download = `reservaciones_${activeEventId}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1984,18 +2023,34 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setConfigFields({ ...configFields, [e.target.name]: e.target.value });
   };
 
-  const filteredList = reservations.filter(r => {
-    const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
-    const matchesSearch = r.purchaser_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          r.purchaser_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          r.purchaser_phone.includes(searchTerm);
-    return matchesStatus && matchesSearch;
-  });
+  // 1. Filtrar las reservas estrictamente por el evento activo seleccionado
+  const eventReservations = useMemo(() => {
+    return reservations.filter(r => (r.event_id || 'autenticas-2026') === activeEventId);
+  }, [reservations, activeEventId]);
 
-  // Calculate Metrics
-  const totalRevenue = reservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'usado' ? acc + r.total_amount : acc, 0);
-  const totalAllTickets = reservations.reduce((acc, r) => acc + r.quantity, 0);
-  const pendingCount = reservations.filter(r => r.status === 'pendiente').length;
+  // 2. Filtrar por término de búsqueda y estado dentro del evento activo
+  const filteredList = useMemo(() => {
+    return eventReservations.filter(r => {
+      const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
+      const matchesSearch = (r.purchaser_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (r.purchaser_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (r.purchaser_phone || '').includes(searchTerm);
+      return matchesStatus && matchesSearch;
+    });
+  }, [eventReservations, filterStatus, searchTerm]);
+
+  // 3. Métricas calculadas EXCLUSIVAMENTE para el evento activo
+  const totalRevenue = useMemo(() => {
+    return eventReservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'usado' ? acc + r.total_amount : acc, 0);
+  }, [eventReservations]);
+
+  const totalAllTickets = useMemo(() => {
+    return eventReservations.reduce((acc, r) => acc + (r.quantity || 0), 0);
+  }, [eventReservations]);
+
+  const pendingCount = useMemo(() => {
+    return eventReservations.filter(r => r.status === 'pendiente').length;
+  }, [eventReservations]);
 
   const neoCard = {
     backgroundColor: '#FAF8F5',
@@ -2494,6 +2549,37 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       {/* TAB 1: RESERVATIONS MANAGER */}
       {activeTab === 'reservations' && (
         <>
+          {/* BANNER IDENTIFICADOR DEL EVENTO SELECCIONADO */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            backgroundColor: activeEventId === 'autenticas-2026' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0, 113, 227, 0.08)',
+            border: `1.5px solid ${activeEventId === 'autenticas-2026' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 113, 227, 0.3)'}`,
+            borderRadius: '16px',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '1.25rem' }}>
+                {activeEventId === 'autenticas-2026' ? '👑' : '🎟️'}
+              </span>
+              <div>
+                <span style={{ fontWeight: 800, color: activeEventId === 'autenticas-2026' ? '#10B981' : '#38BDF8', fontSize: '0.94rem' }}>
+                  Taquilla asignada: {availableEvents.find(e => e.id === activeEventId)?.name}
+                </span>
+                <span style={{ marginLeft: '10px', fontSize: '0.78rem', padding: '2px 10px', borderRadius: '12px', backgroundColor: 'rgba(255,255,255,0.08)', color: '#CBD5E1', fontWeight: 700 }}>
+                  {eventReservations.length} {eventReservations.length === 1 ? 'reserva registrada' : 'reservas registradas'}
+                </span>
+              </div>
+            </div>
+            <div style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
+              Estado: <strong style={{ color: '#FFFFFF' }}>{availableEvents.find(e => e.id === activeEventId)?.status}</strong>
+            </div>
+          </div>
+
           {/* STAT CARDS INCL. TOTAL PERSONAS / ENTRADAS VENDIDAS */}
           <div style={{
             display: 'grid',
@@ -2512,7 +2598,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 {totalAllTickets} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>personas</span>
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                (Acumulado total de entradas registradas)
+                (Acumulado de entradas en este evento)
               </div>
             </div>
 
@@ -2524,7 +2610,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 <Ticket size={20} color="var(--accent-coffee)" />
               </div>
               <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>
-                {reservations.length}
+                {eventReservations.length}
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                 Transacciones de compra
@@ -2624,8 +2710,14 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        No se encontraron reservas registradas con estos filtros.
+                      <td colSpan="6" style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🎟️</div>
+                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '6px' }}>
+                          No hay reservaciones registradas para "{availableEvents.find(e => e.id === activeEventId)?.name || 'este evento'}"
+                        </div>
+                        <div style={{ fontSize: '0.85rem', maxWidth: '500px', margin: '0 auto', color: '#64748B' }}>
+                          La taquilla de cada evento es completamente independiente. Las reservas de otros eventos (como Auténticas) se mantienen protegidas en su propia vista.
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -5134,10 +5226,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       {activeTab === 'pricing' && adminUser.role === 'admin' && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
           <h3 style={{ fontSize: '1.4rem', color: 'var(--accent-coffee)', marginBottom: '10px' }}>
-            Configuración de Precios y Fecha Límite de Preventa
+            Configuración de Precios y Preventa — {availableEvents.find(e => e.id === activeEventId)?.name}
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '24px' }}>
-            Define la fecha límite de preventa y los precios por zona (Preventa y Regular). El sistema cambiará automáticamente los precios en el mapa una vez alcanzada la fecha límite.
+            Ajusta las tarifas independientes para <strong>{availableEvents.find(e => e.id === activeEventId)?.name}</strong>. Cada evento tiene su propia estructura de precios y fecha de preventa sin afectar a los demás.
           </p>
 
           {pricingSuccessMsg && (
@@ -5263,10 +5355,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               <div>
                 <h3 style={{ fontSize: '1.5rem', color: 'var(--accent-coffee)', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Armchair size={26} />
-                  Configuración y Remapeo de Zonas y Asientos
+                  Zonas y Asientos — {availableEvents.find(e => e.id === activeEventId)?.name}
                 </h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', margin: 0, maxWidth: '750px' }}>
-                  Ajusta la cantidad de filas y asientos por fila para cada sector del auditorio. El sistema calculará en tiempo real los espacios ocupados y libres, sincronizando automáticamente el mapa interactivo.
+                  Aforo y mapa de asientos configurado para <strong>{availableEvents.find(e => e.id === activeEventId)?.name}</strong>. Cada evento gestiona su disponibilidad de manera independiente.
                 </p>
               </div>
 
@@ -5288,35 +5380,42 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             )}
 
             {/* Global Auditorio KPIs */}
-            {zoneAnalytics && zoneAnalytics.global && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
-                <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>Capacidad Total Auditorio</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>{zoneAnalytics.global.total_capacity}</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Asientos totales configurados</div>
-                </div>
+            {zoneAnalytics && zoneAnalytics.global && (() => {
+              const totalCap = zoneAnalytics.global.total_capacity;
+              const occCount = activeEventId === 'autenticas-2026' ? zoneAnalytics.global.occupied_count : totalAllTickets;
+              const availCap = Math.max(0, totalCap - occCount);
+              const occPct = totalCap > 0 ? Math.round((occCount / totalCap) * 100) : 0;
 
-                <div style={{ backgroundColor: '#FEF2F2', padding: '20px', borderRadius: '16px', border: '1px solid #FECACA' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '6px' }}>🔴 Asientos Ocupados</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#DC2626' }}>{zoneAnalytics.global.occupied_count}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#991B1B' }}>Reservas y asignaciones activas</div>
-                </div>
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
+                  <div style={{ backgroundColor: '#FAF8F5', padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-beige-border)' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>Capacidad Total Auditorio</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--accent-coffee)' }}>{totalCap}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Asientos totales configurados</div>
+                  </div>
 
-                <div style={{ backgroundColor: '#F0FDF4', padding: '20px', borderRadius: '16px', border: '1px solid #BBF7D0' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>🟢 Asientos Disponibles</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#16A34A' }}>{zoneAnalytics.global.available_capacity}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#166534' }}>Libres para reservar</div>
-                </div>
+                  <div style={{ backgroundColor: '#FEF2F2', padding: '20px', borderRadius: '16px', border: '1px solid #FECACA' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '6px' }}>🔴 Asientos Ocupados</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#DC2626' }}>{occCount}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#991B1B' }}>Reservas en este evento</div>
+                  </div>
 
-                <div style={{ backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '6px' }}>📊 Ocupación General</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0F172A' }}>{zoneAnalytics.global.occupancy_pct}%</div>
-                  <div style={{ width: '100%', height: '6px', backgroundColor: '#E2E8F0', borderRadius: '6px', marginTop: '6px', overflow: 'hidden' }}>
-                    <div style={{ width: `${zoneAnalytics.global.occupancy_pct}%`, height: '100%', backgroundColor: 'var(--accent-coffee)' }} />
+                  <div style={{ backgroundColor: '#F0FDF4', padding: '20px', borderRadius: '16px', border: '1px solid #BBF7D0' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>🟢 Asientos Disponibles</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#16A34A' }}>{availCap}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#166534' }}>Libres para reservar</div>
+                  </div>
+
+                  <div style={{ backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '6px' }}>📊 Ocupación Evento</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0F172A' }}>{occPct}%</div>
+                    <div style={{ width: '100%', height: '6px', backgroundColor: '#E2E8F0', borderRadius: '6px', marginTop: '6px', overflow: 'hidden' }}>
+                      <div style={{ width: `${occPct}%`, height: '100%', backgroundColor: 'var(--accent-coffee)' }} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Zone Grid Cards */}

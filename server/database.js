@@ -182,6 +182,8 @@ function initDb() {
   try { db.exec(`ALTER TABLE reservations ADD COLUMN paypal_order_id TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE reservations ADD COLUMN paypal_capture_id TEXT`); } catch (e) {}
   try { db.exec(`ALTER TABLE reservations ADD COLUMN amount_usd REAL`); } catch (e) {}
+  try { db.exec(`ALTER TABLE reservations ADD COLUMN event_id TEXT DEFAULT 'autenticas-2026'`); } catch (e) {}
+  try { db.exec(`UPDATE reservations SET event_id = 'autenticas-2026' WHERE event_id IS NULL OR event_id = ''`); } catch (e) {}
 
   // Cleanup abandoned PAYPAL_PENDING draft reservations if any exist from pre-refactor
   try {

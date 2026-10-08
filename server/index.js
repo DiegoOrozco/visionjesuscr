@@ -612,12 +612,13 @@ app.post('/api/reservations', reservationLimiter, upload.single('comprobante'), 
         throw new Error('Cola de asientos insuficiente en este momento.');
       }
 
+      const event_id = req.body.event_id || 'autenticas-2026';
       db.prepare(`
         INSERT INTO reservations (
           id, zone_id, purchaser_name, purchaser_email, purchaser_phone,
-          quantity, total_amount, comprobante_url, status, qr_code_hash
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente', ?)
-      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalAmount, comprobanteUrl, qrCodeHash);
+          quantity, total_amount, comprobante_url, status, qr_code_hash, event_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente', ?, ?)
+      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalAmount, comprobanteUrl, qrCodeHash, event_id);
 
       const updateQueueStmt = db.prepare(`
         UPDATE seat_queues
@@ -943,13 +944,14 @@ app.post('/api/paypal/capture-order', async (req, res) => {
         throw new Error('Cola de asientos insuficiente en este momento.');
       }
 
+      const event_id = req.body.event_id || 'autenticas-2026';
       db.prepare(`
         INSERT INTO reservations (
           id, zone_id, purchaser_name, purchaser_email, purchaser_phone,
           quantity, total_amount, comprobante_url, status, qr_code_hash,
-          payment_method, paypal_order_id, paypal_capture_id, amount_usd, approved_at, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PAYPAL_APPROVED', 'aprobado', ?, 'paypal', ?, ?, ?, CURRENT_TIMESTAMP, 'Aprobado automáticamente vía PayPal / Tarjeta')
-      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalCrc, qrCodeHash, orderId, captureId, parseFloat(totalUsd));
+          payment_method, paypal_order_id, paypal_capture_id, amount_usd, approved_at, notes, event_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PAYPAL_APPROVED', 'aprobado', ?, 'paypal', ?, ?, ?, CURRENT_TIMESTAMP, 'Aprobado automáticamente vía PayPal / Tarjeta', ?)
+      `).run(reservationId, zone_id, purchaser_name, purchaser_email, purchaser_phone, quantity, totalCrc, qrCodeHash, orderId, captureId, parseFloat(totalUsd), event_id);
 
       const updateQueueStmt = db.prepare('UPDATE seat_queues SET is_assigned = 1, reservation_id = ? WHERE id = ?');
       const insertAttendeeStmt = db.prepare(`
@@ -1126,12 +1128,19 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
 // 5. Get Reservations (Admin)
 app.get('/api/admin/reservations', verifyAdminToken, (req, res) => {
   try {
-    const reservations = db.prepare(`
-      SELECT r.*, z.name as zone_name
+    const { event_id } = req.query;
+    let query = `
+      SELECT r.*, COALESCE(r.event_id, 'autenticas-2026') as event_id, z.name as zone_name
       FROM reservations r
       JOIN zones z ON r.zone_id = z.id
-      ORDER BY r.created_at DESC
-    `).all();
+    `;
+    const params = [];
+    if (event_id && event_id !== 'all') {
+      query += ` WHERE COALESCE(r.event_id, 'autenticas-2026') = ? `;
+      params.push(event_id);
+    }
+    query += ` ORDER BY r.created_at DESC `;
+    const reservations = db.prepare(query).all(...params);
 
     const result = reservations.map(resv => {
       const attendees = db.prepare(`
@@ -2018,12 +2027,19 @@ app.get('/api/admin/backup/download', verifyAdminToken, (req, res) => {
 // --- CSV EXPORT ---
 app.get('/api/admin/export/csv', verifyAdminToken, (req, res) => {
   try {
-    const reservations = db.prepare(`
-      SELECT r.id, r.purchaser_name, r.purchaser_email, r.purchaser_phone, r.quantity, r.total_amount, r.status, r.created_at, r.approved_at, z.name as zone_name
+    const { event_id } = req.query;
+    let query = `
+      SELECT r.id, r.purchaser_name, r.purchaser_email, r.purchaser_phone, r.quantity, r.total_amount, r.status, r.created_at, r.approved_at, COALESCE(r.event_id, 'autenticas-2026') as event_id, z.name as zone_name
       FROM reservations r
       JOIN zones z ON r.zone_id = z.id
-      ORDER BY r.created_at DESC
-    `).all();
+    `;
+    const params = [];
+    if (event_id && event_id !== 'all') {
+      query += ` WHERE COALESCE(r.event_id, 'autenticas-2026') = ? `;
+      params.push(event_id);
+    }
+    query += ` ORDER BY r.created_at DESC `;
+    const reservations = db.prepare(query).all(...params);
 
     // CSV Header
     const headers = [
