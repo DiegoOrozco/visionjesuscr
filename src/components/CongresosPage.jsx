@@ -169,6 +169,7 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
             <a href="/grupos-de-amistad" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/grupos-de-amistad'; }}>Grupos de Amistad</a>
             <a href="/eventos" className="apple-nav-link active" onClick={(e) => { e.preventDefault(); }}>Eventos</a>
             <a href="/oracion" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }}>Oración</a>
+            <a href="/donar" className="apple-nav-link" onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }}>Donar</a>
           </nav>
 
           {/* RIGHT ACTIONS */}
@@ -210,6 +211,7 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
             <a href="/grupos-de-amistad" className="apple-nav-link">Grupos de Amistad</a>
             <a href="/eventos" className="apple-nav-link active">Eventos</a>
             <a href="/oracion" className="apple-nav-link">Oración</a>
+            <a href="/donar" className="apple-nav-link">Donar</a>
           </div>
         )}
       </div>

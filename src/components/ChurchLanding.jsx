@@ -954,6 +954,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               Modelo de Jesús
             </a>
             <a 
+              href="/grupos-de-amistad" 
+              className={`apple-nav-link ${window.location.pathname === '/grupos-de-amistad' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/grupos-de-amistad';
+              }}
+            >
+              Grupos de Amistad
+            </a>
+            <a 
               href="/eventos" 
               className={`apple-nav-link ${window.location.pathname === '/eventos' || window.location.pathname === '/congresos' ? 'active' : ''}`}
               onClick={(e) => { 
@@ -972,6 +982,16 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               }}
             >
               Oración & Testimonios
+            </a>
+            <a 
+              href="/donar" 
+              className={`apple-nav-link ${window.location.pathname === '/donar' ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                window.location.href = '/donar';
+              }}
+            >
+              Donar
             </a>
             <button 
               onClick={() => {
@@ -1110,6 +1130,18 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               Modelo de Jesús
             </a>
             <a 
+              href="/grupos-de-amistad" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/grupos-de-amistad';
+              }}
+            >
+              Grupos de Amistad
+            </a>
+            <a 
               href="/eventos" 
               className="apple-nav-link"
               style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
@@ -1120,6 +1152,30 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               }}
             >
               Eventos
+            </a>
+            <a 
+              href="/oracion" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/oracion';
+              }}
+            >
+              Oración & Testimonios
+            </a>
+            <a 
+              href="/donar" 
+              className="apple-nav-link"
+              style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setMobileMenuOpen(false);
+                window.location.href = '/donar';
+              }}
+            >
+              Donar
             </a>
             <button 
               onClick={() => {

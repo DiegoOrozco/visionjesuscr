@@ -222,11 +222,35 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
             </a>
 
             <a 
-              href="/congresos" 
-              onClick={(e) => { e.preventDefault(); window.location.href = '/congresos'; }} 
+              href="/grupos-de-amistad" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/grupos-de-amistad'; }} 
+              className="apple-nav-link"
+            >
+              Grupos de Amistad
+            </a>
+
+            <a 
+              href="/eventos" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/eventos'; }} 
               className="apple-nav-link"
             >
               Eventos
+            </a>
+
+            <a 
+              href="/oracion" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/oracion'; }} 
+              className="apple-nav-link"
+            >
+              Oración & Testimonios
+            </a>
+
+            <a 
+              href="/donar" 
+              onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }} 
+              className="apple-nav-link"
+            >
+              Donar
             </a>
 
             <a 

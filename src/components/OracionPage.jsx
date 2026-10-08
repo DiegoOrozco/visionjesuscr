@@ -132,8 +132,10 @@ export default function OracionPage({ config = {}, onGoHome }) {
             <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="apple-nav-link">Inicio</a>
             <a href="/nosotros" onClick={(e) => { e.preventDefault(); window.location.href = '/nosotros'; }} className="apple-nav-link">Nosotros</a>
             <a href="/modelo" onClick={(e) => { e.preventDefault(); window.location.href = '/modelo'; }} className="apple-nav-link">Modelo de Jesús</a>
+            <a href="/grupos-de-amistad" onClick={(e) => { e.preventDefault(); window.location.href = '/grupos-de-amistad'; }} className="apple-nav-link">Grupos de Amistad</a>
             <a href="/eventos" onClick={(e) => { e.preventDefault(); window.location.href = '/eventos'; }} className="apple-nav-link">Eventos</a>
             <a href="/oracion" onClick={(e) => { e.preventDefault(); }} className="apple-nav-link" style={{ color: '#FFFFFF' }}>Oración & Testimonios</a>
+            <a href="/donar" onClick={(e) => { e.preventDefault(); window.location.href = '/donar'; }} className="apple-nav-link">Donar</a>
           </nav>
 
           <button 

@@ -33,7 +33,7 @@ export default function Navbar({ currentView, setCurrentView, adminUser, onLogou
     }
   } catch(e) {}
 
-  const navLinksToRender = dynamicLinks.length > 0 ? dynamicLinks : officialNavLinks;
+  const navLinksToRender = (dynamicLinks.length >= 7) ? dynamicLinks : officialNavLinks;
 
   const handleLinkClick = (link) => {
     if (link.url.startsWith('http')) {
