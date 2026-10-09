@@ -1198,103 +1198,105 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       )}
 
       {/* 3. CONOCÉ LA VISIÓN SECTION */}
-      <div id="vision-section" style={{ padding: '100px 20px', position: 'relative', backgroundColor: 'var(--apple-bg-base)', zIndex: 1 }}>
-        <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div className="apple-kicker">
-              <span className="apple-kicker-dot"></span>
-              <span>Acerca de Nosotros</span>
-            </div>
-
-            <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
-              Conocé la Visión
-            </h2>
-
-            <p className="apple-hero-subtitle" style={{ maxWidth: '680px', marginBottom: '0' }}>
-              {config.about_text || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo en cada corazón, hogar y comunidad.'}
-            </p>
-          </div>
-
-          {/* 3 PILLARS BENTO CARDS: VISIÓN, MISIÓN, VALORES */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
-            gap: '24px'
-          }}>
-            {/* CARD 1: VISIÓN */}
-            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '16px',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: 'var(--apple-purple)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '22px'
-              }}>
-                <Compass size={26} />
+      {config.home_pillars_hidden !== true && config.home_pillars_hidden !== 'true' && (
+        <div id="vision-section" style={{ padding: '100px 20px', position: 'relative', backgroundColor: 'var(--apple-bg-base)', zIndex: 1 }}>
+          <div className="container" style={{ maxWidth: '1180px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <div className="apple-kicker">
+                <span className="apple-kicker-dot"></span>
+                <span>Acerca de Nosotros</span>
               </div>
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
-                {config.vision_title || 'Nuestra Visión'}
-              </h3>
-              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
-                {config.vision_text || 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.'}
+
+              <h2 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: '14px' }}>
+                Conocé la Visión
+              </h2>
+
+              <p className="apple-hero-subtitle" style={{ maxWidth: '680px', marginBottom: '0' }}>
+                {config.about_text || 'Una iglesia viva, apasionada y comprometida con revelar el amor transformador de Jesucristo en cada corazón, hogar y comunidad.'}
               </p>
             </div>
 
-            {/* CARD 2: MISIÓN */}
-            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '16px',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: 'var(--apple-purple)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '22px'
-              }}>
-                <Flame size={26} />
+            {/* 3 PILLARS BENTO CARDS: VISIÓN, MISIÓN, VALORES */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
+              gap: '24px'
+            }}>
+              {/* CARD 1: VISIÓN */}
+              <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: 'var(--apple-purple)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '22px'
+                }}>
+                  <Compass size={26} />
+                </div>
+                <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                  {config.vision_title || 'Nuestra Visión'}
+                </h3>
+                <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
+                  {config.vision_text || 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.'}
+                </p>
               </div>
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
-                {config.mision_title || 'Nuestra Misión'}
-              </h3>
-              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
-                {config.mision_text || 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.'}
-              </p>
-            </div>
 
-            {/* CARD 3: VALORES */}
-            <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '16px',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: 'var(--apple-purple)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '22px'
-              }}>
-                <Users size={26} />
+              {/* CARD 2: MISIÓN */}
+              <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: 'var(--apple-purple)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '22px'
+                }}>
+                  <Flame size={26} />
+                </div>
+                <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                  {config.mision_title || 'Nuestra Misión'}
+                </h3>
+                <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
+                  {config.mision_text || 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.'}
+                </p>
               </div>
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
-                {config.valores_title || 'Nuestros Valores'}
-              </h3>
-              <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
-                {config.valores_text || 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.'}
-              </p>
+
+              {/* CARD 3: VALORES */}
+              <div className="apple-bento-card" style={{ padding: '36px 32px' }}>
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: 'var(--apple-purple)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '22px'
+                }}>
+                  <Users size={26} />
+                </div>
+                <h3 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.02em', marginBottom: '12px' }}>
+                  {config.valores_title || 'Nuestros Valores'}
+                </h3>
+                <p style={{ color: 'var(--apple-text-secondary)', fontSize: '0.98rem', lineHeight: 1.65 }}>
+                  {config.valores_text || 'Amor incondicional, adoración genuina, excelencia en el servicio, integridad moral, restauración familiar y fe firme en las promesas de Dios.'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 4. SCHEDULES SECTION */}
       {schedules && schedules.length > 0 ? (

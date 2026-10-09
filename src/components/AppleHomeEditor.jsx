@@ -887,13 +887,36 @@ export default function AppleHomeEditor({
          ========================================================================= */}
       {activeSubTab === 'pillars' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          <div>
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF' }}>
-              Pilares Fundamentales & ADN de la Iglesia
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(234, 237, 248, 0.65)' }}>
-              Las 3 columnas que definen el corazón, propósito y cultura de Visión Jesús en la página principal.
-            </p>
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '20px',
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
+                Sección "Pilares & ADN" (Visión, Misión, Valores en Inicio)
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.86rem', color: 'rgba(234, 237, 248, 0.6)' }}>
+                Si deseas que la página principal (Inicio) sea más limpia y directa sin mostrar el bloque de Visión/Misión/Valores, puedes ocultarlo aquí con un clic.
+              </p>
+            </div>
+
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem', color: '#F87171', fontWeight: 700 }}>
+              <input
+                type="checkbox"
+                name="home_pillars_hidden"
+                checked={configFields.home_pillars_hidden === true || configFields.home_pillars_hidden === 'true'}
+                onChange={(e) => handleConfigChange({ target: { name: 'home_pillars_hidden', value: e.target.checked } })}
+                style={{ accentColor: '#F87171', width: '18px', height: '18px' }}
+              />
+              <span>Ocultar esta Sección en Inicio (/)</span>
+            </label>
           </div>
 
           {/* 3 BENTO CARDS */}
