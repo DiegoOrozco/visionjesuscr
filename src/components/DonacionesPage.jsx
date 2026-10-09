@@ -42,23 +42,25 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
       }}>
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
           
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'rgba(151, 125, 255, 0.12)',
-            border: '1px solid rgba(151, 125, 255, 0.3)',
-            color: '#977DFF',
-            padding: '6px 20px',
-            borderRadius: '50px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-            marginBottom: '20px'
-          }}>
-            <Heart size={15} /> GENEROSIDAD & MAYORDOMÍA
-          </div>
+          {config.donar_kicker_hidden !== true && config.donar_kicker_hidden !== 'true' && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(151, 125, 255, 0.12)',
+              border: '1px solid rgba(151, 125, 255, 0.3)',
+              color: '#977DFF',
+              padding: '6px 20px',
+              borderRadius: '50px',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              marginBottom: '20px'
+            }}>
+              <Heart size={15} /> {config.donar_kicker || 'GENEROSIDAD & MAYORDOMÍA'}
+            </div>
+          )}
 
           <h1 style={{
             fontSize: 'clamp(2.4rem, 5vw, 4rem)',
@@ -69,7 +71,7 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Donaciones & Ofrendas
+            {config.donar_title || 'Donaciones & Ofrendas'}
           </h1>
 
           <p style={{
@@ -79,7 +81,7 @@ export default function DonacionesPage({ config = {}, onGoHome }) {
             maxWidth: '720px',
             margin: '0 auto 36px'
           }}>
-            Cada semilla sembrada impulsa el Reino de Dios, restaura vidas y extiende el mensaje de Jesucristo en nuestra nación.
+            {config.donar_subtitle || 'Cada semilla sembrada impulsa el Reino de Dios, restaura vidas y extiende el mensaje de Jesucristo en nuestra nación.'}
           </p>
 
           {/* BIBLE VERSE CARD */}

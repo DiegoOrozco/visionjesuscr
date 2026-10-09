@@ -3,24 +3,22 @@ import {
   Sparkles, 
   Heart, 
   Quote, 
-  MessageCircle, 
+  Smartphone, 
+  Building2, 
+  CreditCard, 
   ExternalLink, 
   Check, 
   CheckCircle2, 
   RefreshCw, 
-  Trash2, 
-  ShieldCheck, 
-  Plus, 
-  Clock, 
-  Send, 
-  BookOpen
+  Copy,
+  DollarSign
 } from 'lucide-react';
 
-export default function AppleOracionEditor({
+export default function AppleDonarEditor({
   configFields = {},
   handleConfigChange,
   openMediaLibrary,
-  handleSaveOracionPageApple,
+  handleSaveDonarPageApple,
   saveLoading = false,
   saveSuccessMsg = '',
   onSelectWebPage,
@@ -80,7 +78,7 @@ export default function AppleOracionEditor({
             marginBottom: '10px'
           }}>
             <Sparkles size={13} />
-            <span>APPLE STUDIO · PÁGINA 5 DE 11</span>
+            <span>APPLE STUDIO · PÁGINA 6 DE 11</span>
           </div>
           <h2 style={{
             fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)',
@@ -93,7 +91,7 @@ export default function AppleOracionEditor({
             gap: '12px',
             flexWrap: 'wrap'
           }}>
-            <span>Oración & Testimonios (/oracion)</span>
+            <span>Donaciones & Ofrendas (/donar)</span>
             <span style={{
               fontSize: '0.72rem',
               padding: '4px 10px',
@@ -108,14 +106,14 @@ export default function AppleOracionEditor({
             </span>
           </h2>
           <p style={{ color: 'rgba(234, 237, 248, 0.65)', fontSize: '0.92rem', margin: 0, maxWidth: '680px' }}>
-            Edita los textos inspiradores del Centro de Fe: título principal, subtítulo, pasaje bíblico con su referencia y la promesa del altar.
+            Gestiona los canales oficiales de siembra y diezmo: número de SINPE Móvil, titular de la cuenta, pasajes de mayordomía y cuentas bancarias IBAN.
           </p>
         </div>
 
         {/* ACTION BUTTONS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <a
-            href="/oracion"
+            href="/donar"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -135,12 +133,12 @@ export default function AppleOracionEditor({
             }}
           >
             <ExternalLink size={15} />
-            <span>Ver Oración en Vivo</span>
+            <span>Ver Donar en Vivo</span>
           </a>
 
           <button
             type="button"
-            onClick={handleSaveOracionPageApple}
+            onClick={handleSaveDonarPageApple}
             disabled={saveLoading}
             style={{
               display: 'inline-flex',
@@ -168,7 +166,7 @@ export default function AppleOracionEditor({
             ) : (
               <>
                 <Check size={16} />
-                <span>Guardar y Publicar Oración</span>
+                <span>Guardar y Publicar Donar</span>
               </>
             )}
           </button>
@@ -219,8 +217,8 @@ export default function AppleOracionEditor({
               { id: 'nosotros', name: '2. Nosotros', active: false },
               { id: 'congresos', name: '3. Eventos & Congresos', active: false },
               { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
-              { id: 'oracion', name: '5. Oración & Testimonios', active: true },
-              { id: 'donar', name: '6. Donar', active: false },
+              { id: 'oracion', name: '5. Oración & Testimonios', active: false },
+              { id: 'donar', name: '6. Donar', active: true },
               { id: 'autenticas', name: '7. Auténticas', active: false },
               { id: 'sanados', name: '8. Sanados', active: false },
               { id: 'modelo', name: '9. Modelo', active: false },
@@ -241,7 +239,7 @@ export default function AppleOracionEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'donar') && onSelectWebPage) {
+                  if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'oracion') && onSelectWebPage) {
                     onSelectWebPage(pg.id);
                   } else if (!pg.active) {
                     alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad, 5. Oración y 6. Donar. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
@@ -254,11 +252,11 @@ export default function AppleOracionEditor({
           </div>
         </div>
         <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
-          Página 5 de 11 activa
+          Página 6 de 11 activa
         </span>
       </div>
 
-      {/* APPLE SEGMENTED SUBTABS FOR PAGE 5 */}
+      {/* APPLE SEGMENTED SUBTABS FOR PAGE 6 */}
       <div style={{
         display: 'flex',
         gap: '8px',
@@ -271,8 +269,8 @@ export default function AppleOracionEditor({
         overflowX: 'auto'
       }}>
         {[
-          { id: 'hero', label: 'Portada & Textos Principal', icon: <Sparkles size={15} /> },
-          { id: 'verse', label: 'Pasaje Bíblico & Promesa Altar', icon: <Quote size={15} /> }
+          { id: 'hero', label: 'Portada & Versículo Hero', icon: <Sparkles size={15} /> },
+          { id: 'sinpe', label: 'SINPE Móvil & Cuentas Bancarias IBAN', icon: <Smartphone size={15} /> }
         ].map((tab) => {
           const isSelected = activeSubTab === tab.id;
           return (
@@ -304,7 +302,7 @@ export default function AppleOracionEditor({
         })}
       </div>
 
-      {/* SUBTAB 1: PORTADA & TEXTOS PRINCIPAL */}
+      {/* SUBTAB 1: PORTADA & VERSÍCULO HERO */}
       {activeSubTab === 'hero' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
           
@@ -319,7 +317,7 @@ export default function AppleOracionEditor({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#C4B5FD', letterSpacing: '0.04em' }}>
-                VISTA PREVIA EN TIEMPO REAL · HERO DE ORACIÓN
+                VISTA PREVIA EN TIEMPO REAL · HERO DE DONAR
               </span>
             </div>
 
@@ -327,13 +325,13 @@ export default function AppleOracionEditor({
               borderRadius: '20px',
               padding: '40px 24px',
               textAlign: 'center',
-              background: 'radial-gradient(circle at 50% 20%, rgba(0, 51, 255, 0.18) 0%, rgba(3, 8, 18, 1) 75%)',
+              background: 'radial-gradient(circle at 50% 20%, rgba(151, 125, 255, 0.22) 0%, rgba(3, 8, 18, 1) 75%)',
               border: '1px solid rgba(151, 125, 255, 0.2)',
               position: 'relative',
               overflow: 'hidden'
             }}>
               <div style={{ position: 'relative', zIndex: 2, maxWidth: '640px', margin: '0 auto' }}>
-                {configFields.oracion_kicker_hidden !== true && configFields.oracion_kicker_hidden !== 'true' && (
+                {configFields.donar_kicker_hidden !== true && configFields.donar_kicker_hidden !== 'true' && (
                   <div style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -350,7 +348,7 @@ export default function AppleOracionEditor({
                     textTransform: 'uppercase'
                   }}>
                     <Heart size={14} />
-                    <span>{configFields.oracion_kicker || 'CENTRO DE FE Y INTERCESIÓN'}</span>
+                    <span>{configFields.donar_kicker || 'GENEROSIDAD & MAYORDOMÍA'}</span>
                   </div>
                 )}
 
@@ -365,7 +363,7 @@ export default function AppleOracionEditor({
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
                 }}>
-                  {configFields.oracion_title || 'Peticiones de Oración & Testimonios'}
+                  {configFields.donar_title || 'Donaciones & Ofrendas'}
                 </h1>
 
                 <p style={{
@@ -375,7 +373,7 @@ export default function AppleOracionEditor({
                   lineHeight: 1.6,
                   maxWidth: '560px'
                 }}>
-                  {configFields.oracion_subtitle || 'Creemos que no hay imposible para Dios, por tanto, cualquiera que sea tu problema, ¡tiene solución!'}
+                  {configFields.donar_subtitle || 'Cada semilla sembrada impulsa el Reino de Dios, restaura vidas y extiende el mensaje de Jesucristo en nuestra nación.'}
                 </p>
               </div>
             </div>
@@ -404,9 +402,9 @@ export default function AppleOracionEditor({
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: '#977DFF', fontWeight: 600 }}>
                   <input
                     type="checkbox"
-                    name="oracion_kicker_hidden"
-                    checked={configFields.oracion_kicker_hidden === true || configFields.oracion_kicker_hidden === 'true'}
-                    onChange={(e) => handleConfigChange({ target: { name: 'oracion_kicker_hidden', value: e.target.checked } })}
+                    name="donar_kicker_hidden"
+                    checked={configFields.donar_kicker_hidden === true || configFields.donar_kicker_hidden === 'true'}
+                    onChange={(e) => handleConfigChange({ target: { name: 'donar_kicker_hidden', value: e.target.checked } })}
                     style={{ accentColor: '#977DFF', width: '16px', height: '16px' }}
                   />
                   <span>Ocultar Etiqueta</span>
@@ -419,10 +417,10 @@ export default function AppleOracionEditor({
                 </label>
                 <input
                   type="text"
-                  name="oracion_kicker"
-                  value={configFields.oracion_kicker !== undefined ? configFields.oracion_kicker : 'CENTRO DE FE Y INTERCESIÓN'}
+                  name="donar_kicker"
+                  value={configFields.donar_kicker !== undefined ? configFields.donar_kicker : 'GENEROSIDAD & MAYORDOMÍA'}
                   onChange={handleConfigChange}
-                  placeholder="Ej: CENTRO DE FE Y INTERCESIÓN"
+                  placeholder="Ej: GENEROSIDAD & MAYORDOMÍA"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -450,7 +448,7 @@ export default function AppleOracionEditor({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '12px' }}>
                 <Heart size={16} color="#60A5FA" />
                 <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
-                  Título & Subtítulo Principal
+                  Título & Subtítulo Hero
                 </h3>
               </div>
 
@@ -460,10 +458,10 @@ export default function AppleOracionEditor({
                 </label>
                 <input
                   type="text"
-                  name="oracion_title"
-                  value={configFields.oracion_title || ''}
+                  name="donar_title"
+                  value={configFields.donar_title || ''}
                   onChange={handleConfigChange}
-                  placeholder="Ej: Peticiones de Oración & Testimonios"
+                  placeholder="Ej: Donaciones & Ofrendas"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -480,14 +478,14 @@ export default function AppleOracionEditor({
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
-                  Subtítulo / Bajada de Fe
+                  Subtítulo / Bajada de Mayordomía
                 </label>
                 <textarea
-                  name="oracion_subtitle"
+                  name="donar_subtitle"
                   rows={3}
-                  value={configFields.oracion_subtitle || ''}
+                  value={configFields.donar_subtitle || ''}
                   onChange={handleConfigChange}
-                  placeholder="Escribe el mensaje alentador para motivar a enviar peticiones..."
+                  placeholder="Escribe el mensaje sobre la importancia de la siembra..."
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -508,10 +506,11 @@ export default function AppleOracionEditor({
         </div>
       )}
 
-      {/* SUBTAB 2: PASAJE BÍBLICO & PROMESA ALTAR */}
-      {activeSubTab === 'verse' && (
+      {/* SUBTAB 2: SINPE MÓVIL & CUENTAS BANCARIAS IBAN */}
+      {activeSubTab === 'sinpe' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
           
+          {/* SINPE MOVIL CARD */}
           <div style={{
             backgroundColor: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -519,43 +518,26 @@ export default function AppleOracionEditor({
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px'
+            gap: '20px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF' }}>
-                  Pasaje Bíblico de la Promesa de Oración
-                </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'rgba(234, 237, 248, 0.6)' }}>
-                  Personaliza la cita bíblica destacada en el banner flotante de la página de oración.
-                </p>
-              </div>
-
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem', color: '#977DFF', fontWeight: 600 }}>
-                <input
-                  type="checkbox"
-                  name="oracion_verse_hidden"
-                  checked={configFields.oracion_verse_hidden === true || configFields.oracion_verse_hidden === 'true'}
-                  onChange={(e) => handleConfigChange({ target: { name: 'oracion_verse_hidden', value: e.target.checked } })}
-                  style={{ accentColor: '#977DFF', width: '16px', height: '16px' }}
-                />
-                <span>Ocultar Tarjeta Bíblica</span>
-              </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '14px' }}>
+              <Smartphone size={20} color="#34C759" />
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+                Datos de SINPE Móvil
+              </h3>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-              
-              {/* Verse Text */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#C4B5FD', marginBottom: '6px' }}>
-                  Texto del Pasaje Bíblico
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#34C759', marginBottom: '6px' }}>
+                  Número SINPE Móvil (Directo para copiar)
                 </label>
-                <textarea
-                  name="oracion_verse_text"
-                  rows={4}
-                  value={configFields.oracion_verse_text !== undefined ? configFields.oracion_verse_text : '«Si dos de vosotros se pusieren de acuerdo en la tierra acerca de cualquiera cosa que pidieren, les será hecho por mi Padre que está en los cielos.»'}
+                <input
+                  type="text"
+                  name="sinpe_phone"
+                  value={configFields.sinpe_phone || '60121225'}
                   onChange={handleConfigChange}
-                  placeholder="Texto completo del versículo..."
+                  placeholder="Ej: 60121225"
                   style={{
                     width: '100%',
                     padding: '12px 14px',
@@ -564,62 +546,171 @@ export default function AppleOracionEditor({
                     borderRadius: '12px',
                     color: '#FFFFFF',
                     fontSize: '0.9rem',
-                    lineHeight: 1.5,
+                    fontWeight: 700,
                     boxSizing: 'border-box'
                   }}
                 />
               </div>
 
-              {/* Verse Reference & Altar Promise */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#C4B5FD', marginBottom: '6px' }}>
-                    Referencia Bíblica
-                  </label>
-                  <input
-                    type="text"
-                    name="oracion_verse_ref"
-                    value={configFields.oracion_verse_ref !== undefined ? configFields.oracion_verse_ref : 'MATEO 18:19'}
-                    onChange={handleConfigChange}
-                    placeholder="Ej: MATEO 18:19"
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: '12px',
-                      color: '#FFFFFF',
-                      fontSize: '0.9rem',
-                      fontWeight: 700,
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#F59E0B', marginBottom: '6px' }}>
-                    Promesa del Altar (Pie de Tarjeta)
-                  </label>
-                  <input
-                    type="text"
-                    name="oracion_altar_note"
-                    value={configFields.oracion_altar_note !== undefined ? configFields.oracion_altar_note : 'Impresas y colocadas en el altar durante los días de servicio'}
-                    onChange={handleConfigChange}
-                    placeholder="Ej: Impresas y colocadas en el altar..."
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: '12px',
-                      color: '#FFFFFF',
-                      fontSize: '0.88rem',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#34C759', marginBottom: '6px' }}>
+                  Número SINPE Formateado (Visual)
+                </label>
+                <input
+                  type="text"
+                  name="sinpe_display"
+                  value={configFields.sinpe_display || '6012-1225'}
+                  onChange={handleConfigChange}
+                  placeholder="Ej: 6012-1225"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    boxSizing: 'border-box'
+                  }}
+                />
               </div>
 
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#34C759', marginBottom: '6px' }}>
+                  Titular de la Cuenta SINPE / Jurídico
+                </label>
+                <input
+                  type="text"
+                  name="sinpe_holder"
+                  value={configFields.sinpe_holder || 'Iglesia Visión Jesús'}
+                  onChange={handleConfigChange}
+                  placeholder="Ej: Iglesia Visión Jesús"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* BANK IBAN ACCOUNTS CARD */}
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '24px',
+            padding: '28px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '14px' }}>
+              <Building2 size={20} color="#60A5FA" />
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+                Cuentas Bancarias e IBAN
+              </h3>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
+                  IBAN Banco Nacional (Colones ₡)
+                </label>
+                <input
+                  type="text"
+                  name="iban_bncr_crc"
+                  value={configFields.iban_bncr_crc || ''}
+                  onChange={handleConfigChange}
+                  placeholder="CR05015100000000000000"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
+                  IBAN Banco Nacional (Dólares $)
+                </label>
+                <input
+                  type="text"
+                  name="iban_bncr_usd"
+                  value={configFields.iban_bncr_usd || ''}
+                  onChange={handleConfigChange}
+                  placeholder="CR05015100000000000000"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#977DFF', marginBottom: '6px' }}>
+                  IBAN BAC Credomatic (Colones ₡)
+                </label>
+                <input
+                  type="text"
+                  name="iban_bac_crc"
+                  value={configFields.iban_bac_crc || ''}
+                  onChange={handleConfigChange}
+                  placeholder="CR05010200000000000000"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#977DFF', marginBottom: '6px' }}>
+                  IBAN BAC Credomatic (Dólares $)
+                </label>
+                <input
+                  type="text"
+                  name="iban_bac_usd"
+                  value={configFields.iban_bac_usd || ''}
+                  onChange={handleConfigChange}
+                  placeholder="CR05010200000000000000"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
             </div>
           </div>
 

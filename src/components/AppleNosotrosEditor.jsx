@@ -262,10 +262,10 @@ export default function AppleNosotrosEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if ((pg.id === 'home' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'oracion') && onSelectWebPage) {
+                  if ((pg.id === 'home' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'oracion' || pg.id === 'donar') && onSelectWebPage) {
                     onSelectWebPage(pg.id);
                   } else if (!pg.active) {
-                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad y 5. Oración. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
+                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad, 5. Oración y 6. Donar. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
                   }
                 }}
               >

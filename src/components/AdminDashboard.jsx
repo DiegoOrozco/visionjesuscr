@@ -8,6 +8,7 @@ import AppleNosotrosEditor from './AppleNosotrosEditor';
 import AppleCongresosEditor from './AppleCongresosEditor';
 import AppleGruposEditor from './AppleGruposEditor';
 import AppleOracionEditor from './AppleOracionEditor';
+import AppleDonarEditor from './AppleDonarEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -2105,6 +2106,46 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleSaveDonarPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        donar_title: configFields.donar_title || 'Donaciones & Ofrendas',
+        donar_subtitle: configFields.donar_subtitle || 'Cada semilla sembrada impulsa el Reino de Dios, restaura vidas y extiende el mensaje de Jesucristo en nuestra nación.',
+        donar_kicker: configFields.donar_kicker !== undefined ? configFields.donar_kicker : 'GENEROSIDAD & MAYORDOMÍA',
+        donar_kicker_hidden: configFields.donar_kicker_hidden || false,
+        sinpe_phone: configFields.sinpe_phone || '60121225',
+        sinpe_display: configFields.sinpe_display || '6012-1225',
+        sinpe_holder: configFields.sinpe_holder || 'Iglesia Visión Jesús',
+        iban_bncr_crc: configFields.iban_bncr_crc || '',
+        iban_bncr_usd: configFields.iban_bncr_usd || '',
+        iban_bac_crc: configFields.iban_bac_crc || '',
+        iban_bac_usd: configFields.iban_bac_usd || ''
+      };
+
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomepageConfig(updatedConfig);
+        setConfigFields(updatedConfig);
+        setSaveSuccessMsg('¡Página de Donaciones & Ofrendas guardada y publicada exitosamente!');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      } else {
+        alert(data.message || 'Error al guardar Donaciones.');
+      }
+    } catch (err) {
+      alert('Error de conexión al guardar.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const handleSaveNosotrosPageApple = async () => {
     setSaveLoading(true);
     setSaveSuccessMsg('');
@@ -3857,6 +3898,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               handleConfigChange={handleConfigChange}
               openMediaLibrary={openMediaLibrary}
               handleSaveOracionPageApple={handleSaveOracionPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'donar' && (
+            <AppleDonarEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveDonarPageApple={handleSaveDonarPageApple}
               saveLoading={saveLoading}
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}
