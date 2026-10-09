@@ -190,6 +190,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [activeWebPage, setActiveWebPage] = useState('nosotros');
   const [localNosotrosCards, setLocalNosotrosCards] = useState([]);
   const [localPastoresProfiles, setLocalPastoresProfiles] = useState([]);
+  const [localNosotrosButtons, setLocalNosotrosButtons] = useState([]);
   const [uploadingNosotrosHero, setUploadingNosotrosHero] = useState(false);
   const [uploadingNosotrosCardImage, setUploadingNosotrosCardImage] = useState(null);
   const [uploadingPastorImage, setUploadingPastorImage] = useState(null);
@@ -1330,9 +1331,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         iban_bac_crc: homepageConfig.iban_bac_crc || 'CR05010200009876543210',
         iban_bac_usd: homepageConfig.iban_bac_usd || 'CR05010200001234567890',
         legal_transparency_note: homepageConfig.legal_transparency_note || 'Iglesia Visión Jesús es una entidad legalmente constituida en Costa Rica. Todas las ofrendas y diezmos son administrados con transparencia para la obra del Evangelio.',
-        nosotros_title: homepageConfig.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
-        nosotros_subtitle: homepageConfig.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
-        nosotros_hero_bg: homepageConfig.nosotros_hero_bg || ''
+        nosotros_title: homepageConfig.nosotros_title || '¿Eres nuevo en Visión Jesús?',
+        nosotros_subtitle: homepageConfig.nosotros_subtitle || 'Si es la primera vez que asistes a uno de nuestros servicios te aseguramos que te sentirás como en casa, en todo momento contarás con nuestro equipo de servicio quienes te guiarán de principio a fin.',
+        nosotros_hero_bg: homepageConfig.nosotros_hero_bg || '/uploads/comprobantes/1788307724342-46295df0-d020-4a8e-9606-8d16b8688a73.jpg',
+        nosotros_kicker: homepageConfig.nosotros_kicker !== undefined ? homepageConfig.nosotros_kicker : 'CONOCÉ LA VISIÓN',
+        nosotros_kicker_hidden: homepageConfig.nosotros_kicker_hidden || 'false',
+        nosotros_buttons_hidden: homepageConfig.nosotros_buttons_hidden || 'false',
+        nosotros_buttons_align: homepageConfig.nosotros_buttons_align || 'center'
       });
 
       setPricingFields({
@@ -1425,6 +1430,23 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       }
       setLocalNosotrosCards(parsedNosotrosCards);
 
+      // Parse Nosotros Buttons
+      let parsedNosotrosButtons = [];
+      try {
+        if (homepageConfig.nosotros_buttons) {
+          parsedNosotrosButtons = typeof homepageConfig.nosotros_buttons === 'string' ? JSON.parse(homepageConfig.nosotros_buttons) : homepageConfig.nosotros_buttons;
+        }
+      } catch (e) {
+        console.error('Error parsing nosotros_buttons in admin:', e);
+      }
+      if (!parsedNosotrosButtons || parsedNosotrosButtons.length === 0) {
+        parsedNosotrosButtons = [
+          { label: 'Unirte a un Grupo de Amistad', link: '/grupos-de-amistad', primary: true },
+          { label: 'Horarios de Servicios', link: '/', primary: false }
+        ];
+      }
+      setLocalNosotrosButtons(parsedNosotrosButtons);
+
       // Parse Pastores Profiles
       let parsedPastores = [];
       try {
@@ -1437,11 +1459,18 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       if (!parsedPastores || parsedPastores.length === 0) {
         parsedPastores = [
           {
-            id: 'pastores-principales',
-            name: 'Pastores Principales',
-            role: 'Liderazgo Pastoral',
-            bio: 'Guiando a la congregación con un corazón dispuesto a servir, predicar la verdad del Evangelio y formar discípulos de Jesucristo.',
-            image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800'
+            id: 'pastor-wagner',
+            name: 'Pastor Wagner Castro',
+            role: 'Pastor Principal',
+            bio: 'Liderando con visión y pasión por la presencia de Dios y la transformación de las familias.',
+            image: `${API_URL}/uploads/comprobantes/1788309651553-080761e7-6073-4dab-8aed-0e3e7895156d.jpg`
+          },
+          {
+            id: 'pastora-dayana',
+            name: 'Pastora Dayana de Castro',
+            role: 'Pastora Principal',
+            bio: 'Apasionada por la adoración, el discipulado y el empoderamiento de las generaciones.',
+            image: `${API_URL}/uploads/comprobantes/1788309659550-70c28495-5cd4-4c79-8e44-45bcf3f09bc0.jpg`
           }
         ];
       }
@@ -1701,6 +1730,26 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleAddNosotrosButton = () => {
+    setLocalNosotrosButtons(prev => [...prev, { label: 'Nuevo Botón', link: '/', primary: false }]);
+  };
+
+  const handleRemoveNosotrosButton = (index) => {
+    setLocalNosotrosButtons(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleNosotrosButtonChange = (index, field, value) => {
+    if (field === 'CLEAR_ALL') {
+      setLocalNosotrosButtons([]);
+      return;
+    }
+    setLocalNosotrosButtons(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
   const handleNosotrosHeroUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1735,6 +1784,11 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         nosotros_title: configFields.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
         nosotros_subtitle: configFields.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
         nosotros_hero_bg: configFields.nosotros_hero_bg || '',
+        nosotros_kicker: configFields.nosotros_kicker !== undefined ? configFields.nosotros_kicker : 'CONOCÉ LA VISIÓN',
+        nosotros_kicker_hidden: configFields.nosotros_kicker_hidden || false,
+        nosotros_buttons_hidden: configFields.nosotros_buttons_hidden || false,
+        nosotros_buttons_align: configFields.nosotros_buttons_align || 'center',
+        nosotros_buttons: JSON.stringify(localNosotrosButtons),
         vision_title: configFields.vision_title || 'NUESTRA VISIÓN',
         vision_text: configFields.vision_text || '',
         mision_title: configFields.mision_title || 'NUESTRA MISIÓN',
@@ -3414,6 +3468,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               handlePastorChange={handlePastorChange}
               handlePastorImageUpload={handlePastorImageUpload}
               uploadingPastorImage={uploadingPastorImage}
+              localNosotrosButtons={localNosotrosButtons}
+              handleAddNosotrosButton={handleAddNosotrosButton}
+              handleRemoveNosotrosButton={handleRemoveNosotrosButton}
+              handleNosotrosButtonChange={handleNosotrosButtonChange}
               handleNosotrosHeroUpload={handleNosotrosHeroUpload}
               uploadingNosotrosHero={uploadingNosotrosHero}
               openMediaLibrary={openMediaLibrary}

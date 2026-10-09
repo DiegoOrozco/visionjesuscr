@@ -34,6 +34,10 @@ export default function AppleNosotrosEditor({
   handlePastorChange,
   handlePastorImageUpload,
   uploadingPastorImage,
+  localNosotrosButtons = [],
+  handleAddNosotrosButton,
+  handleRemoveNosotrosButton,
+  handleNosotrosButtonChange,
   handleNosotrosHeroUpload,
   uploadingNosotrosHero,
   openMediaLibrary,
@@ -373,23 +377,25 @@ export default function AppleNosotrosEditor({
 
               {/* Live Content */}
               <div style={{ position: 'relative', zIndex: 2, maxWidth: '640px' }}>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '9999px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  marginBottom: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
-                }}>
-                  <Compass size={14} color="#977DFF" />
-                  <span>CONOCÉ LA VISIÓN</span>
-                </div>
+                {configFields.nosotros_kicker_hidden !== true && configFields.nosotros_kicker_hidden !== 'true' && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '9999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    marginBottom: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}>
+                    <Compass size={14} color="#977DFF" />
+                    <span>{configFields.nosotros_kicker !== undefined ? configFields.nosotros_kicker : 'CONOCÉ LA VISIÓN'}</span>
+                  </div>
+                )}
 
                 <h1 style={{
                   fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
@@ -412,33 +418,35 @@ export default function AppleNosotrosEditor({
                   {configFields.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.'}
                 </p>
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <span style={{
-                    padding: '8px 18px',
-                    borderRadius: '9999px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    backgroundColor: '#3B82F6',
-                    color: '#FFFFFF',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
+                {configFields.nosotros_buttons_hidden !== true && configFields.nosotros_buttons_hidden !== 'true' && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    justifyContent: (configFields.nosotros_buttons_align === 'left' ? 'flex-start' : configFields.nosotros_buttons_align === 'right' ? 'flex-end' : 'center'),
+                    flexWrap: 'wrap'
                   }}>
-                    <span>Unirte a un Grupo de Amistad</span>
-                    <ArrowRight size={14} />
-                  </span>
-                  <span style={{
-                    padding: '8px 18px',
-                    borderRadius: '9999px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255, 255, 255, 0.25)'
-                  }}>
-                    Horarios de Servicios
-                  </span>
-                </div>
+                    {(localNosotrosButtons.length > 0 ? localNosotrosButtons : [
+                      { label: 'Unirte a un Grupo de Amistad', link: '/grupos-de-amistad', primary: true },
+                      { label: 'Horarios de Servicios', link: '/', primary: false }
+                    ]).map((btn, idx) => (
+                      <span key={idx} style={{
+                        padding: '8px 18px',
+                        borderRadius: '9999px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        backgroundColor: btn.primary ? '#3B82F6' : 'rgba(255, 255, 255, 0.12)',
+                        color: '#FFFFFF',
+                        border: btn.primary ? 'none' : '1px solid rgba(255, 255, 255, 0.25)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <span>{btn.label || 'Botón'}</span>
+                        {btn.primary && <ArrowRight size={14} />}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -446,7 +454,63 @@ export default function AppleNosotrosEditor({
           {/* CONTROLS GRID */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             
-            {/* 1. TEXT FIELDS CARD */}
+            {/* 1. KICKER BADGE CARD */}
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '20px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Compass size={16} color="#977DFF" />
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
+                    Etiqueta Superior (Pill)
+                  </h3>
+                </div>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: '#977DFF', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    name="nosotros_kicker_hidden"
+                    checked={configFields.nosotros_kicker_hidden === true || configFields.nosotros_kicker_hidden === 'true'}
+                    onChange={(e) => handleConfigChange({ target: { name: 'nosotros_kicker_hidden', value: e.target.checked } })}
+                    style={{ accentColor: '#977DFF', width: '16px', height: '16px' }}
+                  />
+                  <span>Ocultar Etiqueta</span>
+                </label>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#977DFF', marginBottom: '6px' }}>
+                  Texto de la Etiqueta ("Pill")
+                </label>
+                <input
+                  type="text"
+                  name="nosotros_kicker"
+                  value={configFields.nosotros_kicker !== undefined ? configFields.nosotros_kicker : 'CONOCÉ LA VISIÓN'}
+                  onChange={handleConfigChange}
+                  disabled={configFields.nosotros_kicker_hidden === true || configFields.nosotros_kicker_hidden === 'true'}
+                  placeholder="Ej: CONOCÉ LA VISIÓN"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                    opacity: (configFields.nosotros_kicker_hidden === true || configFields.nosotros_kicker_hidden === 'true') ? 0.4 : 1
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* 2. TEXT FIELDS CARD */}
             <div style={{
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -514,7 +578,7 @@ export default function AppleNosotrosEditor({
               </div>
             </div>
 
-            {/* 2. BACKGROUND MEDIA CARD */}
+            {/* 3. BACKGROUND MEDIA CARD */}
             <div style={{
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -607,6 +671,227 @@ export default function AppleNosotrosEditor({
               <div style={{ fontSize: '0.76rem', color: 'rgba(234, 237, 248, 0.5)', lineHeight: 1.4 }}>
                 💡 Tip: Si dejas el fondo vacío, se usará automáticamente la foto de portada principal de la iglesia.
               </div>
+            </div>
+
+            {/* 4. BUTTONS DISPLAY & ALIGNMENT CARD */}
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '20px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ArrowRight size={16} color="#60A5FA" />
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
+                    Visualización & Posición de Botones
+                  </h3>
+                </div>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8rem', color: '#F87171', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    name="nosotros_buttons_hidden"
+                    checked={configFields.nosotros_buttons_hidden === true || configFields.nosotros_buttons_hidden === 'true'}
+                    onChange={(e) => handleConfigChange({ target: { name: 'nosotros_buttons_hidden', value: e.target.checked } })}
+                    style={{ accentColor: '#F87171', width: '16px', height: '16px' }}
+                  />
+                  <span>Ocultar Todos los Botones</span>
+                </label>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
+                  Alineación de Botones en Pantalla
+                </label>
+                <select
+                  name="nosotros_buttons_align"
+                  value={configFields.nosotros_buttons_align || 'center'}
+                  onChange={handleConfigChange}
+                  disabled={configFields.nosotros_buttons_hidden === true || configFields.nosotros_buttons_hidden === 'true'}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                    opacity: (configFields.nosotros_buttons_hidden === true || configFields.nosotros_buttons_hidden === 'true') ? 0.4 : 1
+                  }}
+                >
+                  <option value="center" style={{ background: '#0D1117' }}>Centrado (Recomendado)</option>
+                  <option value="left" style={{ background: '#0D1117' }}>Alineado a la Izquierda</option>
+                  <option value="right" style={{ background: '#0D1117' }}>Alineado a la Derecha</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 5. BUTTONS LIST EDITOR CARD */}
+            <div style={{
+              gridColumn: '1 / -1',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '20px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '12px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
+                    Editar / Quitar / Agregar Botones de la Portada
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
+                    Personaliza el texto, enlace y estilo de cada botón
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleNosotrosButtonChange && handleNosotrosButtonChange(0, 'CLEAR_ALL')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '10px',
+                      color: '#F87171',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    <span>Quitar Todos los Botones</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleAddNosotrosButton}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 16px',
+                      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                      borderRadius: '10px',
+                      color: '#60A5FA',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Plus size={14} />
+                    <span>Agregar Nuevo Botón</span>
+                  </button>
+                </div>
+              </div>
+
+              {localNosotrosButtons.length === 0 ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(234, 237, 248, 0.5)', fontSize: '0.88rem' }}>
+                  No hay botones configurados. Haz clic en "Agregar Nuevo Botón" para crear uno o activa "Ocultar Todos los Botones".
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {localNosotrosButtons.map((btn, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '14px',
+                      padding: '14px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ flex: 2, minWidth: '180px' }}>
+                        <label style={{ display: 'block', fontSize: '0.74rem', color: 'rgba(234, 237, 248, 0.6)', fontWeight: 700, marginBottom: '4px' }}>
+                          Texto del Botón
+                        </label>
+                        <input
+                          type="text"
+                          value={btn.label || ''}
+                          onChange={(e) => handleNosotrosButtonChange(idx, 'label', e.target.value)}
+                          placeholder="Ej: Unirte a un Grupo de Amistad"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '8px',
+                            color: '#FFFFFF',
+                            fontSize: '0.88rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ flex: 2, minWidth: '180px' }}>
+                        <label style={{ display: 'block', fontSize: '0.74rem', color: 'rgba(234, 237, 248, 0.6)', fontWeight: 700, marginBottom: '4px' }}>
+                          Enlace / Destino
+                        </label>
+                        <input
+                          type="text"
+                          value={btn.link || ''}
+                          onChange={(e) => handleNosotrosButtonChange(idx, 'link', e.target.value)}
+                          placeholder="Ej: /grupos-de-amistad"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '8px',
+                            color: '#FFFFFF',
+                            fontSize: '0.88rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '16px' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: '#60A5FA', fontWeight: 600 }}>
+                          <input
+                            type="checkbox"
+                            checked={btn.primary === true}
+                            onChange={(e) => handleNosotrosButtonChange(idx, 'primary', e.target.checked)}
+                            style={{ accentColor: '#3B82F6' }}
+                          />
+                          <span>Destacado (Azul)</span>
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveNosotrosButton(idx)}
+                          style={{
+                            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '8px',
+                            color: '#F87171',
+                            padding: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Eliminar botón"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>

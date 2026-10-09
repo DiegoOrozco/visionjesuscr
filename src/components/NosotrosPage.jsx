@@ -21,6 +21,31 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
   const valoresTitle = config.valores_title || 'NUESTROS VALORES';
   const valoresText = config.valores_text || 'Amor Incondicional, Excelencia en el Servicio, Integridad, Unidad Familiar y Apasionados por la Adoración.';
 
+  const kickerText = config.nosotros_kicker !== undefined ? config.nosotros_kicker : 'CONOCÉ LA VISIÓN';
+  const showKicker = config.nosotros_kicker_hidden !== true && config.nosotros_kicker_hidden !== 'true';
+  const showButtons = config.nosotros_buttons_hidden !== true && config.nosotros_buttons_hidden !== 'true';
+  const buttonsAlign = config.nosotros_buttons_align || 'center';
+
+  let flexAlign = 'center';
+  if (buttonsAlign === 'left') flexAlign = 'flex-start';
+  if (buttonsAlign === 'right') flexAlign = 'flex-end';
+
+  let nosotrosButtons = [];
+  try {
+    if (config.nosotros_buttons) {
+      nosotrosButtons = typeof config.nosotros_buttons === 'string' ? JSON.parse(config.nosotros_buttons) : config.nosotros_buttons;
+    }
+  } catch (e) {
+    console.error('Failed to parse nosotros_buttons:', e);
+  }
+
+  if (!nosotrosButtons || nosotrosButtons.length === 0) {
+    nosotrosButtons = [
+      { label: 'Unirte a un Grupo de Amistad', link: '/grupos-de-amistad', primary: true },
+      { label: 'Horarios de Servicios', link: '/', primary: false }
+    ];
+  }
+
   // Parse 3 Columns Cards
   let cards = [];
   try {
@@ -77,11 +102,18 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
   if (!pastores || pastores.length === 0) {
     pastores = [
       {
-        id: 'pastores-principales',
-        name: 'Pastores Principales',
-        role: 'Liderazgo Pastoral',
-        bio: 'Guiando a la congregación con un corazón dispuesto a servir, predicar la verdad del Evangelio y formar discípulos de Jesucristo.',
-        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800'
+        id: 'pastor-wagner',
+        name: 'Pastor Wagner Castro',
+        role: 'Pastor Principal',
+        bio: 'Liderando con visión y pasión por la presencia de Dios y la transformación de las familias.',
+        image: `${API_URL}/uploads/comprobantes/1788309651553-080761e7-6073-4dab-8aed-0e3e7895156d.jpg`
+      },
+      {
+        id: 'pastora-dayana',
+        name: 'Pastora Dayana de Castro',
+        role: 'Pastora Principal',
+        bio: 'Apasionada por la adoración, el discipulado y el empoderamiento de las generaciones.',
+        image: `${API_URL}/uploads/comprobantes/1788309659550-70c28495-5cd4-4c79-8e44-45bcf3f09bc0.jpg`
       }
     ];
   }
@@ -99,23 +131,25 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
         overflow: 'hidden'
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '6px 18px',
-            borderRadius: '30px',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            letterSpacing: '1px',
-            color: '#E0E7FF',
-            marginBottom: '20px',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <Compass size={16} color="#977DFF" /> CONOCÉ LA VISIÓN
-          </span>
+          {showKicker && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              padding: '6px 18px',
+              borderRadius: '30px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              letterSpacing: '1px',
+              color: '#E0E7FF',
+              marginBottom: '20px',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <Compass size={16} color="#977DFF" /> {kickerText}
+            </span>
+          )}
 
           <h1 style={{
             fontSize: 'clamp(2.5rem, 6vw, 4rem)',
@@ -139,49 +173,41 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
             {subtitle}
           </p>
 
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a 
-              href="/grupos-de-amistad"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/grupos-de-amistad'; }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                backgroundColor: '#3B82F6',
-                color: '#FFFFFF',
-                padding: '14px 28px',
-                borderRadius: '50px',
-                fontWeight: 700,
-                fontSize: '1rem',
-                textDecoration: 'none',
-                boxShadow: '0 8px 25px rgba(59, 130, 246, 0.4)',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Unirte a un Grupo de Amistad <ArrowRight size={18} />
-            </a>
-            <a 
-              href="/"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                color: '#FFFFFF',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                padding: '14px 28px',
-                borderRadius: '50px',
-                fontWeight: 700,
-                fontSize: '1rem',
-                textDecoration: 'none',
-                backdropFilter: 'blur(10px)',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Horarios de Servicios
-            </a>
-          </div>
+          {showButtons && (
+            <div style={{ display: 'flex', gap: '16px', justifyContent: flexAlign, flexWrap: 'wrap' }}>
+              {nosotrosButtons.map((btn, idx) => (
+                <a
+                  key={idx}
+                  href={btn.link || '/'}
+                  onClick={(e) => {
+                    if (btn.link) {
+                      if (btn.link.startsWith('http')) return;
+                      e.preventDefault();
+                      window.location.href = btn.link;
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    backgroundColor: btn.primary ? '#3B82F6' : 'rgba(255, 255, 255, 0.12)',
+                    color: '#FFFFFF',
+                    border: btn.primary ? 'none' : '1px solid rgba(255, 255, 255, 0.25)',
+                    padding: '14px 28px',
+                    borderRadius: '50px',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    textDecoration: 'none',
+                    boxShadow: btn.primary ? '0 8px 25px rgba(59, 130, 246, 0.4)' : 'none',
+                    backdropFilter: btn.primary ? 'none' : 'blur(10px)',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {btn.label} {btn.primary && <ArrowRight size={18} />}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
