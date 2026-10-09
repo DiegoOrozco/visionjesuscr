@@ -227,12 +227,15 @@ export default function AppleCongresosEditor({
             {[
               { id: 'home', name: '1. Inicio (/)', active: false },
               { id: 'nosotros', name: '2. Nosotros', active: false },
-              { id: 'congresos', name: '3. Congresos', active: true },
-              { id: 'autenticas', name: '4. Auténticas', active: false },
-              { id: 'sanados', name: '5. Sanados', active: false },
-              { id: 'modelo', name: '6. Modelo', active: false },
-              { id: 'move', name: '7. Move', active: false },
-              { id: 'tienda', name: '8. Tienda', active: false }
+              { id: 'congresos', name: '3. Eventos & Congresos', active: true },
+              { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
+              { id: 'oracion', name: '5. Oración & Testimonios', active: false },
+              { id: 'donar', name: '6. Donar', active: false },
+              { id: 'autenticas', name: '7. Auténticas', active: false },
+              { id: 'sanados', name: '8. Sanados', active: false },
+              { id: 'modelo', name: '9. Modelo', active: false },
+              { id: 'move', name: '10. Move', active: false },
+              { id: 'tienda', name: '11. Tienda', active: false }
             ].map((pg) => (
               <span
                 key={pg.id}
@@ -251,7 +254,7 @@ export default function AppleCongresosEditor({
                   if ((pg.id === 'home' || pg.id === 'nosotros') && onSelectWebPage) {
                     onSelectWebPage(pg.id);
                   } else if (!pg.active) {
-                    alert(`Estamos renovando la edición del sitio página por página. ¡Estamos en Página 3: Congresos & Eventos! Pronto continuaremos con ${pg.name}.`);
+                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros y 3. Eventos & Congresos. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
                   }
                 }}
               >
@@ -261,7 +264,7 @@ export default function AppleCongresosEditor({
           </div>
         </div>
         <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
-          Paso 3 de 8 en progreso
+          Página 3 de 11 activa
         </span>
       </div>
 

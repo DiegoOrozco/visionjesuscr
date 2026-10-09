@@ -237,12 +237,15 @@ export default function AppleHomeEditor({
             {[
               { id: 'home', name: '1. Inicio (/)', active: true },
               { id: 'nosotros', name: '2. Nosotros', active: false },
-              { id: 'congresos', name: '3. Congresos', active: false },
-              { id: 'autenticas', name: '4. Auténticas', active: false },
-              { id: 'sanados', name: '5. Sanados', active: false },
-              { id: 'modelo', name: '6. Modelo', active: false },
-              { id: 'move', name: '7. Move', active: false },
-              { id: 'tienda', name: '8. Tienda', active: false }
+              { id: 'congresos', name: '3. Eventos & Congresos', active: false },
+              { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
+              { id: 'oracion', name: '5. Oración & Testimonios', active: false },
+              { id: 'donar', name: '6. Donar', active: false },
+              { id: 'autenticas', name: '7. Auténticas', active: false },
+              { id: 'sanados', name: '8. Sanados', active: false },
+              { id: 'modelo', name: '9. Modelo', active: false },
+              { id: 'move', name: '10. Move', active: false },
+              { id: 'tienda', name: '11. Tienda', active: false }
             ].map((pg) => (
               <span
                 key={pg.id}
@@ -258,10 +261,10 @@ export default function AppleHomeEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if (pg.id === 'nosotros' && onSelectWebPage) {
-                    onSelectWebPage('nosotros');
+                  if ((pg.id === 'nosotros' || pg.id === 'congresos') && onSelectWebPage) {
+                    onSelectWebPage(pg.id);
                   } else if (!pg.active) {
-                    alert(`Estamos renovando el sistema página por página como indicaste. ¡Actualmente estamos en Fase 2: Nosotros! Pronto continuaremos con ${pg.name}.`);
+                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros y 3. Eventos & Congresos. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
                   }
                 }}
               >
@@ -271,7 +274,7 @@ export default function AppleHomeEditor({
           </div>
         </div>
         <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
-          Paso 1 de 8 en progreso
+          Página 1 de 11 activa
         </span>
       </div>
 
