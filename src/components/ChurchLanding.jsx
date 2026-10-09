@@ -388,6 +388,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       }
 
       case 'pillars': {
+        if (config.home_pillars_hidden === true || config.home_pillars_hidden === 'true') return null;
         const pillars = content.pillars || [
           { id: '1', title: 'Nuestra Visión', text: 'Ser una iglesia viva que inspira a miles de personas a experimentar una relación personal con Dios, transformando vidas y formando discípulos apasionados por la verdad.', icon: 'Compass' },
           { id: '2', title: 'Nuestra Misión', text: 'Evangelizar, consolidar, edificar y enviar a cada creyente a vivir su propósito divino, restaurando familias y equipando líderes para impactar nuestra sociedad.', icon: 'Flame' },
