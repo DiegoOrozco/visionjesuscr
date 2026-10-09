@@ -1975,14 +1975,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       };
 
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedConfig)
+        body: JSON.stringify({ config: updatedConfig })
       });
       const data = await res.json();
       if (data.success) {
         setHomepageConfig(updatedConfig);
         setConfigFields(updatedConfig);
+        if (onSaveConfig) onSaveConfig(updatedConfig);
         setSaveSuccessMsg('¡Página de Congresos & Eventos guardada y publicada exitosamente!');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
@@ -2049,14 +2050,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       };
 
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedConfig)
+        body: JSON.stringify({ config: updatedConfig })
       });
       const data = await res.json();
       if (data.success) {
         setHomepageConfig(updatedConfig);
         setConfigFields(updatedConfig);
+        if (onSaveConfig) onSaveConfig(updatedConfig);
         setSaveSuccessMsg('¡Página de Grupos de Amistad guardada y publicada exitosamente!');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
@@ -2086,14 +2088,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       };
 
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedConfig)
+        body: JSON.stringify({ config: updatedConfig })
       });
       const data = await res.json();
       if (data.success) {
         setHomepageConfig(updatedConfig);
         setConfigFields(updatedConfig);
+        if (onSaveConfig) onSaveConfig(updatedConfig);
         setSaveSuccessMsg('¡Página de Oración & Testimonios guardada y publicada exitosamente!');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
@@ -2126,14 +2129,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       };
 
       const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedConfig)
+        body: JSON.stringify({ config: updatedConfig })
       });
       const data = await res.json();
       if (data.success) {
         setHomepageConfig(updatedConfig);
         setConfigFields(updatedConfig);
+        if (onSaveConfig) onSaveConfig(updatedConfig);
         setSaveSuccessMsg('¡Página de Donaciones & Ofrendas guardada y publicada exitosamente!');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
