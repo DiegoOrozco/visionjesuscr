@@ -387,24 +387,26 @@ export default function AppleHomeEditor({
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(180deg, transparent 0%, #000000 100%)', zIndex: 1 }} />
 
               {/* Live Content */}
-              <div style={{ position: 'relative', zIndex: 2, maxWidth: '640px' }}>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '9999px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  marginBottom: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
-                }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34C759' }}></span>
-                  <span>Comunidad de Fe & Esperanza</span>
-                </div>
+              <div style={{ position: 'relative', zIndex: 2, maxWidth: '640px', width: '100%' }}>
+                {configFields.hero_kicker_hidden !== 'true' && configFields.hero_kicker_hidden !== true && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '9999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    marginBottom: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34C759' }}></span>
+                    <span>{configFields.hero_kicker || 'Comunidad de Fe & Esperanza'}</span>
+                  </div>
+                )}
 
                 <h1 style={{
                   fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
@@ -427,31 +429,30 @@ export default function AppleHomeEditor({
                   {configFields.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración'}
                 </p>
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  {(localButtons && localButtons.length > 0 ? localButtons : [
-                    { id: '1', label: 'Conocé la Visión', url: '/nosotros', style: 'primary' },
-                    { id: '2', label: 'Horarios de Servicios', url: '#horarios-section', style: 'secondary' }
-                  ]).map((btn, idx) => (
-                    <span
-                      key={btn.id || idx}
-                      style={{
-                        padding: '8px 18px',
-                        borderRadius: '9999px',
-                        fontSize: '0.82rem',
-                        fontWeight: 700,
-                        backgroundColor: btn.style === 'primary' || idx === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.12)',
-                        color: btn.style === 'primary' || idx === 0 ? '#000000' : '#FFFFFF',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      {btn.emoji && <span>{btn.emoji}</span>}
-                      <span>{btn.label}</span>
-                    </span>
-                  ))}
-                </div>
+                {configFields.hero_buttons_hidden !== 'true' && configFields.hero_buttons_hidden !== true && localButtons && localButtons.length > 0 && (
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: configFields.hero_buttons_align || 'center', flexWrap: 'wrap', width: '100%' }}>
+                    {localButtons.map((btn, idx) => (
+                      <span
+                        key={btn.id || idx}
+                        style={{
+                          padding: '8px 18px',
+                          borderRadius: '9999px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          backgroundColor: btn.style === 'primary' || idx === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.12)',
+                          color: btn.style === 'primary' || idx === 0 ? '#000000' : '#FFFFFF',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        {btn.emoji && <span>{btn.emoji}</span>}
+                        <span>{btn.label}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -472,9 +473,44 @@ export default function AppleHomeEditor({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '12px' }}>
                 <Sparkles size={16} color="#977DFF" />
                 <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
-                  Textos de Portada
+                  Textos y Etiqueta de Portada
                 </h3>
               </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#C4B5FD', marginBottom: '6px' }}>
+                  Etiqueta Flotante Superior (Kicker Badge)
+                </label>
+                <input
+                  type="text"
+                  name="hero_kicker"
+                  value={configFields.hero_kicker !== undefined ? configFields.hero_kicker : 'Comunidad de Fe & Esperanza'}
+                  onChange={handleConfigChange}
+                  placeholder="Ej: Comunidad de Fe & Esperanza"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem', color: '#EAEDF8', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  name="hero_kicker_hidden"
+                  checked={configFields.hero_kicker_hidden === 'true' || configFields.hero_kicker_hidden === true}
+                  onChange={(e) => handleConfigChange({ target: { name: 'hero_kicker_hidden', value: e.target.checked ? 'true' : 'false' } })}
+                  style={{ width: '18px', height: '18px', accentColor: '#977DFF', cursor: 'pointer' }}
+                />
+                <span>🚫 Ocultar Etiqueta Superior (Pill / Kicker)</span>
+              </label>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#C4B5FD', marginBottom: '6px' }}>
@@ -638,30 +674,107 @@ export default function AppleHomeEditor({
                   Botones de Acción en Portada (CTA)
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'rgba(234, 237, 248, 0.6)' }}>
-                  Configura los botones principales que dirigen a los nuevos visitantes a conocer la visión, horarios o eventos.
+                  Configura la posición, alineación o bien oculta los botones si prefieres una portada sin elementos sobrepuestos.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddButton}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  backgroundColor: 'rgba(151, 125, 255, 0.15)',
-                  border: '1px solid rgba(151, 125, 255, 0.3)',
-                  borderRadius: '9999px',
-                  color: '#C4B5FD',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <Plus size={14} />
-                <span>Agregar Botón</span>
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleAddButton}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    backgroundColor: 'rgba(151, 125, 255, 0.15)',
+                    border: '1px solid rgba(151, 125, 255, 0.3)',
+                    borderRadius: '9999px',
+                    color: '#C4B5FD',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>Agregar Botón</span>
+                </button>
+
+                {localButtons && localButtons.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('¿Deseas eliminar TODOS los botones de la portada?')) {
+                        handleButtonChange(null, 'CLEAR_ALL');
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      backgroundColor: 'rgba(255, 59, 48, 0.12)',
+                      border: '1px solid rgba(255, 59, 48, 0.3)',
+                      borderRadius: '9999px',
+                      color: '#FF3B30',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Eliminar Todos</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* BUTTON CONTROLS (HIDE TOGGLE + ALIGNMENT SELECTOR) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+              padding: '16px',
+              borderRadius: '14px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.06)'
+            }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.86rem', color: '#EAEDF8', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  name="hero_buttons_hidden"
+                  checked={configFields.hero_buttons_hidden === 'true' || configFields.hero_buttons_hidden === true}
+                  onChange={(e) => handleConfigChange({ target: { name: 'hero_buttons_hidden', value: e.target.checked ? 'true' : 'false' } })}
+                  style={{ width: '18px', height: '18px', accentColor: '#977DFF', cursor: 'pointer' }}
+                />
+                <span>🚫 Ocultar Todos los Botones de la Portada</span>
+              </label>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#C4B5FD', marginBottom: '4px' }}>
+                  Alineación Horizontal de Botones
+                </label>
+                <select
+                  name="hero_buttons_align"
+                  value={configFields.hero_buttons_align || 'center'}
+                  onChange={handleConfigChange}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    backgroundColor: '#1E293B',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '8px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem',
+                    fontWeight: 600
+                  }}
+                >
+                  <option value="center">Centro (Recomendado)</option>
+                  <option value="flex-start">Izquierda (Alinear a la izquierda)</option>
+                  <option value="flex-end">Derecha (Alinear a la derecha)</option>
+                </select>
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -1541,6 +1541,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     setLocalButtons(localButtons.filter(b => b.id !== id));
   };
   const handleButtonChange = (id, field, value) => {
+    if (field === 'CLEAR_ALL') {
+      setLocalButtons([]);
+      return;
+    }
     setLocalButtons(localButtons.map(b => b.id === id ? { ...b, [field]: value } : b));
   };
 
@@ -2353,10 +2357,11 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
             title: configFields.hero_title || 'Bienvenido a TU CASA',
             subtitle: configFields.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración',
             bgUrl: configFields.hero_bg || homepageConfig.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
-            buttons: localButtons && localButtons.length > 0 ? localButtons : [
-              { id: '1', label: 'Conocé la Visión', emoji: '✨', url: '/nosotros', style: 'primary' },
-              { id: '2', label: 'Horarios de Servicios', emoji: '⏰', url: '#horarios-section', style: 'secondary' }
-            ]
+            kicker: configFields.hero_kicker !== undefined ? configFields.hero_kicker : 'Comunidad de Fe & Esperanza',
+            kickerHidden: configFields.hero_kicker_hidden === 'true' || configFields.hero_kicker_hidden === true,
+            buttons: localButtons || [],
+            buttonsHidden: configFields.hero_buttons_hidden === 'true' || configFields.hero_buttons_hidden === true,
+            buttonsAlign: configFields.hero_buttons_align || 'center'
           },
           styles: { backgroundColor: '#000000', textColor: '#EAEDF8', accentColor: '#977DFF' }
         },

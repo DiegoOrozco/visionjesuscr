@@ -135,11 +135,12 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         let bgUrl = content.bgUrl || config.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
         bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
         const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
-        const heroTitle = content.title !== undefined ? content.title : 'Bienvenido a TU CASA';
-        const heroSubtitle = content.subtitle !== undefined ? content.subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración';
-        const heroButtons = content.buttons && content.buttons.length > 0 
-          ? content.buttons 
-          : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }];
+        const kickerText = content.kicker !== undefined ? content.kicker : (config.hero_kicker !== undefined ? config.hero_kicker : 'Comunidad de Fe & Esperanza');
+        const showKicker = content.kickerHidden !== true && config.hero_kicker_hidden !== 'true' && config.hero_kicker_hidden !== true && !!kickerText;
+
+        const rawButtons = content.buttons !== undefined ? content.buttons : heroButtons;
+        const showButtons = content.buttonsHidden !== true && config.hero_buttons_hidden !== 'true' && config.hero_buttons_hidden !== true && rawButtons && rawButtons.length > 0;
+        const buttonsAlign = content.buttonsAlign || config.hero_buttons_align || 'center';
 
         return (
           <div 
@@ -208,13 +209,15 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
               pointerEvents: 'none'
             }} />
             
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
               
               {/* Apple Kicker Pill */}
-              <div className="apple-kicker">
-                <span className="apple-kicker-dot"></span>
-                <span>Comunidad de Fe & Esperanza</span>
-              </div>
+              {showKicker && (
+                <div className="apple-kicker">
+                  <span className="apple-kicker-dot"></span>
+                  <span>{kickerText}</span>
+                </div>
+              )}
 
               {heroTitle && (
                 <h1 className="apple-hero-headline apple-gradient-text" style={{ maxWidth: '880px' }}>
@@ -228,25 +231,27 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
                 </p>
               )}
 
-              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-                {heroButtons.map((btn, bIdx) => {
-                  const isPrimary = btn.style === 'primary' || bIdx === 0;
-                  return (
-                    <button
-                      key={btn.id}
-                      onClick={() => handleButtonClick(btn)}
-                      className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
-                      style={{
-                        padding: '14px 28px',
-                        fontSize: '0.94rem'
-                      }}
-                    >
-                      <span>{btn.label}</span>
-                      {isPrimary && <ArrowRight size={16} />}
-                    </button>
-                  );
-                })}
-              </div>
+              {showButtons && (
+                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: buttonsAlign, alignItems: 'center', width: '100%', marginTop: '16px' }}>
+                  {rawButtons.map((btn, bIdx) => {
+                    const isPrimary = btn.style === 'primary' || bIdx === 0;
+                    return (
+                      <button
+                        key={btn.id || bIdx}
+                        onClick={() => handleButtonClick(btn)}
+                        className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
+                        style={{
+                          padding: '14px 28px',
+                          fontSize: '0.94rem'
+                        }}
+                      >
+                        <span>{btn.label}</span>
+                        {isPrimary && <ArrowRight size={16} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -995,13 +1000,15 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
           pointerEvents: 'none'
         }} />
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
           
           {/* Apple Kicker Pill */}
-          <div className="apple-kicker">
-            <span className="apple-kicker-dot"></span>
-            <span>Comunidad de Fe & Esperanza</span>
-          </div>
+          {config.hero_kicker_hidden !== 'true' && config.hero_kicker_hidden !== true && (config.hero_kicker || 'Comunidad de Fe & Esperanza') && (
+            <div className="apple-kicker">
+              <span className="apple-kicker-dot"></span>
+              <span>{config.hero_kicker || 'Comunidad de Fe & Esperanza'}</span>
+            </div>
+          )}
 
           {(config.hero_title !== undefined ? config.hero_title : '') && (
             <h1 className="apple-hero-headline apple-gradient-text" style={{ maxWidth: '880px' }}>
@@ -1015,25 +1022,27 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
             </p>
           )}
 
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-            {(heroButtons.length > 0 ? heroButtons : [{ id: '1', label: '¿Eres nuevo en la Visión?', url: '#vision', style: 'primary' }]).map((btn, bIdx) => {
-              const isPrimary = btn.style === 'primary' || bIdx === 0;
-              return (
-                <button
-                  key={btn.id}
-                  onClick={() => handleButtonClick(btn)}
-                  className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
-                  style={{
-                    padding: '14px 28px',
-                    fontSize: '0.94rem'
-                  }}
-                >
-                  <span>{btn.label}</span>
-                  {isPrimary && <ArrowRight size={16} />}
-                </button>
-              );
-            })}
-          </div>
+          {config.hero_buttons_hidden !== 'true' && config.hero_buttons_hidden !== true && heroButtons && heroButtons.length > 0 && (
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: config.hero_buttons_align || 'center', alignItems: 'center', width: '100%', marginTop: '16px' }}>
+              {heroButtons.map((btn, bIdx) => {
+                const isPrimary = btn.style === 'primary' || bIdx === 0;
+                return (
+                  <button
+                    key={btn.id || bIdx}
+                    onClick={() => handleButtonClick(btn)}
+                    className={`apple-btn ${isPrimary ? 'apple-btn-primary' : 'apple-btn-secondary'}`}
+                    style={{
+                      padding: '14px 28px',
+                      fontSize: '0.94rem'
+                    }}
+                  >
+                    <span>{btn.label}</span>
+                    {isPrimary && <ArrowRight size={16} />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
