@@ -773,80 +773,92 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const selectMediaItem = (url) => {
     if (mediaTarget) {
-      const [type, secId, field, subField] = mediaTarget;
-      if (type === 'config') {
-        const fieldName = secId;
-        setConfigFields(prev => ({ ...prev, [fieldName]: url }));
-      } else if (type === 'news') {
-        handleNewsChange(secId, field || 'image', url);
-      } else if (type === 'nosotros_card') {
-        handleNosotrosCardChange(secId, field || 'image', url);
-      } else if (type === 'pastor') {
-        handlePastorChange(secId, field || 'image', url);
-      } else if (type === 'events_list') {
-        handleEventChange(secId, field || 'image', url);
-      } else if (type === 'section') {
-        setLocalSections(prev => prev.map(s => {
-          if (s.id === secId) {
-            return {
-              ...s,
-              content: {
-                ...s.content,
-                [field]: url
-              }
-            };
+      if (typeof mediaTarget === 'string') {
+        if (mediaTarget.startsWith('modelo_network_image_')) {
+          const idxStr = mediaTarget.replace('modelo_network_image_', '');
+          const idx = parseInt(idxStr, 10);
+          if (!isNaN(idx)) {
+            handleModeloNetworkChangeApple(idx, 'image', url);
           }
-          return s;
-        }));
-      } else if (type === 'section_news') {
-        setLocalSections(prev => prev.map(s => {
-          if (s.id === secId) {
-            const list = [...(s.content.newsItems || [])];
-            list[field] = { ...list[field], [subField]: url };
-            return {
-              ...s,
-              content: {
-                ...s.content,
-                newsItems: list
-              }
-            };
-          }
-          return s;
-        }));
-      } else if (type === 'section_pastor') {
-        setLocalSections(prev => prev.map(s => {
-          if (s.id === secId) {
-            const list = [...(s.content.pastors || [])];
-            if (list[field]) {
-              list[field] = { ...list[field], imageUrl: url };
+        } else {
+          setConfigFields(prev => ({ ...prev, [mediaTarget]: url }));
+        }
+      } else if (Array.isArray(mediaTarget)) {
+        const [type, secId, field, subField] = mediaTarget;
+        if (type === 'config') {
+          const fieldName = secId;
+          setConfigFields(prev => ({ ...prev, [fieldName]: url }));
+        } else if (type === 'news') {
+          handleNewsChange(secId, field || 'image', url);
+        } else if (type === 'nosotros_card') {
+          handleNosotrosCardChange(secId, field || 'image', url);
+        } else if (type === 'pastor') {
+          handlePastorChange(secId, field || 'image', url);
+        } else if (type === 'events_list') {
+          handleEventChange(secId, field || 'image', url);
+        } else if (type === 'section') {
+          setLocalSections(prev => prev.map(s => {
+            if (s.id === secId) {
+              return {
+                ...s,
+                content: {
+                  ...s.content,
+                  [field]: url
+                }
+              };
             }
-            return {
-              ...s,
-              content: {
-                ...s.content,
-                pastors: list
-              }
-            };
-          }
-          return s;
-        }));
-      } else if (type === 'section_grid') {
-        setLocalSections(prev => prev.map(s => {
-          if (s.id === secId) {
-            const list = [...(s.content.cells || [])];
-            if (list[field]) {
-              list[field] = { ...list[field], imageUrl: url };
+            return s;
+          }));
+        } else if (type === 'section_news') {
+          setLocalSections(prev => prev.map(s => {
+            if (s.id === secId) {
+              const list = [...(s.content.newsItems || [])];
+              list[field] = { ...list[field], [subField]: url };
+              return {
+                ...s,
+                content: {
+                  ...s.content,
+                  newsItems: list
+                }
+              };
             }
-            return {
-              ...s,
-              content: {
-                ...s.content,
-                cells: list
+            return s;
+          }));
+        } else if (type === 'section_pastor') {
+          setLocalSections(prev => prev.map(s => {
+            if (s.id === secId) {
+              const list = [...(s.content.pastors || [])];
+              if (list[field]) {
+                list[field] = { ...list[field], imageUrl: url };
               }
-            };
-          }
-          return s;
-        }));
+              return {
+                ...s,
+                content: {
+                  ...s.content,
+                  pastors: list
+                }
+              };
+            }
+            return s;
+          }));
+        } else if (type === 'section_grid') {
+          setLocalSections(prev => prev.map(s => {
+            if (s.id === secId) {
+              const list = [...(s.content.cells || [])];
+              if (list[field]) {
+                list[field] = { ...list[field], imageUrl: url };
+              }
+              return {
+                ...s,
+                content: {
+                  ...s.content,
+                  cells: list
+                }
+              };
+            }
+            return s;
+          }));
+        }
       }
     }
     setShowMediaLibrary(false);
