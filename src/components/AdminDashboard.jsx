@@ -727,18 +727,24 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     formData.append('image', file);
 
     try {
+      setLoadingMedia(true);
       const res = await authFetch(`${API_URL}/api/admin/landing/upload`, {
         method: 'POST',
         body: formData
       });
       const data = await res.json();
       if (data.success) {
-        fetchMediaList();
+        await fetchMediaList();
+        if (data.url && mediaTarget) {
+          selectMediaItem(data.url);
+        }
       } else {
         alert(data.message || 'Error al subir el archivo.');
       }
     } catch (err) {
       alert('Error de red al subir el archivo.');
+    } finally {
+      setLoadingMedia(false);
     }
   };
 
@@ -6603,13 +6609,18 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       {/* 2. MODAL: BIBLIOTECA DE MEDIOS (MEDIA LIBRARY) */}
       {showMediaLibrary && (
         <div className="modal-overlay" onClick={() => setShowMediaLibrary(false)} style={{ zIndex: 99999 }}>
-          <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '850px', width: '90%', borderRadius: '24px', backgroundColor: '#FFFFFF', color: 'var(--accent-coffee)', padding: '24px' }}>
+          <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '1000px', width: '92%', borderRadius: '24px', backgroundColor: '#FFFFFF', color: 'var(--accent-coffee)', padding: '28px' }}>
             
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #EAEAEA', paddingBottom: '14px', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Globe size={24} color="var(--accent-gold)" /> Biblioteca de Medios (Media Library)
-              </h3>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-coffee)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Globe size={24} color="var(--accent-gold)" /> Biblioteca de Medios (Media Library)
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Sube nuevas imágenes o videos. La imagen más reciente se selecciona automáticamente.
+                </p>
+              </div>
               <button 
                 type="button" 
                 onClick={() => setShowMediaLibrary(false)} 
@@ -6624,17 +6635,17 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               
               {/* File input wrapper */}
               <div>
-                <label className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '50px', cursor: 'pointer', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)', border: 'none', color: '#FFFFFF' }}>
+                <label className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 22px', borderRadius: '50px', cursor: 'pointer', fontWeight: 800, background: 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)', border: 'none', color: '#FFFFFF', boxShadow: '0 4px 14px rgba(0, 51, 255, 0.3)' }}>
                   <Plus size={18} /> Subir Nuevo Archivo
                   <input type="file" onChange={handleMediaUpload} style={{ display: 'none' }} accept="image/*,video/*" />
                 </label>
               </div>
 
               {/* Search filter input */}
-              <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
+              <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
                 <input 
                   type="text" 
-                  placeholder="Buscar archivos por nombre..." 
+                  placeholder="Buscar por nombre (ej. comprobante, logo)..." 
                   value={mediaSearch}
                   onChange={(e) => setMediaSearch(e.target.value)}
                   style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '50px', border: '1px solid #CCC', fontSize: '0.88rem' }}
@@ -6666,7 +6677,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                 }
 
                 return (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '14px', maxHeight: '420px', overflowY: 'auto', padding: '4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px', maxHeight: '520px', overflowY: 'auto', padding: '6px' }}>
                     {filteredMedia.map((item, idx) => {
                       const isImage = item.filename.match(/\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i);
                       const isVideo = item.filename.match(/\.(mp4|webm|mov|ogg)($|\?)/i);

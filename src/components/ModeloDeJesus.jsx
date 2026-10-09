@@ -208,23 +208,25 @@ export default function ModeloDeJesus({ config = {}, onGoHome }) {
 
         <div style={{ zIndex: 1, maxWidth: '850px', margin: '0 auto' }}>
           <AnimatedSection>
-            <span style={{
-              backgroundColor: 'rgba(0, 51, 255, 0.15)',
-              border: '1px solid rgba(151, 125, 255, 0.3)',
-              color: '#977DFF',
-              padding: '6px 20px',
-              borderRadius: '50px',
-              fontSize: '0.85rem',
-              fontWeight: 800,
-              letterSpacing: '2px',
-              textTransform: 'uppercase',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '20px'
-            }}>
-              <Users size={16} /> NUESTRAS REDES Y MINISTERIOS
-            </span>
+            {config.modelo_kicker_hidden !== 'true' && config.modelo_kicker_hidden !== true && (
+              <span style={{
+                backgroundColor: 'rgba(0, 51, 255, 0.15)',
+                border: '1px solid rgba(151, 125, 255, 0.3)',
+                color: '#977DFF',
+                padding: '6px 20px',
+                borderRadius: '50px',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '20px'
+              }}>
+                <Users size={16} /> {config.modelo_kicker || 'REDES Y MINISTERIOS'}
+              </span>
+            )}
 
             <h1 style={{
               fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',

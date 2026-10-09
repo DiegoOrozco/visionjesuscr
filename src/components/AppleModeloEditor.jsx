@@ -320,16 +320,38 @@ export default function AppleModeloEditor({
 
             {/* Kicker Badge */}
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: '8px', color: 'rgba(234, 237, 248, 0.8)' }}>
-                Kicker / Etiqueta Superior
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ fontSize: '0.84rem', fontWeight: 600, color: 'rgba(234, 237, 248, 0.8)' }}>
+                  Kicker / Etiqueta Superior
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.78rem', color: '#F472B6' }}>
+                  <input
+                    type="checkbox"
+                    name="modelo_kicker_hidden"
+                    checked={configFields.modelo_kicker_hidden === 'true' || configFields.modelo_kicker_hidden === true}
+                    onChange={(e) => {
+                      handleConfigChange({
+                        target: {
+                          name: 'modelo_kicker_hidden',
+                          value: e.target.checked
+                        }
+                      });
+                    }}
+                  />
+                  <span>Ocultar Kicker en la web</span>
+                </label>
+              </div>
               <input
                 type="text"
                 name="modelo_kicker"
                 value={configFields.modelo_kicker !== undefined ? configFields.modelo_kicker : 'REDES Y MINISTERIOS'}
                 onChange={handleConfigChange}
-                placeholder="Ej. REDES Y MINISTERIOS"
+                disabled={configFields.modelo_kicker_hidden === 'true' || configFields.modelo_kicker_hidden === true}
+                placeholder="Ej. REDES Y MINISTERIOS (deja vacío u oculta si no deseas mostrarlo)"
                 className="apple-input"
+                style={{
+                  opacity: (configFields.modelo_kicker_hidden === 'true' || configFields.modelo_kicker_hidden === true) ? 0.5 : 1
+                }}
               />
             </div>
 
