@@ -132,7 +132,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
 
     switch (sec.type) {
       case 'hero': {
-        let bgUrl = content.bgUrl || '';
+        let bgUrl = content.bgUrl || config.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
         bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
         const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
         const heroTitle = content.title !== undefined ? content.title : 'Bienvenido a TU CASA';

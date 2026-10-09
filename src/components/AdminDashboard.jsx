@@ -761,7 +761,16 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const selectMediaItem = (url) => {
     if (mediaTarget) {
       const [type, secId, field, subField] = mediaTarget;
-      if (type === 'section') {
+      if (type === 'config') {
+        const fieldName = secId;
+        setConfigFields(prev => ({ ...prev, [fieldName]: url }));
+      } else if (type === 'news') {
+        handleNewsChange(secId, field || 'image', url);
+      } else if (type === 'nosotros_card') {
+        handleNosotrosCardChange(secId, field || 'image', url);
+      } else if (type === 'pastor') {
+        handlePastorChange(secId, field || 'image', url);
+      } else if (type === 'section') {
         setLocalSections(prev => prev.map(s => {
           if (s.id === secId) {
             return {
@@ -2343,7 +2352,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           content: {
             title: configFields.hero_title || 'Bienvenido a TU CASA',
             subtitle: configFields.hero_subtitle || 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración',
-            bgUrl: configFields.hero_bg || '',
+            bgUrl: configFields.hero_bg || homepageConfig.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
             buttons: localButtons && localButtons.length > 0 ? localButtons : [
               { id: '1', label: 'Conocé la Visión', emoji: '✨', url: '/nosotros', style: 'primary' },
               { id: '2', label: 'Horarios de Servicios', emoji: '⏰', url: '#horarios-section', style: 'secondary' }
