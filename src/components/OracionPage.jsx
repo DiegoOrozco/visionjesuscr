@@ -127,23 +127,25 @@ export default function OracionPage({ config = {}, onGoHome }) {
       }}>
         <div style={{ maxWidth: '840px', margin: '0 auto' }}>
           
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'rgba(151, 125, 255, 0.12)',
-            border: '1px solid rgba(151, 125, 255, 0.3)',
-            color: '#977DFF',
-            padding: '6px 20px',
-            borderRadius: '50px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-            marginBottom: '20px'
-          }}>
-            <Heart size={15} /> CENTRO DE FE Y INTERCESIÓN
-          </div>
+          {config.oracion_kicker_hidden !== true && config.oracion_kicker_hidden !== 'true' && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(151, 125, 255, 0.12)',
+              border: '1px solid rgba(151, 125, 255, 0.3)',
+              color: '#977DFF',
+              padding: '6px 20px',
+              borderRadius: '50px',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              marginBottom: '20px'
+            }}>
+              <Heart size={15} /> {config.oracion_kicker || 'CENTRO DE FE Y INTERCESIÓN'}
+            </div>
+          )}
 
           <h1 style={{
             fontSize: 'clamp(2.4rem, 5vw, 4rem)',
@@ -154,7 +156,7 @@ export default function OracionPage({ config = {}, onGoHome }) {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Peticiones de Oración & Testimonios
+            {config.oracion_title || 'Peticiones de Oración & Testimonios'}
           </h1>
 
           <p style={{
@@ -164,45 +166,47 @@ export default function OracionPage({ config = {}, onGoHome }) {
             maxWidth: '720px',
             margin: '0 auto 36px'
           }}>
-            Creemos que no hay imposible para Dios, por tanto, cualquiera que sea tu problema, ¡tiene solución!
+            {config.oracion_subtitle || 'Creemos que no hay imposible para Dios, por tanto, cualquiera que sea tu problema, ¡tiene solución!'}
           </p>
 
           {/* BIBLE VERSE CARD */}
-          <div style={{
-            background: 'rgba(0, 3, 61, 0.55)',
-            border: '1px solid rgba(151, 125, 255, 0.25)',
-            borderRadius: '24px',
-            padding: '32px',
-            backdropFilter: 'blur(16px)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-            position: 'relative',
-            textAlign: 'left',
-            maxWidth: '780px',
-            margin: '0 auto'
-          }}>
-            <Quote size={40} style={{ position: 'absolute', top: '24px', right: '28px', opacity: 0.15, color: '#977DFF' }} />
-            
-            <p style={{
-              fontSize: '1.15rem',
-              fontStyle: 'italic',
-              lineHeight: 1.7,
-              color: '#FFFFFF',
-              marginBottom: '14px',
-              fontWeight: 500
+          {config.oracion_verse_hidden !== true && config.oracion_verse_hidden !== 'true' && (
+            <div style={{
+              background: 'rgba(0, 3, 61, 0.55)',
+              border: '1px solid rgba(151, 125, 255, 0.25)',
+              borderRadius: '24px',
+              padding: '32px',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+              position: 'relative',
+              textAlign: 'left',
+              maxWidth: '780px',
+              margin: '0 auto'
             }}>
-              «Si dos de vosotros se pusieren de acuerdo en la tierra acerca de cualquiera cosa que pidieren, les será hecho por mi Padre que está en los cielos.»
-            </p>
-            
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-              <span style={{ color: '#977DFF', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '1px' }}>
-                MATEO 18:19
-              </span>
+              <Quote size={40} style={{ position: 'absolute', top: '24px', right: '28px', opacity: 0.15, color: '#977DFF' }} />
               
-              <span style={{ fontSize: '0.84rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={14} style={{ color: '#F59E0B' }} /> Impresas y colocadas en el altar durante los días de servicio
-              </span>
+              <p style={{
+                fontSize: '1.15rem',
+                fontStyle: 'italic',
+                lineHeight: 1.7,
+                color: '#FFFFFF',
+                marginBottom: '14px',
+                fontWeight: 500
+              }}>
+                {config.oracion_verse_text !== undefined ? config.oracion_verse_text : '«Si dos de vosotros se pusieren de acuerdo en la tierra acerca de cualquiera cosa que pidieren, les será hecho por mi Padre que está en los cielos.»'}
+              </p>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                <span style={{ color: '#977DFF', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '1px' }}>
+                  {config.oracion_verse_ref !== undefined ? config.oracion_verse_ref : 'MATEO 18:19'}
+                </span>
+                
+                <span style={{ fontSize: '0.84rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} style={{ color: '#F59E0B' }} /> {config.oracion_altar_note !== undefined ? config.oracion_altar_note : 'Impresas y colocadas en el altar durante los días de servicio'}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

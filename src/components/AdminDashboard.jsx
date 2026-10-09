@@ -7,6 +7,7 @@ import AppleHomeEditor from './AppleHomeEditor';
 import AppleNosotrosEditor from './AppleNosotrosEditor';
 import AppleCongresosEditor from './AppleCongresosEditor';
 import AppleGruposEditor from './AppleGruposEditor';
+import AppleOracionEditor from './AppleOracionEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -2067,6 +2068,43 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleSaveOracionPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        oracion_title: configFields.oracion_title || 'Peticiones de Oración & Testimonios',
+        oracion_subtitle: configFields.oracion_subtitle || 'Creemos que no hay imposible para Dios, por tanto, cualquiera que sea tu problema, ¡tiene solución!',
+        oracion_kicker: configFields.oracion_kicker !== undefined ? configFields.oracion_kicker : 'CENTRO DE FE Y INTERCESIÓN',
+        oracion_kicker_hidden: configFields.oracion_kicker_hidden || false,
+        oracion_verse_hidden: configFields.oracion_verse_hidden || false,
+        oracion_verse_text: configFields.oracion_verse_text !== undefined ? configFields.oracion_verse_text : '«Si dos de vosotros se pusieren de acuerdo en la tierra acerca de cualquiera cosa que pidieren, les será hecho por mi Padre que está en los cielos.»',
+        oracion_verse_ref: configFields.oracion_verse_ref !== undefined ? configFields.oracion_verse_ref : 'MATEO 18:19',
+        oracion_altar_note: configFields.oracion_altar_note !== undefined ? configFields.oracion_altar_note : 'Impresas y colocadas en el altar durante los días de servicio'
+      };
+
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomepageConfig(updatedConfig);
+        setConfigFields(updatedConfig);
+        setSaveSuccessMsg('¡Página de Oración & Testimonios guardada y publicada exitosamente!');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      } else {
+        alert(data.message || 'Error al guardar Oración.');
+      }
+    } catch (err) {
+      alert('Error de conexión al guardar.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const handleSaveNosotrosPageApple = async () => {
     setSaveLoading(true);
     setSaveSuccessMsg('');
@@ -3806,6 +3844,19 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               handleGroupChange={handleGroupChangeApple}
               openMediaLibrary={openMediaLibrary}
               handleSaveGruposPageApple={handleSaveGruposPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'oracion' && (
+            <AppleOracionEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveOracionPageApple={handleSaveOracionPageApple}
               saveLoading={saveLoading}
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}
