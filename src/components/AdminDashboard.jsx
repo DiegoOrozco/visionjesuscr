@@ -4,6 +4,7 @@ import AutenticasPromo from './AutenticasPromo';
 import ModeloDeJesus from './ModeloDeJesus';
 import CongresosPage from './CongresosPage';
 import AppleHomeEditor from './AppleHomeEditor';
+import AppleNosotrosEditor from './AppleNosotrosEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -185,9 +186,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const [localSections, setLocalSections] = useState([]);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
-  const [previewDeviceMode, setPreviewDeviceMode] = useState('desktop');
-  const [builderPagePath, setBuilderPagePath] = useState('/');
-  const [homeEditorSubTab, setHomeEditorSubTab] = useState('hero');
+  const [builderPagePath, setBuilderPagePath] = useState('/nosotros');
+  const [activeWebPage, setActiveWebPage] = useState('nosotros');
+  const [localNosotrosCards, setLocalNosotrosCards] = useState([]);
+  const [localPastoresProfiles, setLocalPastoresProfiles] = useState([]);
+  const [uploadingNosotrosHero, setUploadingNosotrosHero] = useState(false);
+  const [uploadingNosotrosCardImage, setUploadingNosotrosCardImage] = useState(null);
+  const [uploadingPastorImage, setUploadingPastorImage] = useState(null);
   const [builderSuccessMsg, setBuilderSuccessMsg] = useState('');
   const [savingBuilder, setSavingBuilder] = useState(false);
   const [showAddComponentModal, setShowAddComponentModal] = useState(false);
@@ -1315,7 +1320,10 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         iban_bncr_usd: homepageConfig.iban_bncr_usd || 'CR05015100010087654321',
         iban_bac_crc: homepageConfig.iban_bac_crc || 'CR05010200009876543210',
         iban_bac_usd: homepageConfig.iban_bac_usd || 'CR05010200001234567890',
-        legal_transparency_note: homepageConfig.legal_transparency_note || 'Iglesia Visión Jesús es una entidad legalmente constituida en Costa Rica. Todas las ofrendas y diezmos son administrados con transparencia para la obra del Evangelio.'
+        legal_transparency_note: homepageConfig.legal_transparency_note || 'Iglesia Visión Jesús es una entidad legalmente constituida en Costa Rica. Todas las ofrendas y diezmos son administrados con transparencia para la obra del Evangelio.',
+        nosotros_title: homepageConfig.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
+        nosotros_subtitle: homepageConfig.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
+        nosotros_hero_bg: homepageConfig.nosotros_hero_bg || ''
       });
 
       setPricingFields({
@@ -1364,6 +1372,71 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         ];
       }
       setLocalEventsList(parsedEvents);
+
+      // Parse Nosotros Cards
+      let parsedNosotrosCards = [];
+      try {
+        if (homepageConfig.nosotros_cards) {
+          parsedNosotrosCards = typeof homepageConfig.nosotros_cards === 'string' ? JSON.parse(homepageConfig.nosotros_cards) : homepageConfig.nosotros_cards;
+        }
+      } catch (e) {
+        console.error('Error parsing nosotros_cards in admin:', e);
+      }
+      if (!parsedNosotrosCards || parsedNosotrosCards.length === 0) {
+        parsedNosotrosCards = [
+          {
+            id: 'vj-kids',
+            title: 'VJ KIDS',
+            tagline: 'FE Y DIVERSIÓN PARA LOS PEQUEÑOS',
+            description: 'Un espacio especialmente preparado para que niños y niñas aprendan de la Palabra de Dios a través de dinámicas, alabanzas y enseñanzas interactivas.',
+            badge: 'CADA SERVICIO',
+            icon: 'Sparkles',
+            image: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?q=80&w=800'
+          },
+          {
+            id: 'cafeteria',
+            title: 'CAFETERÍA VISIÓN',
+            tagline: 'COMPAÑERISMO Y CAFÉ DE ESPECIALIDAD',
+            description: 'El lugar perfecto para conectar en comunidad, disfrutar de deliciosas bebidas y bocadillos, y compartir momentos especiales en familia antes y después del servicio.',
+            badge: 'ABIERTO EN SERVICIOS',
+            icon: 'Coffee',
+            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=800'
+          },
+          {
+            id: 'grupos-amistad',
+            title: 'GRUPOS DE AMISTAD',
+            tagline: 'CRECER EN FAMILIA Y COMUNIDAD',
+            description: 'Nuestra red de grupos pequeños y Casas de Paz distribuidas por cantones y zonas. Un ambiente cálido para edificar la fe, orar unos por otros y hacer verdaderos amigos.',
+            badge: 'SEMANAL',
+            icon: 'Users',
+            image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800',
+            link: '/grupos-de-amistad'
+          }
+        ];
+      }
+      setLocalNosotrosCards(parsedNosotrosCards);
+
+      // Parse Pastores Profiles
+      let parsedPastores = [];
+      try {
+        if (homepageConfig.pastores_profiles) {
+          parsedPastores = typeof homepageConfig.pastores_profiles === 'string' ? JSON.parse(homepageConfig.pastores_profiles) : homepageConfig.pastores_profiles;
+        }
+      } catch (e) {
+        console.error('Error parsing pastores_profiles in admin:', e);
+      }
+      if (!parsedPastores || parsedPastores.length === 0) {
+        parsedPastores = [
+          {
+            id: 'pastores-principales',
+            name: 'Pastores Principales',
+            role: 'Liderazgo Pastoral',
+            bio: 'Guiando a la congregación con un corazón dispuesto a servir, predicar la verdad del Evangelio y formar discípulos de Jesucristo.',
+            image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800'
+          }
+        ];
+      }
+      setLocalPastoresProfiles(parsedPastores);
     }
   }, [homepageConfig]);
 
@@ -1519,6 +1592,232 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       alert('Error de red al subir la imagen.');
     } finally {
       setUploadingScheduleBg(false);
+    }
+  };
+
+  // --- NOSOTROS CARDS & PASTORS HANDLERS ---
+  const handleAddNosotrosCard = () => {
+    setLocalNosotrosCards([
+      ...localNosotrosCards,
+      {
+        id: Date.now().toString(),
+        title: 'NUEVO ESPACIO',
+        tagline: 'DESCRIPCIÓN BREVE',
+        description: 'Escribe aquí la información sobre este espacio o ministerio...',
+        badge: 'ACTIVO',
+        image: 'https://images.unsplash.com/photo-1511649475669-e288648b2339?q=80&w=800',
+        link: ''
+      }
+    ]);
+  };
+
+  const handleRemoveNosotrosCard = (id) => {
+    setLocalNosotrosCards(localNosotrosCards.filter(c => c.id !== id));
+  };
+
+  const handleNosotrosCardChange = (id, field, value) => {
+    setLocalNosotrosCards(localNosotrosCards.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
+
+  const handleNosotrosCardImageUpload = async (id, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingNosotrosCardImage(id);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        handleNosotrosCardChange(id, 'image', data.url);
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingNosotrosCardImage(null);
+    }
+  };
+
+  const handleAddPastor = () => {
+    setLocalPastoresProfiles([
+      ...localPastoresProfiles,
+      {
+        id: Date.now().toString(),
+        name: 'Nuevo Pastor / Líder',
+        role: 'Ministerio Pastoral',
+        bio: 'Biografía o reseña de servicio ministerial...',
+        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800'
+      }
+    ]);
+  };
+
+  const handleRemovePastor = (id) => {
+    setLocalPastoresProfiles(localPastoresProfiles.filter(p => p.id !== id));
+  };
+
+  const handlePastorChange = (id, field, value) => {
+    setLocalPastoresProfiles(localPastoresProfiles.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const handlePastorImageUpload = async (id, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPastorImage(id);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        handlePastorChange(id, 'image', data.url);
+      } else {
+        alert(data.message || 'Error al subir foto.');
+      }
+    } catch (err) {
+      alert('Error de red al subir foto.');
+    } finally {
+      setUploadingPastorImage(null);
+    }
+  };
+
+  const handleNosotrosHeroUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingNosotrosHero(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfigFields(prev => ({ ...prev, nosotros_hero_bg: data.url }));
+        alert('¡Foto de portada de Nosotros actualizada!');
+      } else {
+        alert(data.message || 'Error al subir imagen.');
+      }
+    } catch (err) {
+      alert('Error de red al subir la imagen.');
+    } finally {
+      setUploadingNosotrosHero(false);
+    }
+  };
+
+  const handleSaveNosotrosPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        nosotros_title: configFields.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
+        nosotros_subtitle: configFields.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
+        nosotros_hero_bg: configFields.nosotros_hero_bg || '',
+        vision_title: configFields.vision_title || 'NUESTRA VISIÓN',
+        vision_text: configFields.vision_text || '',
+        mision_title: configFields.mision_title || 'NUESTRA MISIÓN',
+        mision_text: configFields.mision_text || '',
+        valores_title: configFields.valores_title || 'NUESTROS VALORES',
+        valores_text: configFields.valores_text || '',
+        nosotros_cards: JSON.stringify(localNosotrosCards),
+        pastores_profiles: JSON.stringify(localPastoresProfiles)
+      };
+
+      const updatedSectionsForNosotros = [
+        {
+          id: 'sec_nosotros_hero',
+          type: 'image_text',
+          sequence_order: 1,
+          content: {
+            title: configFields.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
+            text: configFields.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
+            bgUrl: configFields.nosotros_hero_bg || configFields.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600',
+            imagePosition: 'right'
+          },
+          styles: { backgroundColor: '#07070B', textColor: '#FFFFFF', accentColor: '#3B82F6' }
+        },
+        {
+          id: 'sec_nosotros_pillars',
+          type: 'pillars',
+          sequence_order: 2,
+          content: {
+            title: 'FUNDAMENTOS CONGREGACIONALES',
+            subtitle: 'Identidad y Propósito Divino',
+            pillars: [
+              { id: '1', title: configFields.vision_title || 'NUESTRA VISIÓN', text: configFields.vision_text || 'Evangelizar, Afirmar, Discipular y Enviar...', icon: 'Compass' },
+              { id: '2', title: configFields.mision_title || 'NUESTRA MISIÓN', text: configFields.mision_text || 'Llevar el evangelio de Jesucristo con poder y amor...', icon: 'Heart' },
+              { id: '3', title: configFields.valores_title || 'NUESTROS VALORES', text: configFields.valores_text || 'Amor Incondicional, Excelencia, Integridad...', icon: 'ShieldCheck' }
+            ]
+          },
+          styles: { backgroundColor: '#0B0C10', textColor: '#FFFFFF', accentColor: '#977DFF' }
+        },
+        {
+          id: 'sec_nosotros_grid',
+          type: 'grid',
+          sequence_order: 3,
+          content: {
+            title: 'Espacios Diseñados para Ti y Tu Familia',
+            columns: 3,
+            cells: localNosotrosCards.map(c => ({
+              title: c.title,
+              text: c.description,
+              imageUrl: c.image,
+              tagline: c.tagline,
+              badge: c.badge
+            }))
+          },
+          styles: { backgroundColor: '#07070B', textColor: '#FFFFFF', accentColor: '#3B82F6' }
+        },
+        {
+          id: 'sec_nosotros_pastors',
+          type: 'pastors_profile',
+          sequence_order: 4,
+          content: {
+            title: 'Pastores Principales',
+            pastores: localPastoresProfiles
+          },
+          styles: { backgroundColor: '#0B0C10', textColor: '#FFFFFF', accentColor: '#10B981' }
+        }
+      ];
+
+      const [resConfig, resSections] = await Promise.all([
+        authFetch(`${API_URL}/api/admin/homepage/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ config: updatedConfig })
+        }),
+        authFetch(`${API_URL}/api/admin/landing/sections`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sections: updatedSectionsForNosotros, page_path: '/nosotros' })
+        })
+      ]);
+
+      const dataConfig = await resConfig.json();
+      const dataSections = await resSections.json();
+
+      if (dataConfig.success && dataSections.success) {
+        setSaveSuccessMsg('¡Página Nosotros (/nosotros) publicada exitosamente en vivo!');
+        if (onSaveConfig) onSaveConfig(updatedConfig);
+        if (onSaveSections) onSaveSections();
+        setTimeout(() => setSaveSuccessMsg(''), 5000);
+      } else {
+        alert((dataConfig.message || dataSections.message) || 'Error al guardar.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de red al guardar la página de Nosotros.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -3051,35 +3350,67 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       )}
 
       {/* =========================================================================
-          APPLE STUDIO: EDITOR MODERNO DE CONTENIDO (PÁGINA 1: INICIO)
+          APPLE STUDIO: EDITOR MODERNO DE CONTENIDO (PÁGINAS)
          ========================================================================= */}
       {activeTab === 'church_web' && (
-        <AppleHomeEditor
-          configFields={configFields}
-          handleConfigChange={handleConfigChange}
-          localSchedules={localSchedules}
-          handleAddSchedule={handleAddSchedule}
-          handleRemoveSchedule={handleRemoveSchedule}
-          handleScheduleTextChange={handleScheduleTextChange}
-          handleScheduleVirtualToggle={handleScheduleVirtualToggle}
-          localButtons={localButtons}
-          handleAddButton={handleAddButton}
-          handleRemoveButton={handleRemoveButton}
-          handleButtonChange={handleButtonChange}
-          localNewsItems={localNewsItems}
-          handleAddNews={handleAddNews}
-          handleRemoveNews={handleRemoveNews}
-          handleNewsChange={handleNewsChange}
-          handleNewsImageUpload={handleNewsImageUpload}
-          uploadingNewsImage={uploadingNewsImage}
-          handleHeroUpload={handleHeroUpload}
-          uploadingHero={uploadingHero}
-          openMediaLibrary={openMediaLibrary}
-          handleSaveHomePageApple={handleSaveHomePageApple}
-          saveLoading={saveLoading}
-          saveSuccessMsg={saveSuccessMsg}
-          API_URL={API_URL}
-        />
+        <>
+          {activeWebPage === 'home' && (
+            <AppleHomeEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              localSchedules={localSchedules}
+              handleAddSchedule={handleAddSchedule}
+              handleRemoveSchedule={handleRemoveSchedule}
+              handleScheduleTextChange={handleScheduleTextChange}
+              handleScheduleVirtualToggle={handleScheduleVirtualToggle}
+              localButtons={localButtons}
+              handleAddButton={handleAddButton}
+              handleRemoveButton={handleRemoveButton}
+              handleButtonChange={handleButtonChange}
+              localNewsItems={localNewsItems}
+              handleAddNews={handleAddNews}
+              handleRemoveNews={handleRemoveNews}
+              handleNewsChange={handleNewsChange}
+              handleNewsImageUpload={handleNewsImageUpload}
+              uploadingNewsImage={uploadingNewsImage}
+              handleHeroUpload={handleHeroUpload}
+              uploadingHero={uploadingHero}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveHomePageApple={handleSaveHomePageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'nosotros' && (
+            <AppleNosotrosEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              localNosotrosCards={localNosotrosCards}
+              handleAddNosotrosCard={handleAddNosotrosCard}
+              handleRemoveNosotrosCard={handleRemoveNosotrosCard}
+              handleNosotrosCardChange={handleNosotrosCardChange}
+              handleNosotrosCardImageUpload={handleNosotrosCardImageUpload}
+              uploadingNosotrosCardImage={uploadingNosotrosCardImage}
+              localPastoresProfiles={localPastoresProfiles}
+              handleAddPastor={handleAddPastor}
+              handleRemovePastor={handleRemovePastor}
+              handlePastorChange={handlePastorChange}
+              handlePastorImageUpload={handlePastorImageUpload}
+              uploadingPastorImage={uploadingPastorImage}
+              handleNosotrosHeroUpload={handleNosotrosHeroUpload}
+              uploadingNosotrosHero={uploadingNosotrosHero}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveNosotrosPageApple={handleSaveNosotrosPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+        </>
       )}
 
       {/* TAB: UNIVERSAL PAGE CONFIGURATION FORM FOR ALL ROUTES */}

@@ -43,6 +43,7 @@ export default function AppleHomeEditor({
   handleSaveHomePageApple,
   saveLoading = false,
   saveSuccessMsg = '',
+  onSelectWebPage,
   API_URL = ''
 }) {
   const [activeSubTab, setActiveSubTab] = useState('hero');
@@ -257,8 +258,10 @@ export default function AppleHomeEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if (!pg.active) {
-                    alert(`Estamos renovando el sistema página por página como indicaste. ¡Actualmente estamos en Página 1: Inicio! Pronto continuaremos con ${pg.name}.`);
+                  if (pg.id === 'nosotros' && onSelectWebPage) {
+                    onSelectWebPage('nosotros');
+                  } else if (!pg.active) {
+                    alert(`Estamos renovando el sistema página por página como indicaste. ¡Actualmente estamos en Fase 2: Nosotros! Pronto continuaremos con ${pg.name}.`);
                   }
                 }}
               >
