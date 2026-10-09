@@ -212,16 +212,17 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
       </section>
 
       {/* VISIÓN, MISIÓN Y VALORES BLOCK */}
-      <section style={{ padding: '80px 24px', backgroundColor: '#0B0C10' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#977DFF', textTransform: 'uppercase', letterSpacing: '2px' }}>
-              FUNDAMENTOS CONGREGACIONALES
-            </span>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#FFFFFF', marginTop: '8px' }}>
-              Identidad y Propósito Divino
-            </h2>
-          </div>
+      {config.nosotros_foundations_hidden !== true && config.nosotros_foundations_hidden !== 'true' && (
+        <section style={{ padding: '80px 24px', backgroundColor: '#0B0C10' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#977DFF', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                {config.nosotros_foundations_kicker || 'FUNDAMENTOS CONGREGACIONALES'}
+              </span>
+              <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#FFFFFF', marginTop: '8px' }}>
+                {config.nosotros_foundations_heading || 'Identidad y Propósito Divino'}
+              </h2>
+            </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             {/* VISION CARD */}
@@ -286,6 +287,7 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* 3 COLUMNS EXPERIENCE BLOCK (VJ Kids, Cafetería, Grupos de Amistad) */}
       <section style={{ padding: '80px 24px', backgroundColor: '#07070B' }}>

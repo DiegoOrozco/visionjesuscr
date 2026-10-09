@@ -904,13 +904,36 @@ export default function AppleNosotrosEditor({
          ========================================================================= */}
       {activeSubTab === 'foundations' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          <div>
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF' }}>
-              Fundamentos Congregacionales & Doctrina
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(234, 237, 248, 0.65)' }}>
-              Identidad y propósito divino presentados a los nuevos visitantes en la sección central de Nosotros.
-            </p>
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '20px',
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
+                Sección "Fundamentos Congregacionales" (Visión, Misión, Valores)
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.86rem', color: 'rgba(234, 237, 248, 0.6)' }}>
+                Si no deseas repetir el bloque de Visión/Misión de la página de Inicio, puedes ocultarlo en /nosotros con un clic.
+              </p>
+            </div>
+
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem', color: '#F87171', fontWeight: 700 }}>
+              <input
+                type="checkbox"
+                name="nosotros_foundations_hidden"
+                checked={configFields.nosotros_foundations_hidden === true || configFields.nosotros_foundations_hidden === 'true'}
+                onChange={(e) => handleConfigChange({ target: { name: 'nosotros_foundations_hidden', value: e.target.checked } })}
+                style={{ accentColor: '#F87171', width: '18px', height: '18px' }}
+              />
+              <span>Ocultar esta Sección en /nosotros</span>
+            </label>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>

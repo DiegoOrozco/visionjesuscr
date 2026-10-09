@@ -1789,6 +1789,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         nosotros_buttons_hidden: configFields.nosotros_buttons_hidden || false,
         nosotros_buttons_align: configFields.nosotros_buttons_align || 'center',
         nosotros_buttons: JSON.stringify(localNosotrosButtons),
+        nosotros_foundations_hidden: configFields.nosotros_foundations_hidden || false,
         vision_title: configFields.vision_title || 'NUESTRA VISIÓN',
         vision_text: configFields.vision_text || '',
         mision_title: configFields.mision_title || 'NUESTRA MISIÓN',
