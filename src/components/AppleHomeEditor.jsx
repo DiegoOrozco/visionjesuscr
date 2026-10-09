@@ -261,10 +261,10 @@ export default function AppleHomeEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if ((pg.id === 'nosotros' || pg.id === 'congresos') && onSelectWebPage) {
+                  if ((pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad') && onSelectWebPage) {
                     onSelectWebPage(pg.id);
                   } else if (!pg.active) {
-                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros y 3. Eventos & Congresos. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
+                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos y 4. Grupos de Amistad. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
                   }
                 }}
               >

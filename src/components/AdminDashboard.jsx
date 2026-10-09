@@ -6,6 +6,7 @@ import CongresosPage from './CongresosPage';
 import AppleHomeEditor from './AppleHomeEditor';
 import AppleNosotrosEditor from './AppleNosotrosEditor';
 import AppleCongresosEditor from './AppleCongresosEditor';
+import AppleGruposEditor from './AppleGruposEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -1992,6 +1993,80 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleAddGroupApple = () => {
+    setAdminGroupsList(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        name: 'Nuevo Grupo de Amistad',
+        zone: 'Desamparados',
+        canton: 'Desamparados Central',
+        address_reference: 'Referencia de dirección...',
+        meeting_day: 'Jueves',
+        meeting_time: '7:30 PM',
+        modality: 'Presencial',
+        network_category: 'Mixto',
+        leaders: 'Líderes de Grupo',
+        phone: '+506 8888-0000'
+      }
+    ]);
+  };
+
+  const handleRemoveGroupApple = (idOrIdx) => {
+    setAdminGroupsList(prev => prev.filter((grp, i) => (grp.id || i) !== idOrIdx));
+  };
+
+  const handleGroupChangeApple = (idOrIdx, field, value) => {
+    setAdminGroupsList(prev => prev.map((grp, i) => {
+      if ((grp.id || i) === idOrIdx) {
+        return { ...grp, [field]: value };
+      }
+      return grp;
+    }));
+  };
+
+  const handleSaveGruposPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        grupos_title: configFields.grupos_title || 'Grupos de Amistad',
+        grupos_subtitle: configFields.grupos_subtitle || 'Conéctate con hermanos en la fe en pequeños grupos donde compartimos la palabra, oramos juntos y construimos verdaderas amistades.',
+        grupos_kicker: configFields.grupos_kicker !== undefined ? configFields.grupos_kicker : 'COMUNIDAD EN HOGARES',
+        grupos_kicker_hidden: configFields.grupos_kicker_hidden || false,
+        grupos_steps_hidden: configFields.grupos_steps_hidden || false,
+        grupos_step1_title: configFields.grupos_step1_title || 'Busca tu Zona o Red',
+        grupos_step1_desc: configFields.grupos_step1_desc || 'Explora nuestra lista por cantón, día de reunión o red.',
+        grupos_step2_title: configFields.grupos_step2_title || 'Elige tu Grupo Ideal',
+        grupos_step2_desc: configFields.grupos_step2_desc || 'Encuentra el grupo que mejor se adapte a tu ubicación y horario.',
+        grupos_step3_title: configFields.grupos_step3_title || 'Completa tu Solicitud',
+        grupos_step3_desc: configFields.grupos_step3_desc || 'Haz clic en "¡Quiero Unirme!" y completa tu contacto.',
+        grupos_step4_title: configFields.grupos_step4_title || 'Recibe la Bienvenida',
+        grupos_step4_desc: configFields.grupos_step4_desc || 'El anfitrión o líder te contactará con la dirección.'
+      };
+
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomepageConfig(updatedConfig);
+        setConfigFields(updatedConfig);
+        setSaveSuccessMsg('¡Página de Grupos de Amistad guardada y publicada exitosamente!');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      } else {
+        alert(data.message || 'Error al guardar Grupos de Amistad.');
+      }
+    } catch (err) {
+      alert('Error de conexión al guardar.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const handleSaveNosotrosPageApple = async () => {
     setSaveLoading(true);
     setSaveSuccessMsg('');
@@ -3714,6 +3789,23 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               uploadingEventImage={uploadingEventImage}
               openMediaLibrary={openMediaLibrary}
               handleSaveCongresosPageApple={handleSaveCongresosPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'grupos-de-amistad' && (
+            <AppleGruposEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              adminGroupsList={adminGroupsList}
+              handleAddGroup={handleAddGroupApple}
+              handleRemoveGroup={handleRemoveGroupApple}
+              handleGroupChange={handleGroupChangeApple}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveGruposPageApple={handleSaveGruposPageApple}
               saveLoading={saveLoading}
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}

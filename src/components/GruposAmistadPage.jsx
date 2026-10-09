@@ -85,23 +85,25 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
       }}>
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
           
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'rgba(0, 51, 255, 0.15)',
-            border: '1px solid rgba(151, 125, 255, 0.3)',
-            color: '#977DFF',
-            padding: '6px 20px',
-            borderRadius: '50px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-            marginBottom: '20px'
-          }}>
-            <Users size={15} /> COMUNIDAD EN HOGARES
-          </div>
+          {config.grupos_kicker_hidden !== true && config.grupos_kicker_hidden !== 'true' && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(0, 51, 255, 0.15)',
+              border: '1px solid rgba(151, 125, 255, 0.3)',
+              color: '#977DFF',
+              padding: '6px 20px',
+              borderRadius: '50px',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              marginBottom: '20px'
+            }}>
+              <Users size={15} /> {config.grupos_kicker || 'COMUNIDAD EN HOGARES'}
+            </div>
+          )}
 
           <h1 style={{
             fontSize: 'clamp(2.4rem, 5vw, 4rem)',
@@ -112,7 +114,7 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Grupos de Amistad
+            {config.grupos_title || 'Grupos de Amistad'}
           </h1>
 
           <p style={{
@@ -122,158 +124,160 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
             maxWidth: '720px',
             margin: '0 auto 40px'
           }}>
-            Conéctate con hermanos en la fe en pequeños grupos donde compartimos la palabra, oramos juntos y construimos verdaderas amistades.
+            {config.grupos_subtitle || 'Conéctate con hermanos en la fe en pequeños grupos donde compartimos la palabra, oramos juntos y construimos verdaderas amistades.'}
           </p>
 
         </div>
       </div>
 
-      {/* 4 STEPS ONBOARDING (EXACTLY AS SCREENSHOT) */}
-      <div style={{ padding: '0 20px 60px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#FFFFFF' }}>
-            ¿Cómo integrarte a un Grupo de Amistad?
-          </h2>
+      {/* 4 STEPS ONBOARDING */}
+      {config.grupos_steps_hidden !== true && config.grupos_steps_hidden !== 'true' && (
+        <div style={{ padding: '0 20px 60px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#FFFFFF' }}>
+              ¿Cómo integrarte a un Grupo de Amistad?
+            </h2>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '20px'
+          }}>
+            {/* STEP 1 */}
+            <div style={{
+              background: 'rgba(0, 3, 61, 0.45)',
+              border: '1px solid rgba(151, 125, 255, 0.2)',
+              borderRadius: '24px',
+              padding: '28px 24px',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '16px',
+                background: 'rgba(0, 51, 255, 0.2)',
+                border: '1px solid rgba(0, 51, 255, 0.4)',
+                color: '#977DFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                <Search size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
+                1. {config.grupos_step1_title || 'Busca'}
+              </h3>
+              <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                {config.grupos_step1_desc || 'Explora todos nuestros Grupos de Amistad para conocer su ubicación, sus horarios, rangos de edad y líderes.'}
+              </p>
+            </div>
+
+            {/* STEP 2 */}
+            <div style={{
+              background: 'rgba(0, 3, 61, 0.45)',
+              border: '1px solid rgba(151, 125, 255, 0.2)',
+              borderRadius: '24px',
+              padding: '28px 24px',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '16px',
+                background: 'rgba(0, 51, 255, 0.2)',
+                border: '1px solid rgba(0, 51, 255, 0.4)',
+                color: '#977DFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                <Filter size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
+                2. {config.grupos_step2_title || 'Escoge'}
+              </h3>
+              <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                {config.grupos_step2_desc || 'Selecciona el grupo ideal que mejor se adapte a tu ubicación geográfica y horario disponible.'}
+              </p>
+            </div>
+
+            {/* STEP 3 */}
+            <div style={{
+              background: 'rgba(0, 3, 61, 0.45)',
+              border: '1px solid rgba(151, 125, 255, 0.2)',
+              borderRadius: '24px',
+              padding: '28px 24px',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '16px',
+                background: 'rgba(0, 51, 255, 0.2)',
+                border: '1px solid rgba(0, 51, 255, 0.4)',
+                color: '#977DFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                <Send size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
+                3. {config.grupos_step3_title || 'Solicita'}
+              </h3>
+              <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                {config.grupos_step3_desc || 'Haz clic en "¡Quiero Unirme!" para dejar tus datos de contacto directos con el líder.'}
+              </p>
+            </div>
+
+            {/* STEP 4 */}
+            <div style={{
+              background: 'rgba(0, 3, 61, 0.45)',
+              border: '1px solid rgba(151, 125, 255, 0.2)',
+              borderRadius: '24px',
+              padding: '28px 24px',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '16px',
+                background: 'rgba(0, 51, 255, 0.2)',
+                border: '1px solid rgba(0, 51, 255, 0.4)',
+                color: '#977DFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                <Heart size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
+                4. {config.grupos_step4_title || 'Conéctate'}
+              </h3>
+              <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                {config.grupos_step4_desc || 'El anfitrión se comunicará contigo para darte la bienvenida y compartir los detalles del próximo grupo.'}
+              </p>
+            </div>
+          </div>
         </div>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '20px'
-        }}>
-          {/* STEP 1: BUSCA */}
-          <div style={{
-            background: 'rgba(0, 3, 61, 0.45)',
-            border: '1px solid rgba(151, 125, 255, 0.2)',
-            borderRadius: '24px',
-            padding: '28px 24px',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start'
-          }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '16px',
-              background: 'rgba(0, 51, 255, 0.2)',
-              border: '1px solid rgba(0, 51, 255, 0.4)',
-              color: '#977DFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <Search size={24} />
-            </div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
-              1. Busca
-            </h3>
-            <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
-              Explora todos nuestros Grupos de Amistad para conocer su ubicación, sus horarios, rangos de edad y líderes.
-            </p>
-          </div>
-
-          {/* STEP 2: ESCOGE */}
-          <div style={{
-            background: 'rgba(0, 3, 61, 0.45)',
-            border: '1px solid rgba(151, 125, 255, 0.2)',
-            borderRadius: '24px',
-            padding: '28px 24px',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start'
-          }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '16px',
-              background: 'rgba(151, 125, 255, 0.2)',
-              border: '1px solid rgba(151, 125, 255, 0.4)',
-              color: '#977DFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <Users size={24} />
-            </div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
-              2. Escoge
-            </h3>
-            <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
-              Selecciona la que más se adapte a tus necesidades antes de rellenar el formulario con tus datos de contacto.
-            </p>
-          </div>
-
-          {/* STEP 3: ESPERA */}
-          <div style={{
-            background: 'rgba(0, 3, 61, 0.45)',
-            border: '1px solid rgba(151, 125, 255, 0.2)',
-            borderRadius: '24px',
-            padding: '28px 24px',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start'
-          }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '16px',
-              background: 'rgba(16, 185, 129, 0.2)',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              color: '#10B981',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <Clock size={24} />
-            </div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
-              3. Espera
-            </h3>
-            <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
-              Cuando recibamos tus datos te enviaremos toda la información acerca de la reunión a la mayor brevedad.
-            </p>
-          </div>
-
-          {/* STEP 4: ÚNETE */}
-          <div style={{
-            background: 'rgba(0, 3, 61, 0.45)',
-            border: '1px solid rgba(151, 125, 255, 0.2)',
-            borderRadius: '24px',
-            padding: '28px 24px',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start'
-          }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '16px',
-              background: 'rgba(245, 158, 11, 0.2)',
-              border: '1px solid rgba(245, 158, 11, 0.4)',
-              color: '#F59E0B',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <Heart size={24} />
-            </div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px' }}>
-              4. Únete
-            </h3>
-            <p style={{ color: '#94A3B8', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
-              Tan solo deberás esperar al día y a la hora señalados para seguir creciendo en la fe junto a otros hermanos.
-            </p>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* FILTER BAR & SEARCH DIRECTORY */}
       <div style={{ padding: '0 20px 80px', maxWidth: '1200px', margin: '0 auto' }}>
