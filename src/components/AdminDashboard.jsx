@@ -9,6 +9,7 @@ import AppleCongresosEditor from './AppleCongresosEditor';
 import AppleGruposEditor from './AppleGruposEditor';
 import AppleOracionEditor from './AppleOracionEditor';
 import AppleDonarEditor from './AppleDonarEditor';
+import AppleModeloEditor from './AppleModeloEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -2150,6 +2151,70 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  const handleAddModeloNetworkApple = () => {
+    setLocalModeloNetworks(prev => [
+      ...prev,
+      {
+        id: `net-${Date.now()}`,
+        name: 'Nueva Red',
+        badge: 'Red de Ministerios',
+        age: 'Todas las edades',
+        iconName: 'Sparkles',
+        logo: '',
+        description: 'Descripción del ministerio o grupo de edad...',
+        image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000'
+      }
+    ]);
+  };
+
+  const handleRemoveModeloNetworkApple = (idOrIdx) => {
+    setLocalModeloNetworks(prev => prev.filter((net, i) => (net.id || i) !== idOrIdx));
+  };
+
+  const handleModeloNetworkChangeApple = (idOrIdx, field, value) => {
+    setLocalModeloNetworks(prev => prev.map((net, i) => {
+      if ((net.id || i) === idOrIdx) {
+        return { ...net, [field]: value };
+      }
+      return net;
+    }));
+  };
+
+  const handleSaveModeloPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        modelo_title: configFields.modelo_title || 'MODELO DE JESÚS',
+        modelo_subtitle: configFields.modelo_subtitle || 'Trabajamos con redes y grupos organizados que cuidan de las personas en cada etapa de su vida, formando líderes con carácter y corazón de servicio.',
+        modelo_kicker: configFields.modelo_kicker !== undefined ? configFields.modelo_kicker : 'REDES Y MINISTERIOS',
+        modelo_hero_bg: configFields.modelo_hero_bg || '',
+        modelo_networks: JSON.stringify(localModeloNetworks)
+      };
+
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: updatedConfig })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomepageConfig(updatedConfig);
+        setConfigFields(updatedConfig);
+        if (onSaveConfig) onSaveConfig(updatedConfig);
+        setSaveSuccessMsg('¡Página de Modelo de Jesús guardada y publicada exitosamente!');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      } else {
+        alert(data.message || 'Error al guardar Modelo de Jesús.');
+      }
+    } catch (err) {
+      alert('Error de conexión al guardar.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const handleSaveNosotrosPageApple = async () => {
     setSaveLoading(true);
     setSaveSuccessMsg('');
@@ -3915,6 +3980,23 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               handleConfigChange={handleConfigChange}
               openMediaLibrary={openMediaLibrary}
               handleSaveDonarPageApple={handleSaveDonarPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'modelo' && (
+            <AppleModeloEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              localModeloNetworks={localModeloNetworks}
+              handleAddNetwork={handleAddModeloNetworkApple}
+              handleRemoveNetwork={handleRemoveModeloNetworkApple}
+              handleNetworkChange={handleModeloNetworkChangeApple}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveModeloPageApple={handleSaveModeloPageApple}
               saveLoading={saveLoading}
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}
