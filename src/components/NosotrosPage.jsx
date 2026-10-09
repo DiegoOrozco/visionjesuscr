@@ -377,37 +377,49 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
       </section>
 
       {/* PASTORS SECTION */}
-      <section style={{ padding: '80px 24px', backgroundColor: '#0B0C10' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', letterSpacing: '2px' }}>
+      <section style={{ padding: '100px 24px', backgroundColor: '#0B0C10' }}>
+        <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', letterSpacing: '2px' }}>
               LIDERAZGO PASTORAL
             </span>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#FFFFFF', marginTop: '8px' }}>
+            <h2 style={{ fontSize: 'clamp(2.2rem, 4vw, 3rem)', fontWeight: 850, color: '#FFFFFF', marginTop: '10px' }}>
               Pastores Principales
             </h2>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '36px' }}>
             {pastores.map((p, idx) => (
               <div key={p.id || idx} style={{
-                backgroundColor: 'rgba(20, 22, 32, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '24px',
-                padding: '32px',
+                backgroundColor: 'rgba(20, 22, 32, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '32px',
+                padding: '48px 36px',
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'
+                alignItems: 'center',
+                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+                backdropFilter: 'blur(20px)',
+                transition: 'transform 0.3s ease, boxShadow 0.3s ease'
               }}>
-                <img 
-                  src={p.image && p.image.startsWith('http') ? p.image : (p.image ? `${API_URL}${p.image}` : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800')}
-                  alt={p.name}
-                  style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', marginBottom: '20px', border: '3px solid #977DFF' }}
-                />
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px' }}>{p.name}</h3>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#977DFF', marginBottom: '14px' }}>{p.role}</span>
-                <p style={{ color: 'rgba(255, 255, 255, 0.72)', fontSize: '0.94rem', lineHeight: 1.6, margin: 0 }}>
+                <div style={{ position: 'relative', marginBottom: '28px' }}>
+                  <img 
+                    src={p.image && p.image.startsWith('http') ? p.image : (p.image ? `${API_URL}${p.image}` : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800')}
+                    alt={p.name}
+                    style={{
+                      width: '200px',
+                      height: '200px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '4px solid #977DFF',
+                      boxShadow: '0 12px 35px rgba(151, 125, 255, 0.35)'
+                    }}
+                  />
+                </div>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 850, color: '#FFFFFF', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>{p.name}</h3>
+                <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#977DFF', marginBottom: '16px', letterSpacing: '0.02em' }}>{p.role}</span>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.08rem', lineHeight: 1.65, margin: 0, maxWidth: '420px' }}>
                   {p.bio}
                 </p>
               </div>
