@@ -781,47 +781,84 @@ export default function AppleCongresosEditor({
                     </div>
 
                     {/* Status Badge Text & Color */}
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <div style={{ flex: 2 }}>
-                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#34C759', marginBottom: '6px' }}>
-                          Estado (Badge)
-                        </label>
-                        <input
-                          type="text"
-                          value={evt.status || 'Entradas Disponibles'}
-                          onChange={(e) => handleEventChange(evt.id || idx, 'status', e.target.value)}
-                          placeholder="Ej: Entradas Disponibles"
-                          style={{
-                            width: '100%',
-                            padding: '10px 14px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
-                            borderRadius: '10px',
-                            color: '#FFFFFF',
-                            fontSize: '0.88rem',
-                            boxSizing: 'border-box'
-                          }}
-                        />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#34C759', margin: 0 }}>
+                        Estado del Evento (Badge)
+                      </label>
+
+                      {/* Quick Presets */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {[
+                          { label: 'Entradas Disponibles', color: '#10B981', isFinished: false },
+                          { label: '🏁 Evento Finalizado', color: '#64748B', isFinished: true },
+                          { label: '⛔ Cupos Agotados', color: '#EF4444', isFinished: false },
+                          { label: '🔥 Últimos Cupos', color: '#F59E0B', isFinished: false },
+                          { label: '⏳ Próximamente', color: '#3B82F6', isFinished: false }
+                        ].map((preset) => {
+                          const isSelected = evt.status === preset.label;
+                          return (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => {
+                                handleEventChange(evt.id || idx, 'status', preset.label);
+                                handleEventChange(evt.id || idx, 'statusColor', preset.color);
+                                handleEventChange(evt.id || idx, 'isFinished', preset.isFinished);
+                              }}
+                              style={{
+                                padding: '5px 11px',
+                                borderRadius: '9999px',
+                                fontSize: '0.74rem',
+                                fontWeight: isSelected ? 800 : 600,
+                                backgroundColor: isSelected ? preset.color : 'rgba(255, 255, 255, 0.06)',
+                                border: isSelected ? `1.5px solid ${preset.color}` : '1px solid rgba(255, 255, 255, 0.12)',
+                                color: isSelected ? '#FFFFFF' : 'rgba(234, 237, 248, 0.7)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#34C759', marginBottom: '6px' }}>
-                          Color Badge
-                        </label>
-                        <input
-                          type="color"
-                          value={evt.statusColor || '#10B981'}
-                          onChange={(e) => handleEventChange(evt.id || idx, 'statusColor', e.target.value)}
-                          style={{
-                            width: '100%',
-                            height: '42px',
-                            padding: '4px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
-                            borderRadius: '10px',
-                            cursor: 'pointer'
-                          }}
-                        />
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ flex: 2 }}>
+                          <input
+                            type="text"
+                            value={evt.status || 'Entradas Disponibles'}
+                            onChange={(e) => handleEventChange(evt.id || idx, 'status', e.target.value)}
+                            placeholder="Texto personalizado del estado"
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              borderRadius: '10px',
+                              color: '#FFFFFF',
+                              fontSize: '0.88rem',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                          <input
+                            type="color"
+                            value={evt.statusColor || '#10B981'}
+                            onChange={(e) => handleEventChange(evt.id || idx, 'statusColor', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '42px',
+                              padding: '4px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              borderRadius: '10px',
+                              cursor: 'pointer'
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
 

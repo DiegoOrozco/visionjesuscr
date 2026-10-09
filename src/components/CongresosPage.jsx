@@ -359,20 +359,41 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                   </div>
                 </div>
 
-                <button 
-                  className="apple-btn apple-btn-primary"
-                  style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    padding: '12px',
-                    borderRadius: '50px',
-                    fontWeight: 800,
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  <span>{evt.id === 'autenticas' ? 'Reservar Entradas' : 'Ver Detalles del Evento'}</span>
-                  <ArrowRight size={16} />
-                </button>
+                {evt.status?.toLowerCase().includes('finalizado') || evt.status?.toLowerCase().includes('concluido') || evt.statusColor === '#64748B' ? (
+                  <button 
+                    disabled
+                    className="apple-btn"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      padding: '12px',
+                      borderRadius: '50px',
+                      fontWeight: 800,
+                      fontSize: '0.9rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      color: 'rgba(234, 237, 248, 0.45)',
+                      cursor: 'not-allowed'
+                    }}
+                  >
+                    <span>🏁 Evento Concluido</span>
+                  </button>
+                ) : (
+                  <button 
+                    className="apple-btn apple-btn-primary"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      padding: '12px',
+                      borderRadius: '50px',
+                      fontWeight: 800,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    <span>{evt.id === 'autenticas' ? 'Reservar Entradas' : 'Ver Detalles del Evento'}</span>
+                    <ArrowRight size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
