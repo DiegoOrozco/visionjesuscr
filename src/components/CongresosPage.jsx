@@ -162,80 +162,84 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
         background: 'radial-gradient(circle at 50% 20%, rgba(0, 51, 255, 0.2) 0%, rgba(3, 8, 18, 1) 75%)'
       }}>
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-          <div className="apple-kicker">
-            <span className="apple-kicker-dot"></span>
-            <span>CARTELERA & AGENDA INSTITUCIONAL</span>
-          </div>
+          {config.events_kicker_hidden !== true && config.events_kicker_hidden !== 'true' && (
+            <div className="apple-kicker">
+              <span className="apple-kicker-dot"></span>
+              <span>{config.events_kicker !== undefined ? config.events_kicker : 'CARTELERA & AGENDA INSTITUCIONAL'}</span>
+            </div>
+          )}
 
           <h1 className="apple-hero-headline apple-gradient-text" style={{ fontSize: 'clamp(2.5rem, 5.5vw, 4.2rem)', marginBottom: '16px' }}>
-            Eventos Visión Jesús
+            {config.events_title || 'Eventos Visión Jesús'}
           </h1>
 
           <p className="apple-hero-subtitle" style={{ maxWidth: '680px', margin: '0 auto 30px' }}>
-            Descubre nuestras actividades especiales para el **cierre del 2026** y la **proyección del año 2027**. Selecciona el evento para ver detalles y registrarte.
+            {config.events_subtitle || 'Descubre nuestras actividades especiales para el cierre del 2026 y la proyección del año 2027. Selecciona el evento para ver detalles y registrarte.'}
           </p>
 
           {/* YEAR FILTER TABS */}
-          <div style={{
-            display: 'inline-flex',
-            gap: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            padding: '6px',
-            borderRadius: '50px',
-            backdropFilter: 'blur(16px)'
-          }}>
-            <button
-              onClick={() => setActiveYear('todos')}
-              style={{
-                padding: '8px 20px',
-                borderRadius: '50px',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                border: 'none',
-                background: activeYear === 'todos' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
-                color: activeYear === 'todos' ? '#FFFFFF' : '#94A3B8',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              ⚡ Todos los Eventos
-            </button>
+          {config.events_filters_hidden !== true && config.events_filters_hidden !== 'true' && (
+            <div style={{
+              display: 'inline-flex',
+              gap: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '6px',
+              borderRadius: '50px',
+              backdropFilter: 'blur(16px)'
+            }}>
+              <button
+                onClick={() => setActiveYear('todos')}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: '50px',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  background: activeYear === 'todos' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                  color: activeYear === 'todos' ? '#FFFFFF' : '#94A3B8',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ⚡ Todos los Eventos
+              </button>
 
-            <button
-              onClick={() => setActiveYear('2026')}
-              style={{
-                padding: '8px 20px',
-                borderRadius: '50px',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                border: 'none',
-                background: activeYear === '2026' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
-                color: activeYear === '2026' ? '#FFFFFF' : '#94A3B8',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              📅 Cierre 2026
-            </button>
+              <button
+                onClick={() => setActiveYear('2026')}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: '50px',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  background: activeYear === '2026' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                  color: activeYear === '2026' ? '#FFFFFF' : '#94A3B8',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                📅 Cierre 2026
+              </button>
 
-            <button
-              onClick={() => setActiveYear('2027')}
-              style={{
-                padding: '8px 20px',
-                borderRadius: '50px',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                border: 'none',
-                background: activeYear === '2027' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
-                color: activeYear === '2027' ? '#FFFFFF' : '#94A3B8',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              🚀 Proyección 2027
-            </button>
-          </div>
+              <button
+                onClick={() => setActiveYear('2027')}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: '50px',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  background: activeYear === '2027' ? 'linear-gradient(135deg, #0033FF 0%, #977DFF 100%)' : 'transparent',
+                  color: activeYear === '2027' ? '#FFFFFF' : '#94A3B8',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                🚀 Proyección 2027
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

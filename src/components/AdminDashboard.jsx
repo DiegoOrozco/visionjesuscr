@@ -5,6 +5,7 @@ import ModeloDeJesus from './ModeloDeJesus';
 import CongresosPage from './CongresosPage';
 import AppleHomeEditor from './AppleHomeEditor';
 import AppleNosotrosEditor from './AppleNosotrosEditor';
+import AppleCongresosEditor from './AppleCongresosEditor';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -194,6 +195,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [uploadingNosotrosHero, setUploadingNosotrosHero] = useState(false);
   const [uploadingNosotrosCardImage, setUploadingNosotrosCardImage] = useState(null);
   const [uploadingPastorImage, setUploadingPastorImage] = useState(null);
+  const [uploadingEventImage, setUploadingEventImage] = useState(null);
   const [builderSuccessMsg, setBuilderSuccessMsg] = useState('');
   const [savingBuilder, setSavingBuilder] = useState(false);
   const [showAddComponentModal, setShowAddComponentModal] = useState(false);
@@ -771,6 +773,8 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         handleNosotrosCardChange(secId, field || 'image', url);
       } else if (type === 'pastor') {
         handlePastorChange(secId, field || 'image', url);
+      } else if (type === 'events_list') {
+        handleEventChange(secId, field || 'image', url);
       } else if (type === 'section') {
         setLocalSections(prev => prev.map(s => {
           if (s.id === secId) {
@@ -1475,6 +1479,124 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         ];
       }
       setLocalPastoresProfiles(parsedPastores);
+
+      // Parse Events List (Congresos & Eventos Cartelera)
+      let parsedEventsList = [];
+      try {
+        if (homepageConfig.events_list) {
+          parsedEventsList = typeof homepageConfig.events_list === 'string' ? JSON.parse(homepageConfig.events_list) : homepageConfig.events_list;
+        }
+      } catch (e) {
+        console.error('Error parsing events_list in admin:', e);
+      }
+      if (!parsedEventsList || parsedEventsList.length === 0) {
+        parsedEventsList = [
+          {
+            id: 'autenticas',
+            year: '2026',
+            category: 'Congresos',
+            title: 'Congreso Mujeres Auténticas 2026',
+            subtitle: 'Edición Especial • Sanidad & Dignidad',
+            status: 'Entradas Disponibles',
+            statusColor: '#10B981',
+            date: 'Viernes 18 y Sábado 19 de Noviembre, 2026',
+            time: '7:00 PM',
+            location: 'Auditorio Visión Jesús, Desamparados, CR',
+            image: homepageConfig.autenticas_hero_bg || '/logo_oficial_transparente.png',
+            description: 'El congreso anual para mujeres que deciden sanar sus heridas, abrazar su historia y descubrir la belleza que Dios ha trazado en cada cicatriz.',
+            url: '/autenticas',
+            featured: true,
+            priceInfo: 'Gold: ₡12.000 / General: ₡7.500'
+          },
+          {
+            id: 'sanados',
+            year: '2026',
+            category: 'Adoración',
+            title: 'Noche de Milagros - Sanados para Sanar 2026',
+            subtitle: 'Unción, Sanidad Interior y Restauración',
+            status: 'Entrada Libre',
+            statusColor: '#0033FF',
+            date: 'Sábado 28 de Noviembre, 2026',
+            time: '6:30 PM',
+            location: 'Auditorio Principal Visión Jesús',
+            image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1000',
+            description: 'Un tiempo especial consagrado para la intercesión, oración por los enfermos y manifestación del poder de Dios en las familias.',
+            url: '/oracion',
+            featured: false,
+            priceInfo: 'Entrada Gratuita • Cupo Limitado'
+          },
+          {
+            id: 'fiesta2026',
+            year: '2026',
+            category: 'Congregacional',
+            title: 'Cierre Anual de Acción de Gracias 2026',
+            subtitle: 'Celebración & Noche de Gratitud',
+            status: 'Próximamente',
+            statusColor: '#F59E0B',
+            date: 'Domingo 20 de Diciembre, 2026',
+            time: '5:00 PM',
+            location: 'Auditorio Principal Visión Jesús',
+            image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+            description: 'Gran servicio congregacional para dar gracias a Dios por cada victoria del año 2026 y consagrar los proyectos del nuevo año.',
+            url: '/#horarios-section',
+            featured: false,
+            priceInfo: 'Entrada Gratuita'
+          },
+          {
+            id: 'liderazgo2027',
+            year: '2027',
+            category: 'Congresos',
+            title: 'Congreso Internacional de Liderazgo 2027',
+            subtitle: 'Equipamiento & Visión del Reino',
+            status: 'Proyección 2027',
+            statusColor: '#977DFF',
+            date: 'Febrero 2027',
+            time: 'Por Confirmar',
+            location: 'Auditorio Principal Visión Jesús',
+            image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000',
+            description: 'Capacitación intensiva para pastores, líderes de célula y servidores. Herramientas prácticas y principios apostólicos para el crecimiento.',
+            url: '/modelo',
+            featured: false,
+            priceInfo: 'Detalles de inscripción en Enero 2027'
+          },
+          {
+            id: 'move2027',
+            year: '2027',
+            category: 'Jóvenes',
+            title: 'Encuentro MOVE Jóvenes 2027',
+            subtitle: 'Generación sin Reservas',
+            status: 'Proyección 2027',
+            statusColor: '#977DFF',
+            date: 'Mayo 2027',
+            time: '5:30 PM',
+            location: 'Sede Desamparados',
+            image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000',
+            description: 'El movimiento juvenil de Visión Jesús en un festival de alabanza, adoración extrema y mensaje transformador para adolescentes y jóvenes.',
+            url: '/#contacto-section',
+            featured: false,
+            priceInfo: 'Entrada Gratuita'
+          },
+          {
+            id: 'fuxion2027',
+            year: '2027',
+            category: 'Congresos',
+            title: 'Congreso de Hombres & Familias FUXION 2027',
+            subtitle: 'Varones de Carácter & Sacerdocio',
+            status: 'Proyección 2027',
+            statusColor: '#977DFF',
+            date: 'Julio 2027',
+            time: 'Por Confirmar',
+            location: 'Auditorio Principal',
+            image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000',
+            description: 'Congreso enfocado en afirma la identidad del hombre como sacerdote del hogar, líder espiritual y testimonio activo en la sociedad.',
+            url: '/modelo',
+            featured: false,
+            priceInfo: 'Próximamente'
+          }
+        ];
+      }
+      setLocalEventsList(parsedEventsList);
+      setLocalPastoresProfiles(parsedPastores);
     }
   }, [homepageConfig]);
 
@@ -1772,6 +1894,101 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       alert('Error de red al subir la imagen.');
     } finally {
       setUploadingNosotrosHero(false);
+    }
+  };
+
+  const handleAddEvent = () => {
+    setLocalEventsList(prev => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        year: '2026',
+        category: 'Congresos',
+        title: 'Nuevo Evento / Congreso',
+        subtitle: 'Subtítulo del evento',
+        status: 'Próximamente',
+        statusColor: '#977DFF',
+        date: 'Fecha por definir',
+        time: '7:00 PM',
+        location: 'Auditorio Visión Jesús',
+        image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000',
+        description: 'Descripción e información general del evento.',
+        url: '/eventos',
+        featured: false,
+        priceInfo: 'Entrada Libre'
+      }
+    ]);
+  };
+
+  const handleRemoveEvent = (idOrIdx) => {
+    setLocalEventsList(prev => prev.filter((evt, i) => (evt.id || i) !== idOrIdx));
+  };
+
+  const handleEventChange = (idOrIdx, field, value) => {
+    setLocalEventsList(prev => prev.map((evt, i) => {
+      if ((evt.id || i) === idOrIdx) {
+        return { ...evt, [field]: value };
+      }
+      return evt;
+    }));
+  };
+
+  const handleEventImageUpload = async (idOrIdx, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingEventImage(idOrIdx);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await authFetch(`${API_URL}/api/admin/homepage/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        handleEventChange(idOrIdx, 'image', data.url);
+      } else {
+        alert(data.message || 'Error al subir banner.');
+      }
+    } catch (err) {
+      alert('Error de red al subir banner.');
+    } finally {
+      setUploadingEventImage(null);
+    }
+  };
+
+  const handleSaveCongresosPageApple = async () => {
+    setSaveLoading(true);
+    setSaveSuccessMsg('');
+    try {
+      const updatedConfig = {
+        ...configFields,
+        events_title: configFields.events_title || 'Eventos Visión Jesús',
+        events_subtitle: configFields.events_subtitle || 'Descubre nuestras actividades especiales para el cierre del 2026 y la proyección del año 2027.',
+        events_kicker: configFields.events_kicker !== undefined ? configFields.events_kicker : 'CARTELERA & AGENDA INSTITUCIONAL',
+        events_kicker_hidden: configFields.events_kicker_hidden || false,
+        events_filters_hidden: configFields.events_filters_hidden || false,
+        events_list: JSON.stringify(localEventsList)
+      };
+
+      const res = await authFetch(`${API_URL}/api/admin/homepage/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomepageConfig(updatedConfig);
+        setConfigFields(updatedConfig);
+        setSaveSuccessMsg('¡Página de Congresos & Eventos guardada y publicada exitosamente!');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      } else {
+        alert(data.message || 'Error al guardar Congresos.');
+      }
+    } catch (err) {
+      alert('Error de conexión al guardar.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -3478,6 +3695,25 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               uploadingNosotrosHero={uploadingNosotrosHero}
               openMediaLibrary={openMediaLibrary}
               handleSaveNosotrosPageApple={handleSaveNosotrosPageApple}
+              saveLoading={saveLoading}
+              saveSuccessMsg={saveSuccessMsg}
+              onSelectWebPage={setActiveWebPage}
+              API_URL={API_URL}
+            />
+          )}
+
+          {activeWebPage === 'congresos' && (
+            <AppleCongresosEditor
+              configFields={configFields}
+              handleConfigChange={handleConfigChange}
+              localEventsList={localEventsList}
+              handleAddEvent={handleAddEvent}
+              handleRemoveEvent={handleRemoveEvent}
+              handleEventChange={handleEventChange}
+              handleEventImageUpload={handleEventImageUpload}
+              uploadingEventImage={uploadingEventImage}
+              openMediaLibrary={openMediaLibrary}
+              handleSaveCongresosPageApple={handleSaveCongresosPageApple}
               saveLoading={saveLoading}
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}
