@@ -134,7 +134,8 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
       case 'hero': {
         let bgUrl = content.bgUrl || config.hero_bg || 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
         bgUrl = bgUrl ? (bgUrl.startsWith('http') || bgUrl.startsWith('/') ? (bgUrl.startsWith('/') ? `${API_URL}${bgUrl}` : bgUrl) : `${API_URL}/${bgUrl}`) : '';
-        const isVideo = !!bgUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i);
+        const heroTitle = content.title !== undefined ? content.title : (config.hero_title !== undefined ? config.hero_title : 'Bienvenido a TU CASA');
+        const heroSubtitle = content.subtitle !== undefined ? content.subtitle : (config.hero_subtitle !== undefined ? config.hero_subtitle : 'Iglesia Visión Jesús — Un lugar de fe, amor y restauración');
         const kickerText = content.kicker !== undefined ? content.kicker : (config.hero_kicker !== undefined ? config.hero_kicker : 'Comunidad de Fe & Esperanza');
         const showKicker = content.kickerHidden !== true && config.hero_kicker_hidden !== 'true' && config.hero_kicker_hidden !== true && !!kickerText;
 
