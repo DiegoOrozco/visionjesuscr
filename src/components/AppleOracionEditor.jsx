@@ -241,7 +241,7 @@ export default function AppleOracionEditor({
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => {
-                  if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'donar') && onSelectWebPage) {
+                  if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'donar' || pg.id === 'modelo') && onSelectWebPage) {
                     onSelectWebPage(pg.id);
                   } else if (!pg.active) {
                     alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad, 5. Oración y 6. Donar. ¡Pronto habilitaremos el editor exclusivo de ${pg.name}!`);
