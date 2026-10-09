@@ -114,7 +114,7 @@ export default function Navbar({
   };
 
   const handleLinkClick = (e, link) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setMobileMenuOpen(false);
 
     if (link.isAnchor) {
@@ -322,7 +322,13 @@ export default function Navbar({
 
       {/* Apple iOS Mobile Sheet Drawer */}
       {mobileMenuOpen && (
-        <div className="apple-mobile-sheet">
+        <div 
+          className="apple-mobile-sheet"
+          style={{
+            pointerEvents: 'auto',
+            zIndex: 9999
+          }}
+        >
           {navLinks.map((link) => {
             const active = isLinkActive(link);
             return (
@@ -330,7 +336,16 @@ export default function Navbar({
                 key={link.path}
                 href={link.path}
                 className={`apple-nav-link ${active ? 'active' : ''}`}
-                style={{ fontSize: '1rem', padding: '10px 14px', textAlign: 'left' }}
+                style={{ 
+                  fontSize: '1.05rem', 
+                  padding: '14px 18px', 
+                  textAlign: 'left',
+                  borderRadius: '14px',
+                  display: 'block',
+                  cursor: 'pointer',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
                 onClick={(e) => handleLinkClick(e, link)}
               >
                 {link.label}
