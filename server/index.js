@@ -1823,24 +1823,30 @@ app.delete('/api/admin/media/:filename', verifyAdminToken, (req, res) => {
   }
 });
 
-app.post('/api/admin/homepage/config', verifyAdminToken, (req, res) => {
+const handleSaveHomepageConfig = (req, res) => {
   try {
-    const { config } = req.body;
-    if (!config) {
+    const configData = req.body.config || req.body;
+    if (!configData || typeof configData !== 'object' || Object.keys(configData).length === 0) {
       return res.status(400).json({ success: false, message: 'Configuración no provista.' });
     }
     const updateStmt = db.prepare('INSERT OR REPLACE INTO homepage_config (key, value) VALUES (?, ?)');
     const tx = db.transaction(() => {
-      for (const [key, val] of Object.entries(config)) {
-        updateStmt.run(key, String(val));
+      for (const [key, val] of Object.entries(configData)) {
+        if (val !== undefined && val !== null) {
+          updateStmt.run(key, typeof val === 'object' ? JSON.stringify(val) : String(val));
+        }
       }
     });
     tx();
     res.json({ success: true, message: 'Configuración de portada guardada con éxito.' });
   } catch (e) {
+    console.error('Error saving homepage config:', e);
     res.status(500).json({ success: false, message: e.message });
   }
-});
+};
+
+app.post('/api/admin/homepage/config', verifyAdminToken, handleSaveHomepageConfig);
+app.put('/api/admin/homepage/config', verifyAdminToken, handleSaveHomepageConfig);
 
 // Admin Pricing and Presale Config
 app.post('/api/admin/pricing', verifyAdminToken, (req, res) => {
