@@ -888,32 +888,46 @@ export default function AppleHomeEditor({
       {activeSubTab === 'pillars' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backgroundColor: 'rgba(239, 68, 68, 0.08)',
+            border: '1.5px solid rgba(239, 68, 68, 0.3)',
             borderRadius: '20px',
             padding: '20px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '16px'
+            gap: '16px',
+            boxShadow: '0 8px 30px rgba(239, 68, 68, 0.15)'
           }}>
             <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
-                Sección "Pilares & ADN" (Visión, Misión, Valores en Inicio)
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#F87171' }}>●</span>
+                <span>Visibilidad de la Sección "Pilares & ADN" en Inicio</span>
               </h3>
-              <p style={{ margin: 0, fontSize: '0.86rem', color: 'rgba(234, 237, 248, 0.6)' }}>
-                Si deseas que la página principal (Inicio) sea más limpia y directa sin mostrar el bloque de Visión/Misión/Valores, puedes ocultarlo aquí con un clic.
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(234, 237, 248, 0.75)', lineHeight: 1.5 }}>
+                Marque esta casilla si desea ocultar el bloque de <strong>Visión, Misión y Valores</strong> en la página principal para que no se repita con la página de Nosotros.
               </p>
             </div>
 
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem', color: '#F87171', fontWeight: 700 }}>
+            <label style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              padding: '10px 18px',
+              borderRadius: '12px'
+            }}>
               <input
                 type="checkbox"
                 name="home_pillars_hidden"
                 checked={configFields.home_pillars_hidden === true || configFields.home_pillars_hidden === 'true'}
                 onChange={(e) => handleConfigChange({ target: { name: 'home_pillars_hidden', value: e.target.checked } })}
-                style={{ accentColor: '#F87171', width: '18px', height: '18px' }}
+                style={{ accentColor: '#EF4444', width: '20px', height: '20px', cursor: 'pointer' }}
               />
               <span>Ocultar esta Sección en Inicio (/)</span>
             </label>
