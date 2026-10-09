@@ -1689,61 +1689,7 @@ export default function ChurchLanding({ config = {}, sections = [], onGoToTicket
         </div>
       )}
 
-      {/* STICKY MOBILE CTA BAR - APPLE FLOATING PILL */}
-      <div className="mobile-sticky-cta-bar">
-        <button 
-          onClick={onGoToTickets || (() => {
-            window.history.pushState({}, '', '/autenticas');
-            window.location.reload();
-          })} 
-          className="mobile-sticky-cta-btn"
-        >
-          <Ticket size={18} />
-          <span>Congreso 2026 • Entradas Disponibles</span>
-        </button>
-      </div>
 
-      <style>{`
-        .mobile-sticky-cta-bar {
-          display: none;
-          position: fixed;
-          bottom: 20px;
-          left: 16px;
-          right: 16px;
-          z-index: 999;
-          pointer-events: none;
-        }
-        @media (max-width: 768px) {
-          .mobile-sticky-cta-bar {
-            display: flex;
-            justify-content: center;
-          }
-        }
-        .mobile-sticky-cta-btn {
-          pointer-events: auto;
-          width: 100%;
-          max-width: 440px;
-          padding: 14px 20px;
-          border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.9);
-          background: #FFFFFF;
-          color: #000000;
-          font-family: var(--apple-font);
-          font-weight: 600;
-          font-size: 0.9rem;
-          letter-spacing: -0.01em;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
-          cursor: pointer;
-          transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .mobile-sticky-cta-btn:active {
-          transform: scale(0.96);
-        }
-      `}</style>
 
     </div>
   );
