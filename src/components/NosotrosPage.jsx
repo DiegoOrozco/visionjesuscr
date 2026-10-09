@@ -4,10 +4,9 @@ import { Compass, Users, Heart, Coffee, Sparkles, MapPin, ArrowRight, ShieldChec
 export default function NosotrosPage({ config = {}, onGoHome }) {
   const API_URL = import.meta.env.VITE_API_URL || '';
 
-  const heroBgRaw = config.nosotros_hero_bg || config.hero_bg || '';
-  const heroBg = heroBgRaw
-    ? (heroBgRaw.startsWith('http') ? heroBgRaw : `${API_URL}${heroBgRaw}`)
-    : 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1600';
+  const defaultHeroBg = '/uploads/comprobantes/1788307724342-46295df0-d020-4a8e-9606-8d16b8688a73.jpg';
+  const heroBgRaw = config.nosotros_hero_bg || defaultHeroBg;
+  const heroBg = heroBgRaw.startsWith('http') ? heroBgRaw : `${API_URL}${heroBgRaw}`;
 
   const title = config.nosotros_title || 'NOSOTROS • VISIÓN JESÚS';
   const subtitle = config.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.';
@@ -123,10 +122,10 @@ export default function NosotrosPage({ config = {}, onGoHome }) {
       {/* HERO SECTION */}
       <section style={{
         position: 'relative',
-        padding: '140px 24px 80px',
-        backgroundImage: `linear-gradient(180deg, rgba(7, 7, 11, 0.6) 0%, rgba(7, 7, 11, 0.95) 100%), url(${heroBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        padding: '170px 24px 90px',
+        backgroundImage: `linear-gradient(180deg, rgba(7, 7, 11, 0.35) 0%, rgba(7, 7, 11, 0.92) 100%), url(${heroBg})`,
+        backgroundSize: config.nosotros_hero_bg_size || 'cover',
+        backgroundPosition: config.nosotros_hero_bg_position || 'center 15%',
         textAlign: 'center',
         overflow: 'hidden'
       }}>

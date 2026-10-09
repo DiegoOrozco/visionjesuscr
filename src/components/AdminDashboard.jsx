@@ -1784,6 +1784,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         nosotros_title: configFields.nosotros_title || 'NOSOTROS • VISIÓN JESÚS',
         nosotros_subtitle: configFields.nosotros_subtitle || 'Una iglesia apasionada por la presencia de Dios, la familia y el discipulado.',
         nosotros_hero_bg: configFields.nosotros_hero_bg || '',
+        nosotros_hero_bg_position: configFields.nosotros_hero_bg_position || 'center 15%',
         nosotros_kicker: configFields.nosotros_kicker !== undefined ? configFields.nosotros_kicker : 'CONOCÉ LA VISIÓN',
         nosotros_kicker_hidden: configFields.nosotros_kicker_hidden || false,
         nosotros_buttons_hidden: configFields.nosotros_buttons_hidden || false,

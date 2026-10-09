@@ -363,9 +363,9 @@ export default function AppleNosotrosEditor({
                   position: 'absolute',
                   top: 0, left: 0, width: '100%', height: '100%',
                   backgroundImage: `url("${(configFields.nosotros_hero_bg || configFields.hero_bg).startsWith('http') ? (configFields.nosotros_hero_bg || configFields.hero_bg) : `${API_URL}${configFields.nosotros_hero_bg || configFields.hero_bg}`}")`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  opacity: 0.35,
+                  backgroundSize: configFields.nosotros_hero_bg_size || 'cover',
+                  backgroundPosition: configFields.nosotros_hero_bg_position || 'center 15%',
+                  opacity: 0.45,
                   zIndex: 0
                 }} />
               ) : (
@@ -616,6 +616,33 @@ export default function AppleNosotrosEditor({
                     boxSizing: 'border-box'
                   }}
                 />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
+                  Enfoque / Posición de la Imagen (Para encuadrar rostros)
+                </label>
+                <select
+                  name="nosotros_hero_bg_position"
+                  value={configFields.nosotros_hero_bg_position || 'center 15%'}
+                  onChange={handleConfigChange}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <option value="center 15%" style={{ background: '#0D1117' }}>Enfoque Rostros (Recomendado - Baja la foto)</option>
+                  <option value="center top" style={{ background: '#0D1117' }}>Alineado Superior (Top)</option>
+                  <option value="center" style={{ background: '#0D1117' }}>Centrado Total</option>
+                  <option value="center bottom" style={{ background: '#0D1117' }}>Alineado Inferior (Bottom)</option>
+                </select>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
