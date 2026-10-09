@@ -15,87 +15,8 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Sample default groups if API is empty
-  const [groups, setGroups] = useState([
-    {
-      id: 1,
-      name: 'Grupo de Amistad - Desamparados Central',
-      zone: 'Desamparados',
-      canton: 'Desamparados Central',
-      address_reference: '500m sur del Parque de Desamparados',
-      meeting_day: 'Jueves',
-      meeting_time: '7:30 PM',
-      modality: 'Presencial',
-      network_category: 'Mixto',
-      leaders: 'Carlos & Ana María',
-      phone: '+506 8888-1111'
-    },
-    {
-      id: 2,
-      name: 'Grupo de Amistad - San Antonio',
-      zone: 'Desamparados',
-      canton: 'San Antonio',
-      address_reference: 'Cerca de la Plaza de San Antonio',
-      meeting_day: 'Viernes',
-      meeting_time: '7:00 PM',
-      modality: 'Presencial',
-      network_category: 'Adultos FUXION',
-      leaders: 'Pastor Wagner & Pastora Dayana',
-      phone: '+506 8888-2222'
-    },
-    {
-      id: 3,
-      name: 'Grupo de Amistad - MOVE Jóvenes',
-      zone: 'San José',
-      canton: 'Zapote',
-      address_reference: 'Frente a la Rotonda de las Garantías',
-      meeting_day: 'Sábado',
-      meeting_time: '6:00 PM',
-      modality: 'Presencial',
-      network_category: 'Jóvenes MOVE',
-      leaders: 'Equipo de Liderazgo MOVE',
-      phone: '+506 8888-3333'
-    },
-    {
-      id: 4,
-      name: 'Grupo de Amistad - Gravilias',
-      zone: 'Desamparados',
-      canton: 'Gravilias',
-      address_reference: 'Barrio Gravilias de Desamparados',
-      meeting_day: 'Miércoles',
-      meeting_time: '7:00 PM',
-      modality: 'Presencial',
-      network_category: 'Mujeres',
-      leaders: 'Elena Morales',
-      phone: '+506 8888-4444'
-    },
-    {
-      id: 5,
-      name: 'Grupo de Amistad - Curridabat',
-      zone: 'Curridabat',
-      canton: 'Curridabat Centro',
-      address_reference: 'Cerca de la Iglesia de Curridabat',
-      meeting_day: 'Jueves',
-      meeting_time: '7:30 PM',
-      modality: 'Presencial',
-      network_category: 'Mixto',
-      leaders: 'Roberto & Sofía',
-      phone: '+506 8888-5555'
-    },
-    {
-      id: 6,
-      name: 'Grupo de Amistad - Virtual / Online',
-      zone: 'Virtual',
-      canton: 'Nacional & Internacional',
-      address_reference: 'Reunión por Zoom / Google Meet',
-      meeting_day: 'Martes',
-      meeting_time: '8:00 PM',
-      modality: 'Online',
-      network_category: 'Mixto',
-      leaders: 'Equipo de Conexión Virtual',
-      phone: '+506 8888-6666'
-    }
-  ]);
+  // Friendship groups state
+  const [groups, setGroups] = useState([]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/friendship-groups`)
