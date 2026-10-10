@@ -2934,6 +2934,35 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     }
   };
 
+  // 1. Filtrar las reservas estrictamente por el evento activo seleccionado
+  const eventReservations = useMemo(() => {
+    return reservations.filter(r => (r.event_id || 'autenticas-2026') === activeEventId);
+  }, [reservations, activeEventId]);
+
+  // 2. Filtrar por término de búsqueda y estado dentro del evento activo
+  const filteredList = useMemo(() => {
+    return eventReservations.filter(r => {
+      const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
+      const matchesSearch = (r.purchaser_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (r.purchaser_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (r.purchaser_phone || '').includes(searchTerm);
+      return matchesStatus && matchesSearch;
+    });
+  }, [eventReservations, filterStatus, searchTerm]);
+
+  // 3. Métricas calculadas EXCLUSIVAMENTE para el evento activo
+  const totalRevenue = useMemo(() => {
+    return eventReservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'usado' ? acc + r.total_amount : acc, 0);
+  }, [eventReservations]);
+
+  const totalAllTickets = useMemo(() => {
+    return eventReservations.reduce((acc, r) => acc + (r.quantity || 0), 0);
+  }, [eventReservations]);
+
+  const pendingCount = useMemo(() => {
+    return eventReservations.filter(r => r.status === 'pendiente').length;
+  }, [eventReservations]);
+
   // 2. CONDITIONAL LOGIN FORM (AFTER ALL HOOKS DECLARED)
   if (!adminUser) {
     const handleLoginSubmit = async (e) => {
@@ -3212,35 +3241,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       setSaveLoading(false);
     }
   };
-
-  // 1. Filtrar las reservas estrictamente por el evento activo seleccionado
-  const eventReservations = useMemo(() => {
-    return reservations.filter(r => (r.event_id || 'autenticas-2026') === activeEventId);
-  }, [reservations, activeEventId]);
-
-  // 2. Filtrar por término de búsqueda y estado dentro del evento activo
-  const filteredList = useMemo(() => {
-    return eventReservations.filter(r => {
-      const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
-      const matchesSearch = (r.purchaser_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (r.purchaser_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (r.purchaser_phone || '').includes(searchTerm);
-      return matchesStatus && matchesSearch;
-    });
-  }, [eventReservations, filterStatus, searchTerm]);
-
-  // 3. Métricas calculadas EXCLUSIVAMENTE para el evento activo
-  const totalRevenue = useMemo(() => {
-    return eventReservations.reduce((acc, r) => r.status === 'aprobado' || r.status === 'usado' ? acc + r.total_amount : acc, 0);
-  }, [eventReservations]);
-
-  const totalAllTickets = useMemo(() => {
-    return eventReservations.reduce((acc, r) => acc + (r.quantity || 0), 0);
-  }, [eventReservations]);
-
-  const pendingCount = useMemo(() => {
-    return eventReservations.filter(r => r.status === 'pendiente').length;
-  }, [eventReservations]);
 
   const neoCard = {
     backgroundColor: '#FAF8F5',
