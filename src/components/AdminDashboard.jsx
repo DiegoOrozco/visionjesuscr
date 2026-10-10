@@ -3307,7 +3307,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           gap: '12px',
           flexWrap: 'wrap'
         }}>
-          {['admin', 'editor_noticias', 'editor_eventos', 'editor_grupos', 'editor_redes', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'].includes(adminUser.role) && (
+          {['admin', 'editor_noticias', 'editor_redes', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'].includes(adminUser.role) && (
             <button
               onClick={() => setActiveTab('church_web')}
               style={{
