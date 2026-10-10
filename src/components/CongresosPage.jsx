@@ -132,6 +132,10 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
 }
 
   const handleEventClick = (evt) => {
+    const status = (evt.status || '').toLowerCase();
+    if (status.includes('finalizado') || status.includes('concluido') || evt.statusColor === '#64748B') {
+      return; // Do nothing if event is finished
+    }
     if (evt.id === 'autenticas') {
       window.location.href = '/autenticas';
     } else {
@@ -250,24 +254,27 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
           gap: '30px'
         }}>
-          {filteredEvents.map((evt) => (
-            <div 
-              key={evt.id}
-              onClick={() => handleEventClick(evt)}
-              className="apple-bento-card"
-              style={{
-                padding: 0,
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                border: '1px solid rgba(151, 125, 255, 0.2)',
-                borderRadius: '24px',
-                overflow: 'hidden',
-                background: 'rgba(0, 3, 61, 0.45)',
-                backdropFilter: 'blur(16px)',
-                transition: 'all 0.3s ease'
-              }}
-            >
+          {filteredEvents.map((evt) => {
+            const isFinished = (evt.status || '').toLowerCase().includes('finalizado') || (evt.status || '').toLowerCase().includes('concluido') || evt.statusColor === '#64748B';
+            return (
+              <div 
+                key={evt.id}
+                onClick={() => handleEventClick(evt)}
+                className="apple-bento-card"
+                style={{
+                  padding: 0,
+                  cursor: isFinished ? 'default' : 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: isFinished ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(151, 125, 255, 0.2)',
+                  borderRadius: '24px',
+                  overflow: 'hidden',
+                  background: isFinished ? 'rgba(14, 14, 20, 0.6)' : 'rgba(0, 3, 61, 0.45)',
+                  backdropFilter: 'blur(16px)',
+                  transition: 'all 0.3s ease',
+                  opacity: isFinished ? 0.75 : 1
+                }}
+              >
               {/* Event Image Banner */}
               <div style={{
                 height: '220px',
@@ -396,7 +403,8 @@ export default function CongresosPage({ config = {}, onSelectEvent }) {
                 )}
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       </section>
     </div>

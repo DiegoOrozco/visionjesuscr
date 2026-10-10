@@ -24,29 +24,14 @@ export default function OracionPage({ config = {}, onGoHome }) {
   });
   const [testimonySuccess, setTestimonySuccess] = useState(false);
 
-  // Default initial testimonies for inspiration
-  const [testimoniesList, setTestimoniesList] = useState([
-    {
-      id: 1,
-      name: 'María Fernández',
-      title: 'Sanidad completa en mi familia',
-      story: 'Puse mi petición en el altar durante el servicio del domingo. Los médicos decían que no había esperanza, pero oramos juntos como iglesia y el Señor obró un milagro sobrenatural de sanidad.',
-      date: 'Octubre 2026'
-    },
-    {
-      id: 2,
-      name: 'Carlos & Elena',
-      title: 'Restauración matrimonial y financiera',
-      story: 'Atravesábamos una prueba financiera muy difícil. Aprendimos a confiar en Dios en los Grupos de Amistad y abrimos las puertas a la bendición. Dios proveyó un nuevo trabajo y restauró nuestro hogar.',
-      date: 'Septiembre 2026'
-    }
-  ]);
+  // Public approved testimonies list loaded from backend
+  const [testimoniesList, setTestimoniesList] = useState([]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/testimonies`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.testimonies && data.testimonies.length > 0) {
+        if (data.success && data.testimonies) {
           setTestimoniesList(data.testimonies);
         }
       })
@@ -94,10 +79,6 @@ export default function OracionPage({ config = {}, onGoHome }) {
         setSubmitting(false);
         if (data.success) {
           setTestimonySuccess(true);
-          setTestimoniesList(prev => [
-            { id: Date.now(), name: testimonyForm.name, title: testimonyForm.title || 'Dios es Fiel', story: testimonyForm.story, date: 'Hoy' },
-            ...prev
-          ]);
           setTestimonyForm({ name: '', title: '', story: '' });
         } else {
           setTestimonySuccess(true);
@@ -343,10 +324,14 @@ export default function OracionPage({ config = {}, onGoHome }) {
                     Teléfono / WhatsApp (Opcional)
                   </label>
                   <input
-                    type="text"
+                    type="tel"
+                    maxLength={8}
                     value={prayerForm.phone}
-                    onChange={(e) => setPrayerForm({ ...prayerForm, phone: e.target.value })}
-                    placeholder="Ej: +506 8888-8888"
+                    onChange={(e) => {
+                      const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 8);
+                      setPrayerForm({ ...prayerForm, phone: digitsOnly });
+                    }}
+                    placeholder="Ej: 88888888 (8 dígitos)"
                     style={{
                       width: '100%',
                       padding: '14px 18px',
