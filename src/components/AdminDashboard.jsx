@@ -218,6 +218,164 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [mediaTarget, setMediaTarget] = useState(null);
   const [mediaList, setMediaList] = useState([]);
+
+  // Event Landing Page Modal State
+  const [showEventLandingModal, setShowEventLandingModal] = useState(false);
+  const [targetEventIdx, setTargetEventIdx] = useState(null);
+  const [eventLandingForm, setEventLandingForm] = useState({
+    id: '',
+    title: '',
+    subtitle: '',
+    badge: 'EVENTO',
+    hero_image: '',
+    content_paragraphs: [''],
+    gallery_images: [],
+    cta_label: 'Ver Más Información',
+    cta_url: ''
+  });
+  const [savingEventLanding, setSavingEventLanding] = useState(false);
+  const [uploadingEventLandingHero, setUploadingEventLandingHero] = useState(false);
+  const [uploadingEventGalleryIdx, setUploadingEventGalleryIdx] = useState(null);
+
+  const openEventLandingBuilder = async (evt, idx) => {
+    setTargetEventIdx(idx);
+    let articleId = `noticia_${Date.now()}`;
+    if (evt.url && evt.url.startsWith('/noticia/')) {
+      articleId = evt.url.replace('/noticia/', '');
+      try {
+        const res = await fetch(`${API_URL}/api/news-articles/${articleId}`);
+        const data = await res.json();
+        if (data.success && data.article) {
+          const art = data.article;
+          let parsedParagraphs = [''];
+          let parsedGallery = [];
+          try { parsedParagraphs = typeof art.content_paragraphs === 'string' ? JSON.parse(art.content_paragraphs) : art.content_paragraphs; } catch (e) {}
+          try { parsedGallery = typeof art.gallery_images === 'string' ? JSON.parse(art.gallery_images) : art.gallery_images; } catch (e) {}
+          setEventLandingForm({
+            id: art.id,
+            title: art.title || evt.title || '',
+            subtitle: art.subtitle || evt.subtitle || '',
+            badge: art.badge || evt.status || 'EVENTO',
+            hero_image: art.hero_image || evt.image || '',
+            content_paragraphs: Array.isArray(parsedParagraphs) && parsedParagraphs.length > 0 ? parsedParagraphs : [''],
+            gallery_images: Array.isArray(parsedGallery) ? parsedGallery : [],
+            cta_label: art.cta_label || 'Ver Más Información',
+            cta_url: art.cta_url || ''
+          });
+          setShowEventLandingModal(true);
+          return;
+        }
+      } catch (e) {}
+    }
+
+    setEventLandingForm({
+      id: articleId,
+      title: evt.title || '',
+      subtitle: evt.subtitle || evt.description || '',
+      badge: evt.status || 'EVENTO',
+      hero_image: evt.image || '',
+      content_paragraphs: evt.description ? [evt.description] : [''],
+      gallery_images: [],
+      cta_label: 'Ver Más Información',
+      cta_url: ''
+    });
+    setShowEventLandingModal(true);
+  };
+
+  const handleSaveEventLanding = async () => {
+    if (!eventLandingForm.title) {
+      alert('Por favor ingrese un título para la landing page del evento');
+      return;
+    }
+    setSavingEventLanding(true);
+    try {
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${API_URL}/api/admin/news-articles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...eventLandingForm,
+          content_paragraphs: JSON.stringify(eventLandingForm.content_paragraphs.filter(p => p.trim() !== '')),
+          gallery_images: JSON.stringify(eventLandingForm.gallery_images.filter(img => img.trim() !== ''))
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const updated = [...localEventsList];
+        updated[targetEventIdx].url = `/noticia/${data.id}`;
+        updated[targetEventIdx].title = eventLandingForm.title;
+        if (eventLandingForm.hero_image) updated[targetEventIdx].image = eventLandingForm.hero_image;
+        setLocalEventsList(updated);
+        alert('¡Landing page del evento creada y vinculada con éxito!');
+        setShowEventLandingModal(false);
+      } else {
+        alert('Error al guardar la landing del evento: ' + data.message);
+      }
+    } catch (e) {
+      alert('Error de conexión al guardar la landing page del evento: ' + e.message);
+    } finally {
+      setSavingEventLanding(false);
+    }
+  };
+
+  const handleUploadEventLandingHero = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingEventLandingHero(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && (data.url || data.imageUrl)) {
+        setEventLandingForm(prev => ({ ...prev, hero_image: data.url || data.imageUrl }));
+      } else {
+        alert('Error al subir la imagen: ' + (data.message || 'Respuesta inválida'));
+      }
+    } catch (err) {
+      alert('Error al subir la imagen: ' + err.message);
+    } finally {
+      setUploadingEventLandingHero(false);
+    }
+  };
+
+  const handleUploadEventGallery = async (idx, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingEventGalleryIdx(idx);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && (data.url || data.imageUrl)) {
+        setEventLandingForm(prev => {
+          const newG = [...prev.gallery_images];
+          newG[idx] = data.url || data.imageUrl;
+          return { ...prev, gallery_images: newG };
+        });
+      } else {
+        alert('Error al subir la imagen: ' + (data.message || 'Respuesta inválida'));
+      }
+    } catch (err) {
+      alert('Error al subir la imagen: ' + err.message);
+    } finally {
+      setUploadingEventGalleryIdx(null);
+    }
+  };
   const [mediaSearch, setMediaSearch] = useState('');
   const [loadingMedia, setLoadingMedia] = useState(false);
 
@@ -6000,9 +6158,33 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                           updated[idx].url = e.target.value;
                           setLocalEventsList(updated);
                         }}
-                        placeholder="ej: /autenticas o /oracion"
+                        placeholder="ej: /autenticas o /noticia/noticia_123"
                         style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
                       />
+                      <div style={{ marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => openEventLandingBuilder(evt, idx)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            backgroundColor: evt.url && evt.url.startsWith('/noticia/') ? 'rgba(16, 185, 129, 0.12)' : 'rgba(151, 125, 255, 0.12)',
+                            border: evt.url && evt.url.startsWith('/noticia/') ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(151, 125, 255, 0.4)',
+                            borderRadius: '8px',
+                            color: evt.url && evt.url.startsWith('/noticia/') ? '#059669' : '#7C3AED',
+                            fontSize: '0.8rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <Sparkles size={14} />
+                          <span>{evt.url && evt.url.startsWith('/noticia/') ? '✏️ Editar Landing Page del Evento' : '✨ Crear Landing Page de Evento (Plantilla)'}</span>
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Precios / Cupo</label>
@@ -6892,6 +7074,444 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               <span>Total: {mediaList.length} archivos</span>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: DISEÑADOR Y PLANTILLA DE LANDING PAGE DE EVENTO */}
+      {showEventLandingModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(16px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#0F131C',
+            border: '1.5px solid rgba(151, 125, 255, 0.4)',
+            borderRadius: '24px',
+            width: '100%',
+            maxWidth: '850px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '32px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            color: '#FFFFFF'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '16px' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, color: '#C4B5FD', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={20} />
+                  <span>Diseñador de Landing Page del Evento</span>
+                </h2>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'rgba(234, 237, 248, 0.65)' }}>
+                  Crea una página informativa estilo landing (`/noticia/${eventLandingForm.id}`) con párrafos, imágenes y botón de acción.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEventLandingModal(false)}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  fontWeight: 700
+                }}
+              >
+                ✕ Cerrar
+              </button>
+            </div>
+
+            {/* TITULO Y BADGE */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                  Título del Evento
+                </label>
+                <input
+                  type="text"
+                  value={eventLandingForm.title}
+                  onChange={(e) => setEventLandingForm({ ...eventLandingForm, title: e.target.value })}
+                  placeholder="Ej: Conferencia Anual de Jóvenes 2026"
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem',
+                    fontWeight: 700
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                  Etiqueta / Badge
+                </label>
+                <input
+                  type="text"
+                  value={eventLandingForm.badge}
+                  onChange={(e) => setEventLandingForm({ ...eventLandingForm, badge: e.target.value })}
+                  placeholder="Ej: EVENTO, CONGRESO, ENTRADA LIBRE"
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    color: '#FFFFFF',
+                    fontSize: '0.9rem'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                Subtítulo o Resumen Corto del Evento
+              </label>
+              <input
+                type="text"
+                value={eventLandingForm.subtitle}
+                onChange={(e) => setEventLandingForm({ ...eventLandingForm, subtitle: e.target.value })}
+                placeholder="Ej: Edición Especial • Entrada Gratuita para Toda la Familia"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '10px',
+                  color: '#FFFFFF',
+                  fontSize: '0.88rem'
+                }}
+              />
+            </div>
+
+            {/* IMAGEN HERO DE LA LANDING */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                Imagen Principal de la Landing del Evento
+              </label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="text"
+                  value={eventLandingForm.hero_image}
+                  onChange={(e) => setEventLandingForm({ ...eventLandingForm, hero_image: e.target.value })}
+                  placeholder="URL de la imagen principal..."
+                  style={{
+                    flex: 1,
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    color: '#FFFFFF',
+                    fontSize: '0.85rem'
+                  }}
+                />
+                <label style={{
+                  padding: '10px 18px',
+                  backgroundColor: 'rgba(151, 125, 255, 0.2)',
+                  border: '1px solid #977DFF',
+                  borderRadius: '10px',
+                  color: '#FFFFFF',
+                  fontSize: '0.84rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <Upload size={14} />
+                  <span>{uploadingEventLandingHero ? 'Subiendo...' : 'Subir Imagen'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadEventLandingHero}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* SECCION DE PARRAFOS MULTIPLES */}
+            <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#F1F5F9' }}>
+                  Párrafos de Información del Evento
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEventLandingForm({ ...eventLandingForm, content_paragraphs: [...eventLandingForm.content_paragraphs, ''] })}
+                  style={{
+                    padding: '6px 14px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    borderRadius: '8px',
+                    color: '#34D399',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Plus size={13} />
+                  <span>+ Agregar Párrafo</span>
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {eventLandingForm.content_paragraphs.map((p, pIdx) => (
+                  <div key={pIdx} style={{ display: 'flex', gap: '10px' }}>
+                    <textarea
+                      rows={3}
+                      value={p}
+                      onChange={(e) => {
+                        const newP = [...eventLandingForm.content_paragraphs];
+                        newP[pIdx] = e.target.value;
+                        setEventLandingForm({ ...eventLandingForm, content_paragraphs: newP });
+                      }}
+                      placeholder={`Escribe aquí el párrafo #${pIdx + 1}...`}
+                      style={{
+                        flex: 1,
+                        padding: '10px 14px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '10px',
+                        color: '#FFFFFF',
+                        fontSize: '0.86rem',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                    {eventLandingForm.content_paragraphs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newP = eventLandingForm.content_paragraphs.filter((_, idx) => idx !== pIdx);
+                          setEventLandingForm({ ...eventLandingForm, content_paragraphs: newP });
+                        }}
+                        style={{
+                          padding: '8px',
+                          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          borderRadius: '10px',
+                          color: '#EF4444',
+                          cursor: 'pointer',
+                          alignSelf: 'flex-start'
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECCION DE GALERIA DE FOTOS */}
+            <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#F1F5F9' }}>
+                  Galería de Fotos del Evento (Opcional)
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEventLandingForm({ ...eventLandingForm, gallery_images: [...eventLandingForm.gallery_images, ''] })}
+                  style={{
+                    padding: '6px 14px',
+                    backgroundColor: 'rgba(151, 125, 255, 0.15)',
+                    border: '1px solid rgba(151, 125, 255, 0.3)',
+                    borderRadius: '8px',
+                    color: '#C4B5FD',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Plus size={13} />
+                  <span>+ Agregar Foto</span>
+                </button>
+              </div>
+
+              {eventLandingForm.gallery_images.length === 0 ? (
+                <div style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.4)', fontStyle: 'italic' }}>
+                  No se han agregado fotos secundarias a la galería.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {eventLandingForm.gallery_images.map((gImg, gIdx) => (
+                    <div key={gIdx} style={{ display: 'flex', gap: '10px' }}>
+                      <input
+                        type="text"
+                        value={gImg}
+                        onChange={(e) => {
+                          const newG = [...eventLandingForm.gallery_images];
+                          newG[gIdx] = e.target.value;
+                          setEventLandingForm({ ...eventLandingForm, gallery_images: newG });
+                        }}
+                        placeholder={`URL foto #${gIdx + 1}...`}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '8px',
+                          color: '#FFFFFF',
+                          fontSize: '0.84rem'
+                        }}
+                      />
+                      <label style={{
+                        padding: '8px 14px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '8px',
+                        color: '#FFFFFF',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <Upload size={13} />
+                        <span>{uploadingEventGalleryIdx === gIdx ? '...' : 'Subir'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadEventGallery(gIdx, e)}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newG = eventLandingForm.gallery_images.filter((_, idx) => idx !== gIdx);
+                          setEventLandingForm({ ...eventLandingForm, gallery_images: newG });
+                        }}
+                        style={{
+                          padding: '8px',
+                          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          borderRadius: '8px',
+                          color: '#EF4444',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* BOTON LLAMADA A LA ACCION CTA */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                  Texto del Botón CTA (Call To Action)
+                </label>
+                <input
+                  type="text"
+                  value={eventLandingForm.cta_label}
+                  onChange={(e) => setEventLandingForm({ ...eventLandingForm, cta_label: e.target.value })}
+                  placeholder="Ej: Inscribirme Ahora, Reservar Cupo"
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    color: '#FFFFFF',
+                    fontSize: '0.88rem'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '6px', fontWeight: 700 }}>
+                  Enlace del Botón CTA
+                </label>
+                <input
+                  type="text"
+                  value={eventLandingForm.cta_url}
+                  onChange={(e) => setEventLandingForm({ ...eventLandingForm, cta_url: e.target.value })}
+                  placeholder="Ej: /autenticas o https://wa.me/506..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    color: '#FFFFFF',
+                    fontSize: '0.88rem'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* BOTONES DE ACCION DEL MODAL */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '18px', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setShowEventLandingModal(false)}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveEventLanding}
+                disabled={savingEventLanding}
+                style={{
+                  padding: '12px 28px',
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  cursor: savingEventLanding ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)'
+                }}
+              >
+                <Check size={18} />
+                <span>{savingEventLanding ? 'Guardando...' : '💾 Guardar Landing y Vincular'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
