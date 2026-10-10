@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Calendar, Clock, Users, Send, CheckCircle2, Filter, Heart, Sparkles, Phone, ArrowRight, X, ExternalLink, Navigation } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
   const [contactForm, setContactForm] = useState({ name: '', phone: '', email: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [formError, setFormError] = useState('');
 
   // Friendship groups state
   const [groups, setGroups] = useState([]);
@@ -31,7 +33,27 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    if (!contactForm.name || !contactForm.phone) return;
+    setFormError('');
+
+    if (!contactForm.name || !contactForm.name.trim()) {
+      setFormError('Por favor ingresa tu nombre completo.');
+      return;
+    }
+
+    const cleanPhone = (contactForm.phone || '').replace(/\D/g, '');
+    if (cleanPhone.length !== 8) {
+      setFormError('El teléfono debe contener exactamente 8 dígitos numéricos (ej: 88888888).');
+      return;
+    }
+
+    if (contactForm.email && contactForm.email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contactForm.email.trim())) {
+        setFormError('Por favor ingresa un correo electrónico válido (ej: nombre@correo.com).');
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     fetch(`${API_URL}/api/group-contact`, {
@@ -40,7 +62,9 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
       body: JSON.stringify({
         groupId: activeGroupModal ? activeGroupModal.id : null,
         groupName: activeGroupModal ? activeGroupModal.name : 'Contacto General',
-        ...contactForm
+        ...contactForm,
+        phone: cleanPhone,
+        email: contactForm.email ? contactForm.email.trim() : ''
       })
     })
       .then(res => res.json())
@@ -531,6 +555,7 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
                   onClick={() => {
                     setActiveGroupModal(grp);
                     setSubmitSuccess(false);
+                    setFormError('');
                     setContactForm({ name: '', phone: '', email: '', notes: '' });
                   }}
                   style={{
@@ -629,6 +654,21 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
                   </p>
                 </div>
 
+                {formError && (
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                    borderRadius: '12px',
+                    color: '#F87171',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    lineHeight: 1.4
+                  }}>
+                    {formError}
+                  </div>
+                )}
+
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#EAEDF8', marginBottom: '6px' }}>Tu Nombre Completo *</label>
                   <input
@@ -642,13 +682,18 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#EAEDF8', marginBottom: '6px' }}>Teléfono / WhatsApp *</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#EAEDF8', marginBottom: '6px' }}>Teléfono / WhatsApp * (8 dígitos numéricos)</label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    maxLength={8}
                     required
                     value={contactForm.phone}
-                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                    placeholder="Ej: +506 8888-8888"
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\D/g, '').slice(0, 8);
+                      setContactForm({ ...contactForm, phone: clean });
+                    }}
+                    placeholder="ej: 88888888"
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.15)', color: '#FFF', boxSizing: 'border-box' }}
                   />
                 </div>
