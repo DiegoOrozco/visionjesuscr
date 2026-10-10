@@ -1947,8 +1947,28 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const handleAddNews = () => {
     setLocalNewsItems([...localNewsItems, { id: Date.now().toString(), title: '', description: '', image: '', link: '', badge: '' }]);
   };
-  const handleRemoveNews = (id) => {
-    setLocalNewsItems(localNewsItems.filter(n => n.id !== id));
+  const handleRemoveNews = async (id) => {
+    const targetNews = localNewsItems.find(n => n.id === id);
+    if (targetNews) {
+      const newsUrl = targetNews.link || targetNews.url;
+      if (newsUrl && newsUrl.includes('/noticia/')) {
+        const articleId = newsUrl.split('/noticia/')[1];
+        if (articleId) {
+          try {
+            const token = localStorage.getItem('admin_token');
+            await fetch(`${API_URL}/api/admin/news-articles/${articleId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+          } catch (err) {
+            console.error('Error al eliminar la landing page asociada a la noticia:', err);
+          }
+        }
+      }
+    }
+    setLocalNewsItems(prev => prev.filter(n => n.id !== id));
   };
   const handleNewsChange = (id, field, value) => {
     setLocalNewsItems(localNewsItems.map(n => n.id === id ? { ...n, [field]: value } : n));
@@ -2164,7 +2184,27 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     ]);
   };
 
-  const handleRemoveEvent = (idOrIdx) => {
+  const handleRemoveEvent = async (idOrIdx) => {
+    const targetEvent = localEventsList.find((evt, i) => (evt.id || i) === idOrIdx);
+    if (targetEvent) {
+      const eventUrl = targetEvent.url || targetEvent.link || targetEvent.landingUrl;
+      if (eventUrl && eventUrl.includes('/noticia/')) {
+        const articleId = eventUrl.split('/noticia/')[1];
+        if (articleId) {
+          try {
+            const token = localStorage.getItem('admin_token');
+            await fetch(`${API_URL}/api/admin/news-articles/${articleId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+          } catch (err) {
+            console.error('Error al eliminar la landing page asociada al evento:', err);
+          }
+        }
+      }
+    }
     setLocalEventsList(prev => prev.filter((evt, i) => (evt.id || i) !== idOrIdx));
   };
 
