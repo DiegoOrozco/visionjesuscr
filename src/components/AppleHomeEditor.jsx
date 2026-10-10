@@ -158,17 +158,19 @@ export default function AppleHomeEditor({
       const formData = new FormData();
       formData.append('image', file);
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${API_URL}/api/upload-media`, {
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
       const data = await res.json();
-      if (data.success && data.imageUrl) {
-        setLandingForm(prev => ({ ...prev, hero_image: data.imageUrl }));
+      if (data.success && (data.url || data.imageUrl)) {
+        setLandingForm(prev => ({ ...prev, hero_image: data.url || data.imageUrl }));
+      } else {
+        alert('Error al subir la imagen principal: ' + (data.message || 'Respuesta inválida'));
       }
     } catch (err) {
-      alert('Error al subir la imagen principal');
+      alert('Error al subir la imagen principal: ' + err.message);
     } finally {
       setUploadingLandingHero(false);
     }
@@ -182,21 +184,23 @@ export default function AppleHomeEditor({
       const formData = new FormData();
       formData.append('image', file);
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${API_URL}/api/upload-media`, {
+      const res = await fetch(`${API_URL}/api/admin/landing/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
       const data = await res.json();
-      if (data.success && data.imageUrl) {
+      if (data.success && (data.url || data.imageUrl)) {
         setLandingForm(prev => {
           const newG = [...prev.gallery_images];
-          newG[idx] = data.imageUrl;
+          newG[idx] = data.url || data.imageUrl;
           return { ...prev, gallery_images: newG };
         });
+      } else {
+        alert('Error al subir la imagen: ' + (data.message || 'Respuesta inválida'));
       }
     } catch (err) {
-      alert('Error al subir la imagen');
+      alert('Error al subir la imagen: ' + err.message);
     } finally {
       setUploadingGalleryIdx(null);
     }
