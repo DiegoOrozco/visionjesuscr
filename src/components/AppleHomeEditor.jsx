@@ -49,6 +49,16 @@ export default function AppleHomeEditor({
 }) {
   const [activeSubTab, setActiveSubTab] = useState(() => (adminUser && adminUser.role === 'editor_noticias') ? 'news' : 'hero');
 
+  const [prevUserRole, setPrevUserRole] = useState(adminUser?.role);
+  if (adminUser?.role !== prevUserRole) {
+    setPrevUserRole(adminUser?.role);
+    if (adminUser?.role === 'editor_noticias') {
+      setActiveSubTab('news');
+    } else {
+      setActiveSubTab('hero');
+    }
+  }
+
   // Landing Page Generator Modal State
   const [showLandingModal, setShowLandingModal] = useState(false);
   const [targetNewsId, setTargetNewsId] = useState(null);

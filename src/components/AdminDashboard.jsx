@@ -34,26 +34,50 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     return response;
   };
 
-  const [activeTab, setActiveTab] = useState(() => {
-    if (adminUser) {
-      if (adminUser.role === 'editor_autenticas') return 'autenticas';
-      if (adminUser.role === 'editor_sanados') return 'sanados';
-      if (adminUser.role === 'editor_modelo' || adminUser.role === 'editor_redes') return 'church_web';
-      if (adminUser.role === 'editor_move') return 'move';
-      if (adminUser.role === 'editor_tienda') return 'tienda';
-      if (adminUser.role === 'scanner') return 'escanear';
-      if (adminUser.role === 'editor_noticias') return 'church_web';
-      if (adminUser.role === 'editor_eventos') return 'events_admin';
-      if (adminUser.role === 'editor_grupos') return 'grupos_admin';
-    }
+  const getRoleDefaultTab = (user) => {
+    if (!user) return 'reservations';
+    if (user.role === 'editor_autenticas') return 'autenticas';
+    if (user.role === 'editor_sanados') return 'sanados';
+    if (user.role === 'editor_modelo' || user.role === 'editor_redes') return 'church_web';
+    if (user.role === 'editor_move') return 'move';
+    if (user.role === 'editor_tienda') return 'tienda';
+    if (user.role === 'scanner') return 'escanear';
+    if (user.role === 'editor_noticias') return 'church_web';
+    if (user.role === 'editor_eventos') return 'events_admin';
+    if (user.role === 'editor_grupos') return 'grupos_admin';
     return 'reservations';
-  });
+  };
 
-  const [activeSuite, setActiveSuite] = useState(() => {
-    if (['church_web', 'oracion_admin', 'grupos_admin', 'events_admin', 'donaciones_admin', 'autenticas', 'sanados', 'modelo', 'move', 'tienda'].includes(activeTab)) return 'web';
-    if (['users', 'activity_log'].includes(activeTab)) return 'system';
+  const getRoleDefaultSuite = (user, tab) => {
+    if (['church_web', 'oracion_admin', 'grupos_admin', 'events_admin', 'donaciones_admin', 'autenticas', 'sanados', 'modelo', 'move', 'tienda'].includes(tab)) return 'web';
+    if (['users', 'activity_log'].includes(tab)) return 'system';
     return 'tickets';
-  });
+  };
+
+  const getRoleDefaultWebPage = (user) => {
+    if (!user) return 'home';
+    if (user.role === 'editor_noticias') return 'home';
+    if (user.role === 'editor_eventos') return 'congresos';
+    if (user.role === 'editor_grupos') return 'grupos-de-amistad';
+    if (user.role === 'editor_redes' || user.role === 'editor_modelo') return 'modelo';
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => getRoleDefaultTab(adminUser));
+  const [activeSuite, setActiveSuite] = useState(() => getRoleDefaultSuite(adminUser, activeTab));
+  const [activeWebPage, setActiveWebPage] = useState(() => getRoleDefaultWebPage(adminUser));
+
+  // Synchronous State Adjustment on prop change during rendering to prevent React error #310
+  const [prevUserRole, setPrevUserRole] = useState(adminUser?.role);
+  if (adminUser?.role !== prevUserRole) {
+    setPrevUserRole(adminUser?.role);
+    const newTab = getRoleDefaultTab(adminUser);
+    const newSuite = getRoleDefaultSuite(adminUser, newTab);
+    const newWebPage = getRoleDefaultWebPage(adminUser);
+    setActiveTab(newTab);
+    setActiveSuite(newSuite);
+    setActiveWebPage(newWebPage);
+  }
 
   const [activeEventId, setActiveEventId] = useState('autenticas-2026');
 
@@ -195,15 +219,6 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
   const [localSections, setLocalSections] = useState([]);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
   const [builderPagePath, setBuilderPagePath] = useState('/nosotros');
-  const [activeWebPage, setActiveWebPage] = useState(() => {
-    if (adminUser) {
-      if (adminUser.role === 'editor_noticias') return 'home';
-      if (adminUser.role === 'editor_eventos') return 'congresos';
-      if (adminUser.role === 'editor_grupos') return 'grupos-de-amistad';
-      if (adminUser.role === 'editor_redes' || adminUser.role === 'editor_modelo') return 'modelo';
-    }
-    return 'home';
-  });
   const [localNosotrosCards, setLocalNosotrosCards] = useState([]);
   const [localPastoresProfiles, setLocalPastoresProfiles] = useState([]);
   const [localNosotrosButtons, setLocalNosotrosButtons] = useState([]);

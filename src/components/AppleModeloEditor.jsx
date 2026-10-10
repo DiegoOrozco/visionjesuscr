@@ -39,9 +39,20 @@ export default function AppleModeloEditor({
   saveLoading = false,
   saveSuccessMsg = '',
   onSelectWebPage,
-  API_URL = ''
+  API_URL = '',
+  adminUser = null
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('hero');
+  const [activeSubTab, setActiveSubTab] = useState(() => (adminUser && adminUser.role === 'editor_redes') ? 'networks' : 'hero');
+
+  const [prevUserRole, setPrevUserRole] = useState(adminUser?.role);
+  if (adminUser?.role !== prevUserRole) {
+    setPrevUserRole(adminUser?.role);
+    if (adminUser?.role === 'editor_redes') {
+      setActiveSubTab('networks');
+    } else {
+      setActiveSubTab('hero');
+    }
+  }
 
   // Preview helper for uploaded image paths
   const getImageUrl = (url) => {
@@ -271,10 +282,13 @@ export default function AppleModeloEditor({
         border: '1px solid rgba(255, 255, 255, 0.08)',
         overflowX: 'auto'
       }}>
-        {[
-          { id: 'hero', label: 'Banner & Título Hero', icon: <Sparkles size={15} /> },
-          { id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }
-        ].map((tab) => {
+        {((adminUser && adminUser.role === 'editor_redes')
+          ? [{ id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }]
+          : [
+              { id: 'hero', label: 'Banner & Título Hero', icon: <Sparkles size={15} /> },
+              { id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }
+            ]
+        ).map((tab) => {
           const isSelected = activeSubTab === tab.id;
           return (
             <button
