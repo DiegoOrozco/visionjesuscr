@@ -1173,7 +1173,45 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   useEffect(() => {
     if (adminUser) {
-      fetchReservations();
+      if (adminUser.role === 'editor_autenticas') {
+        setActiveTab('autenticas');
+        setActiveSuite('web');
+      } else if (adminUser.role === 'editor_sanados') {
+        setActiveTab('sanados');
+        setActiveSuite('web');
+      } else if (adminUser.role === 'editor_modelo' || adminUser.role === 'editor_redes') {
+        setActiveTab('church_web');
+        setActiveSuite('web');
+        setActiveWebPage('modelo');
+      } else if (adminUser.role === 'editor_move') {
+        setActiveTab('move');
+        setActiveSuite('web');
+      } else if (adminUser.role === 'editor_tienda') {
+        setActiveTab('tienda');
+        setActiveSuite('web');
+      } else if (adminUser.role === 'scanner') {
+        setActiveTab('escanear');
+        setActiveSuite('tickets');
+      } else if (adminUser.role === 'editor_noticias') {
+        setActiveTab('church_web');
+        setActiveSuite('web');
+        setActiveWebPage('home');
+      } else if (adminUser.role === 'editor_eventos') {
+        setActiveTab('events_admin');
+        setActiveSuite('web');
+        setActiveWebPage('congresos');
+      } else if (adminUser.role === 'editor_grupos') {
+        setActiveTab('grupos_admin');
+        setActiveSuite('web');
+        setActiveWebPage('grupos-de-amistad');
+      } else {
+        setActiveSuite('tickets');
+        setActiveTab('reservations');
+      }
+
+      if (['admin', 'tickets_readonly', 'scanner'].includes(adminUser.role)) {
+        fetchReservations();
+      }
     }
   }, [adminUser]);
 
