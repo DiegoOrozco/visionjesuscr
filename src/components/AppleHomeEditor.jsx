@@ -118,7 +118,7 @@ export default function AppleHomeEditor({
     }
     setSavingLanding(true);
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_token');
       const res = await fetch(`${API_URL}/api/admin/news-articles`, {
         method: 'POST',
         headers: {
@@ -157,7 +157,7 @@ export default function AppleHomeEditor({
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_token');
       const res = await fetch(`${API_URL}/api/upload-media`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
@@ -181,7 +181,7 @@ export default function AppleHomeEditor({
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_token');
       const res = await fetch(`${API_URL}/api/upload-media`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
