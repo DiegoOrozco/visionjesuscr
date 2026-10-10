@@ -562,7 +562,7 @@ export default function AppleModeloEditor({
                     <input
                       type="text"
                       value={net.image || ''}
-                      onChange={(e) => handleNetworkChange(net.id || idx, 'image', e.target.value)}
+                      onChange={(e) => handleNetworkChange(idx, 'image', e.target.value)}
                       placeholder="URL de la imagen..."
                       className="apple-input"
                       style={{ flex: 1 }}

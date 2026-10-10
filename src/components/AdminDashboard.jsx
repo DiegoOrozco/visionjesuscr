@@ -2191,7 +2191,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const handleModeloNetworkChangeApple = (idOrIdx, field, value) => {
     setLocalModeloNetworks(prev => prev.map((net, i) => {
-      if ((net.id || i) === idOrIdx) {
+      if (i === idOrIdx || net.id === idOrIdx || String(net.id) === String(idOrIdx) || String(i) === String(idOrIdx)) {
         return { ...net, [field]: value };
       }
       return net;
