@@ -2331,6 +2331,71 @@ app.delete('/api/admin/group-contacts/:id', verifyAdminToken, (req, res) => {
   }
 });
 
+// News Landing Articles Endpoints
+app.get('/api/news-articles', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM news_articles WHERE is_published = 1 ORDER BY created_at DESC').all();
+    res.json({ success: true, articles: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.get('/api/news-articles/:id', (req, res) => {
+  try {
+    const article = db.prepare('SELECT * FROM news_articles WHERE id = ?').get(req.params.id);
+    if (!article) return res.status(404).json({ success: false, message: 'Noticia no encontrada.' });
+    res.json({ success: true, article });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.post('/api/admin/news-articles', verifyAdminToken, (req, res) => {
+  try {
+    const { id, title, subtitle, badge, hero_image, content_paragraphs, gallery_images, cta_label, cta_url, is_published } = req.body;
+    const articleId = id || `noticia_${Date.now()}`;
+    const stmt = db.prepare(`
+      INSERT INTO news_articles (id, title, subtitle, badge, hero_image, content_paragraphs, gallery_images, cta_label, cta_url, is_published)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        title = excluded.title,
+        subtitle = excluded.subtitle,
+        badge = excluded.badge,
+        hero_image = excluded.hero_image,
+        content_paragraphs = excluded.content_paragraphs,
+        gallery_images = excluded.gallery_images,
+        cta_label = excluded.cta_label,
+        cta_url = excluded.cta_url,
+        is_published = excluded.is_published
+    `);
+    stmt.run(
+      articleId,
+      title || 'Nueva Noticia',
+      subtitle || '',
+      badge || 'NOTICIA',
+      hero_image || '',
+      typeof content_paragraphs === 'string' ? content_paragraphs : JSON.stringify(content_paragraphs || []),
+      typeof gallery_images === 'string' ? gallery_images : JSON.stringify(gallery_images || []),
+      cta_label || 'Ver Más Información',
+      cta_url || '',
+      is_published !== undefined ? (is_published ? 1 : 0) : 1
+    );
+    res.json({ success: true, message: 'Noticia landing guardada exitosamente.', id: articleId });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.delete('/api/admin/news-articles/:id', verifyAdminToken, (req, res) => {
+  try {
+    db.prepare('DELETE FROM news_articles WHERE id = ?').run(req.params.id);
+    res.json({ success: true, message: 'Noticia eliminada.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Express API Server listening on port ${PORT}`);
 });

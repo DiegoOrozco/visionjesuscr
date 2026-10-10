@@ -163,6 +163,20 @@ function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS news_articles (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      subtitle TEXT,
+      badge TEXT DEFAULT 'NOTICIA',
+      hero_image TEXT,
+      content_paragraphs TEXT,
+      gallery_images TEXT,
+      cta_label TEXT,
+      cta_url TEXT,
+      is_published INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seat_holds_expires ON seat_holds (expires_at);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_seat_code ON seat_holds (seat_code);
     CREATE INDEX IF NOT EXISTS idx_seat_holds_session ON seat_holds (session_id);
@@ -271,6 +285,10 @@ function initDb() {
   const insertUser = db.prepare('INSERT OR IGNORE INTO admin_users (username, password_hash, role, full_name) VALUES (?, ?, ?, ?)');
   insertUser.run('admin', hashPass('admin123'), 'admin', 'Administrador Principal');
   insertUser.run('scanner', hashPass('puerta123'), 'scanner', 'Personal de Puerta / Escáner');
+  insertUser.run('editor_noticias', hashPass('noticias123'), 'editor_noticias', 'Encargado de Noticias e Inicio');
+  insertUser.run('editor_eventos', hashPass('eventos123'), 'editor_eventos', 'Encargado de Eventos y Cartelera');
+  insertUser.run('editor_grupos', hashPass('grupos123'), 'editor_grupos', 'Encargado de Grupos de Amistad');
+  insertUser.run('editor_redes', hashPass('redes123'), 'editor_redes', 'Encargado de Redes y Ministerios');
   insertUser.run('editor_move', hashPass('move123'), 'editor_move', 'Editor de Move');
   insertUser.run('editor_sanados', hashPass('sanados123'), 'editor_sanados', 'Editor de Sanados');
   insertUser.run('editor_modelo', hashPass('modelo123'), 'editor_modelo', 'Editor de Modelo');

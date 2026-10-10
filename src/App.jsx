@@ -18,6 +18,7 @@ import OracionPage from './components/OracionPage';
 import GruposAmistadPage from './components/GruposAmistadPage';
 import DonacionesPage from './components/DonacionesPage';
 import NosotrosPage from './components/NosotrosPage';
+import NewsArticleDetail from './components/NewsArticleDetail';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -25,6 +26,7 @@ const getInitialView = () => {
   const path = window.location.pathname;
   if (path === '/') return 'landing';
   if (path.startsWith('/ticket/')) return 'ticket-view';
+  if (path.startsWith('/noticia/')) return 'news-article';
   if (path === '/admin' || path === '/login' || path === '/portal-admin') {
     const savedUser = localStorage.getItem('admin_user');
     const userObj = savedUser ? JSON.parse(savedUser) : null;
@@ -130,6 +132,8 @@ export default function App() {
         setTicketQrHash(hash);
         setCurrentView('ticket-view');
       }
+    } else if (path.startsWith('/noticia/')) {
+      setCurrentView('news-article');
     } else if (path === '/admin' || path === '/login' || path === '/portal-admin') {
       if (path === '/admin') {
         window.history.replaceState({}, '', '/login');
@@ -504,6 +508,17 @@ export default function App() {
               }} 
             />
           )
+        )}
+
+        {/* VIEW: NOTICIA LANDING PAGE */}
+        {currentView === 'news-article' && (
+          <NewsArticleDetail
+            onGoHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('landing');
+              fetchLandingSections('/');
+            }}
+          />
         )}
 
         {/* VIEW 9: NOT FOUND 404 */}

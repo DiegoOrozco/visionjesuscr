@@ -38,10 +38,13 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
     if (adminUser) {
       if (adminUser.role === 'editor_autenticas') return 'autenticas';
       if (adminUser.role === 'editor_sanados') return 'sanados';
-      if (adminUser.role === 'editor_modelo') return 'modelo';
+      if (adminUser.role === 'editor_modelo' || adminUser.role === 'editor_redes') return 'church_web';
       if (adminUser.role === 'editor_move') return 'move';
       if (adminUser.role === 'editor_tienda') return 'tienda';
       if (adminUser.role === 'scanner') return 'escanear';
+      if (adminUser.role === 'editor_noticias') return 'church_web';
+      if (adminUser.role === 'editor_eventos') return 'events_admin';
+      if (adminUser.role === 'editor_grupos') return 'grupos_admin';
     }
     return 'reservations';
   });
@@ -191,8 +194,15 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const [localSections, setLocalSections] = useState([]);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
-  const [builderPagePath, setBuilderPagePath] = useState('/nosotros');
-  const [activeWebPage, setActiveWebPage] = useState('nosotros');
+  const [activeWebPage, setActiveWebPage] = useState(() => {
+    if (adminUser) {
+      if (adminUser.role === 'editor_noticias') return 'home';
+      if (adminUser.role === 'editor_eventos') return 'congresos';
+      if (adminUser.role === 'editor_grupos') return 'grupos-de-amistad';
+      if (adminUser.role === 'editor_redes' || adminUser.role === 'editor_modelo') return 'modelo';
+    }
+    return 'home';
+  });
   const [localNosotrosCards, setLocalNosotrosCards] = useState([]);
   const [localPastoresProfiles, setLocalPastoresProfiles] = useState([]);
   const [localNosotrosButtons, setLocalNosotrosButtons] = useState([]);
@@ -3055,42 +3065,46 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.08)'
       }}>
-        <button
-          onClick={() => {
-            setActiveSuite('tickets');
-            if (!['reservations', 'pricing', 'zones_seating'].includes(activeTab)) {
-              setActiveTab('reservations');
-            }
-          }}
-          style={{
-            flex: '1 1 auto',
-            minWidth: '200px',
-            padding: '12px 20px',
-            borderRadius: '12px',
-            border: activeSuite === 'tickets' ? '2px solid #0071E3' : '1px solid transparent',
-            backgroundColor: activeSuite === 'tickets' ? 'rgba(0, 113, 227, 0.2)' : 'transparent',
-            color: activeSuite === 'tickets' ? '#FFFFFF' : 'var(--text-muted)',
-            fontWeight: 800,
-            fontSize: '0.96rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            transition: 'all 0.2s ease',
-            boxShadow: activeSuite === 'tickets' ? '0 4px 16px rgba(0, 113, 227, 0.3)' : 'none'
-          }}
-        >
-          <Ticket size={20} color={activeSuite === 'tickets' ? '#60A5FA' : 'currentColor'} />
-          <span>🎟️ Tiquetera & Eventos</span>
-        </button>
+        {['admin', 'tickets_readonly', 'scanner'].includes(adminUser.role) && (
+          <button
+            onClick={() => {
+              setActiveSuite('tickets');
+              if (!['reservations', 'pricing', 'zones_seating'].includes(activeTab)) {
+                setActiveTab('reservations');
+              }
+            }}
+            style={{
+              flex: '1 1 auto',
+              minWidth: '200px',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: activeSuite === 'tickets' ? '2px solid #0071E3' : '1px solid transparent',
+              backgroundColor: activeSuite === 'tickets' ? 'rgba(0, 113, 227, 0.2)' : 'transparent',
+              color: activeSuite === 'tickets' ? '#FFFFFF' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '0.96rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'all 0.2s ease',
+              boxShadow: activeSuite === 'tickets' ? '0 4px 16px rgba(0, 113, 227, 0.3)' : 'none'
+            }}
+          >
+            <Ticket size={20} color={activeSuite === 'tickets' ? '#60A5FA' : 'currentColor'} />
+            <span>🎟️ Tiquetera & Eventos</span>
+          </button>
+        )}
 
-        {adminUser.role === 'admin' && (
+        {['admin', 'editor_noticias', 'editor_eventos', 'editor_grupos', 'editor_redes', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'].includes(adminUser.role) && (
           <button
             onClick={() => {
               setActiveSuite('web');
               if (!['church_web', 'oracion_admin', 'grupos_admin', 'events_admin', 'donaciones_admin'].includes(activeTab)) {
-                setActiveTab('church_web');
+                if (adminUser.role === 'editor_eventos') setActiveTab('events_admin');
+                else if (adminUser.role === 'editor_grupos') setActiveTab('grupos_admin');
+                else setActiveTab('church_web');
               }
             }}
             style={{
@@ -3292,127 +3306,137 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
           gap: '12px',
           flexWrap: 'wrap'
         }}>
-          <button
-            onClick={() => setActiveTab('church_web')}
-            style={{
-              backgroundColor: activeTab === 'church_web' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
-              color: '#FFFFFF',
-              border: activeTab === 'church_web' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '10px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'church_web' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Globe size={16} />
-            <span>Diseño Web Iglesia</span>
-          </button>
+          {['admin', 'editor_noticias', 'editor_eventos', 'editor_grupos', 'editor_redes', 'editor_autenticas', 'editor_sanados', 'editor_modelo', 'editor_move', 'editor_tienda'].includes(adminUser.role) && (
+            <button
+              onClick={() => setActiveTab('church_web')}
+              style={{
+                backgroundColor: activeTab === 'church_web' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'church_web' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'church_web' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Globe size={16} />
+              <span>Diseño Web Iglesia</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => {
-              setActiveTab('oracion_admin');
-              fetchAdminPrayers();
-              fetchAdminTestimonies();
-            }}
-            style={{
-              backgroundColor: activeTab === 'oracion_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
-              color: '#FFFFFF',
-              border: activeTab === 'oracion_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '10px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'oracion_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Heart size={16} />
-            <span>Oración & Testimonios</span>
-          </button>
+          {adminUser.role === 'admin' && (
+            <button
+              onClick={() => {
+                setActiveTab('oracion_admin');
+                fetchAdminPrayers();
+                fetchAdminTestimonies();
+              }}
+              style={{
+                backgroundColor: activeTab === 'oracion_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'oracion_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'oracion_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Heart size={16} />
+              <span>Oración & Testimonios</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => {
-              setActiveTab('grupos_admin');
-              fetchAdminGroups();
-              fetchAdminGroupContacts();
-            }}
-            style={{
-              backgroundColor: activeTab === 'grupos_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
-              color: '#FFFFFF',
-              border: activeTab === 'grupos_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '10px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'grupos_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Users size={16} />
-            <span>Grupos de Amistad</span>
-          </button>
+          {['admin', 'editor_grupos'].includes(adminUser.role) && (
+            <button
+              onClick={() => {
+                setActiveTab('grupos_admin');
+                fetchAdminGroups();
+                fetchAdminGroupContacts();
+              }}
+              style={{
+                backgroundColor: activeTab === 'grupos_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'grupos_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'grupos_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Users size={16} />
+              <span>Grupos de Amistad</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => {
-              setActiveTab('events_admin');
-            }}
-            style={{
-              backgroundColor: activeTab === 'events_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
-              color: '#FFFFFF',
-              border: activeTab === 'events_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '10px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'events_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Calendar size={16} />
-            <span>Cartelera de Eventos</span>
-          </button>
+          {['admin', 'editor_eventos'].includes(adminUser.role) && (
+            <button
+              onClick={() => {
+                setActiveTab('events_admin');
+              }}
+              style={{
+                backgroundColor: activeTab === 'events_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'events_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'events_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Calendar size={16} />
+              <span>Cartelera de Eventos</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => {
-              setActiveTab('donaciones_admin');
-            }}
-            style={{
-              backgroundColor: activeTab === 'donaciones_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
-              color: '#FFFFFF',
-              border: activeTab === 'donaciones_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '10px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'donaciones_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <CreditCard size={16} />
-            <span>Donaciones & SINPE</span>
-          </button>
+          {adminUser.role === 'admin' && (
+            <button
+              onClick={() => {
+                setActiveTab('donaciones_admin');
+              }}
+              style={{
+                backgroundColor: activeTab === 'donaciones_admin' ? '#977DFF' : 'rgba(255, 255, 255, 0.06)',
+                color: '#FFFFFF',
+                border: activeTab === 'donaciones_admin' ? '1.5px solid #C4B5FD' : '1px solid rgba(255, 255, 255, 0.12)',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: activeTab === 'donaciones_admin' ? '0 4px 14px rgba(151, 125, 255, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <CreditCard size={16} />
+              <span>Donaciones & SINPE</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -5248,7 +5272,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       )}
 
       {/* TAB: GRUPOS DE AMISTAD & CONTACTOS (Admin) */}
-      {activeTab === 'grupos_admin' && adminUser.role === 'admin' && (
+      {activeTab === 'grupos_admin' && (adminUser.role === 'admin' || adminUser.role === 'editor_grupos') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {/* DIRECTORIO DE GRUPOS DE AMISTAD */}
           <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
@@ -5670,7 +5694,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
       )}
 
       {/* TAB: CARTELERA GLOBAL DE EVENTOS (Admin) */}
-      {activeTab === 'events_admin' && adminUser.role === 'admin' && (
+      {activeTab === 'events_admin' && (adminUser.role === 'admin' || adminUser.role === 'editor_eventos') && (
         <div className="card-glass" style={{ borderRadius: '24px', padding: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
