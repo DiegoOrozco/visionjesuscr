@@ -44,9 +44,10 @@ export default function AppleHomeEditor({
   saveLoading = false,
   saveSuccessMsg = '',
   onSelectWebPage,
-  API_URL = ''
+  API_URL = '',
+  adminUser = null
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('hero');
+  const [activeSubTab, setActiveSubTab] = useState(() => (adminUser && adminUser.role === 'editor_noticias') ? 'news' : 'hero');
 
   // Landing Page Generator Modal State
   const [showLandingModal, setShowLandingModal] = useState(false);
@@ -392,47 +393,63 @@ export default function AppleHomeEditor({
             Inventario de Páginas:
           </span>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'home', name: '1. Inicio (/)', active: true },
-              { id: 'nosotros', name: '2. Nosotros', active: false },
-              { id: 'congresos', name: '3. Eventos & Congresos', active: false },
-              { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
-              { id: 'oracion', name: '5. Oración & Testimonios', active: false },
-              { id: 'donar', name: '6. Donar', active: false },
-              { id: 'autenticas', name: '7. Auténticas', active: false },
-              { id: 'sanados', name: '8. Sanados', active: false },
-              { id: 'modelo', name: '9. Modelo', active: false },
-              { id: 'move', name: '10. Move', active: false },
-              { id: 'tienda', name: '11. Tienda', active: false }
-            ].map((pg) => (
+            {(adminUser && adminUser.role === 'editor_noticias') ? (
               <span
-                key={pg.id}
                 style={{
                   padding: '5px 12px',
                   borderRadius: '9999px',
                   fontSize: '0.78rem',
-                  fontWeight: pg.active ? 800 : 500,
-                  backgroundColor: pg.active ? 'rgba(151, 125, 255, 0.2)' : 'rgba(255, 255, 255, 0.04)',
-                  border: pg.active ? '1.5px solid #977DFF' : '1px solid rgba(255, 255, 255, 0.06)',
-                  color: pg.active ? '#FFFFFF' : 'rgba(234, 237, 248, 0.5)',
-                  cursor: pg.active ? 'default' : 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => {
-                  if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'oracion' || pg.id === 'donar' || pg.id === 'modelo') && onSelectWebPage) {
-                    onSelectWebPage(pg.id);
-                  } else if (!pg.active) {
-                    alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad, 5. Oración, 6. Donar y 9. Modelo.`);
-                  }
+                  fontWeight: 800,
+                  backgroundColor: 'rgba(151, 125, 255, 0.2)',
+                  border: '1.5px solid #977DFF',
+                  color: '#FFFFFF'
                 }}
               >
-                {pg.name}
+                1. Inicio (/) - Noticias & Destacados
               </span>
-            ))}
+            ) : (
+              [
+                { id: 'home', name: '1. Inicio (/)', active: true },
+                { id: 'nosotros', name: '2. Nosotros', active: false },
+                { id: 'congresos', name: '3. Eventos & Congresos', active: false },
+                { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
+                { id: 'oracion', name: '5. Oración & Testimonios', active: false },
+                { id: 'donar', name: '6. Donar', active: false },
+                { id: 'autenticas', name: '7. Auténticas', active: false },
+                { id: 'sanados', name: '8. Sanados', active: false },
+                { id: 'modelo', name: '9. Modelo', active: false },
+                { id: 'move', name: '10. Move', active: false },
+                { id: 'tienda', name: '11. Tienda', active: false }
+              ].map((pg) => (
+                <span
+                  key={pg.id}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    fontSize: '0.78rem',
+                    fontWeight: pg.active ? 800 : 500,
+                    backgroundColor: pg.active ? 'rgba(151, 125, 255, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                    border: pg.active ? '1.5px solid #977DFF' : '1px solid rgba(255, 255, 255, 0.06)',
+                    color: pg.active ? '#FFFFFF' : 'rgba(234, 237, 248, 0.5)',
+                    cursor: pg.active ? 'default' : 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onClick={() => {
+                    if ((pg.id === 'home' || pg.id === 'nosotros' || pg.id === 'congresos' || pg.id === 'grupos-de-amistad' || pg.id === 'oracion' || pg.id === 'donar' || pg.id === 'modelo') && onSelectWebPage) {
+                      onSelectWebPage(pg.id);
+                    } else if (!pg.active) {
+                      alert(`Estamos renovando el sistema página por página. Puedes navegar entre 1. Inicio, 2. Nosotros, 3. Eventos & Congresos, 4. Grupos de Amistad, 5. Oración, 6. Donar y 9. Modelo.`);
+                    }
+                  }}
+                >
+                  {pg.name}
+                </span>
+              ))
+            )}
           </div>
         </div>
         <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
-          Página 1 de 11 activa
+          {(adminUser && adminUser.role === 'editor_noticias') ? 'Sección Noticias Activa' : 'Página 1 de 11 activa'}
         </span>
       </div>
 
@@ -448,13 +465,16 @@ export default function AppleHomeEditor({
         border: '1px solid rgba(255, 255, 255, 0.08)',
         overflowX: 'auto'
       }}>
-        {[
-          { id: 'hero', label: 'Portada (Hero)', icon: <Sparkles size={15} /> },
-          { id: 'pillars', label: 'Pilares & ADN', icon: <Compass size={15} /> },
-          { id: 'schedules', label: 'Horarios de Servicios', icon: <Clock size={15} /> },
-          { id: 'news', label: 'Noticias & Destacados', icon: <Globe size={15} /> },
-          { id: 'contact', label: 'Redes & Contacto Directo', icon: <Phone size={15} /> }
-        ].map((tab) => {
+        {((adminUser && adminUser.role === 'editor_noticias')
+          ? [{ id: 'news', label: 'Noticias & Destacados', icon: <Globe size={15} /> }]
+          : [
+              { id: 'hero', label: 'Portada (Hero)', icon: <Sparkles size={15} /> },
+              { id: 'pillars', label: 'Pilares & ADN', icon: <Compass size={15} /> },
+              { id: 'schedules', label: 'Horarios de Servicios', icon: <Clock size={15} /> },
+              { id: 'news', label: 'Noticias & Destacados', icon: <Globe size={15} /> },
+              { id: 'contact', label: 'Redes & Contacto Directo', icon: <Phone size={15} /> }
+            ]
+        ).map((tab) => {
           const isSelected = activeSubTab === tab.id;
           return (
             <button
