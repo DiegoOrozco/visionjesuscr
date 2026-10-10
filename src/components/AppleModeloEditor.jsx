@@ -214,110 +214,111 @@ export default function AppleModeloEditor({
         </div>
       )}
 
-      {/* PAGE INVENTORY PROGRESS BAR (Apple Style) */}
-      <div style={{
-        marginTop: '24px',
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '20px',
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#F472B6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Inventario de Páginas:
+      {/* PAGE INVENTORY PROGRESS BAR (Apple Style) - Hidden for restricted role editor_redes */}
+      {(!adminUser || adminUser.role !== 'editor_redes') && (
+        <div style={{
+          marginTop: '24px',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '20px',
+          padding: '16px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#F472B6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Inventario de Páginas:
+            </span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'home', name: '1. Inicio (/)', active: false },
+                { id: 'nosotros', name: '2. Nosotros', active: false },
+                { id: 'congresos', name: '3. Eventos & Congresos', active: false },
+                { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
+                { id: 'oracion', name: '5. Oración & Testimonios', active: false },
+                { id: 'donar', name: '6. Donar', active: false },
+                { id: 'modelo', name: '9. Modelo de Jesús', active: true }
+              ].map((pg) => (
+                <span
+                  key={pg.id}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    fontSize: '0.78rem',
+                    fontWeight: pg.active ? 800 : 500,
+                    backgroundColor: pg.active ? 'rgba(236, 72, 153, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                    border: pg.active ? '1.5px solid #F472B6' : '1px solid rgba(255, 255, 255, 0.06)',
+                    color: pg.active ? '#FFFFFF' : 'rgba(234, 237, 248, 0.5)',
+                    cursor: pg.active ? 'default' : 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onClick={() => {
+                    if (onSelectWebPage && !pg.active) {
+                      onSelectWebPage(pg.id);
+                    }
+                  }}
+                >
+                  {pg.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
+            Página 9 de 11 activa
           </span>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'home', name: '1. Inicio (/)', active: false },
-              { id: 'nosotros', name: '2. Nosotros', active: false },
-              { id: 'congresos', name: '3. Eventos & Congresos', active: false },
-              { id: 'grupos-de-amistad', name: '4. Grupos de Amistad', active: false },
-              { id: 'oracion', name: '5. Oración & Testimonios', active: false },
-              { id: 'donar', name: '6. Donar', active: false },
-              { id: 'modelo', name: '9. Modelo de Jesús', active: true }
-            ].map((pg) => (
-              <span
-                key={pg.id}
+        </div>
+      )}
+
+      {/* APPLE SEGMENTED SUBTABS - Hidden if only 1 tab for editor_redes */}
+      {(!adminUser || adminUser.role !== 'editor_redes') && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginTop: '24px',
+          marginBottom: '28px',
+          backgroundColor: 'rgba(255, 255, 255, 0.04)',
+          padding: '6px',
+          borderRadius: '9999px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          overflowX: 'auto'
+        }}>
+          {[
+            { id: 'hero', label: 'Banner & Título Hero', icon: <Sparkles size={15} /> },
+            { id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }
+          ].map((tab) => {
+            const isSelected = activeSubTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveSubTab(tab.id)}
                 style={{
-                  padding: '5px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
                   borderRadius: '9999px',
-                  fontSize: '0.78rem',
-                  fontWeight: pg.active ? 800 : 500,
-                  backgroundColor: pg.active ? 'rgba(236, 72, 153, 0.2)' : 'rgba(255, 255, 255, 0.04)',
-                  border: pg.active ? '1.5px solid #F472B6' : '1px solid rgba(255, 255, 255, 0.06)',
-                  color: pg.active ? '#FFFFFF' : 'rgba(234, 237, 248, 0.5)',
-                  cursor: pg.active ? 'default' : 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => {
-                  if (onSelectWebPage && !pg.active) {
-                    onSelectWebPage(pg.id);
-                  }
+                  border: 'none',
+                  backgroundColor: isSelected ? '#FFFFFF' : 'transparent',
+                  color: isSelected ? '#000000' : 'rgba(234, 237, 248, 0.7)',
+                  fontWeight: isSelected ? 800 : 600,
+                  fontSize: '0.86rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  whiteSpace: 'nowrap',
+                  boxShadow: isSelected ? '0 4px 14px rgba(0, 0, 0, 0.25)' : 'none'
                 }}
               >
-                {pg.name}
-              </span>
-            ))}
-          </div>
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
-        <span style={{ fontSize: '0.78rem', color: 'rgba(234, 237, 248, 0.5)' }}>
-          Página 9 de 11 activa
-        </span>
-      </div>
-
-      {/* APPLE SEGMENTED SUBTABS */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        marginTop: '24px',
-        marginBottom: '28px',
-        backgroundColor: 'rgba(255, 255, 255, 0.04)',
-        padding: '6px',
-        borderRadius: '9999px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        overflowX: 'auto'
-      }}>
-        {((adminUser && adminUser.role === 'editor_redes')
-          ? [{ id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }]
-          : [
-              { id: 'hero', label: 'Banner & Título Hero', icon: <Sparkles size={15} /> },
-              { id: 'networks', label: 'Redes & Ministerios', icon: <Users size={15} /> }
-            ]
-        ).map((tab) => {
-          const isSelected = activeSubTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveSubTab(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                borderRadius: '9999px',
-                border: 'none',
-                backgroundColor: isSelected ? '#FFFFFF' : 'transparent',
-                color: isSelected ? '#000000' : 'rgba(234, 237, 248, 0.7)',
-                fontWeight: isSelected ? 800 : 600,
-                fontSize: '0.86rem',
-                cursor: 'pointer',
-                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                whiteSpace: 'nowrap',
-                boxShadow: isSelected ? '0 4px 14px rgba(0, 0, 0, 0.25)' : 'none'
-              }}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      )}
 
       {/* SUBTAB 1: HERO & MAIN HEADINGS */}
       {activeSubTab === 'hero' && (

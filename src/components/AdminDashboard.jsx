@@ -4296,6 +4296,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
               saveSuccessMsg={saveSuccessMsg}
               onSelectWebPage={setActiveWebPage}
               API_URL={API_URL}
+              adminUser={adminUser}
             />
           )}
         </>
