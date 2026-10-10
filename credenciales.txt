@@ -15,3 +15,11 @@ Gestión de Tiquetes   Dayanna_reservas     Dy6qA3w1        Gestión de tiquetes
 Escáner de Puerta     Stephanie_scanner    Sp7nS2x8        Solo escaneo de códigos QR
 Escáner de Puerta     Evelyn_scanner       Ev2kS5z9        Solo escaneo de códigos QR
 Escáner de Puerta     Andrea_scanner       An4pS7w2        Solo escaneo de códigos QR
+
+
+
+
+editor_noticias	noticias123	Noticiero e Inicio	Exclusivamente para actualizar la portada /inicio y crear landings de noticias.
+editor_eventos	eventos123	Cartelera & Eventos	Exclusivamente para la gestión y creación del catálogo de eventos.
+editor_grupos	grupos123	Grupos de Amistad	Exclusivamente para la administración de Grupos de Amistad y solicitudes de contacto.
+editor_redes	redes123	Redes y Ministerios	Exclusivamente para actualizar las secciones de Redes y Ministerios (Modelo).

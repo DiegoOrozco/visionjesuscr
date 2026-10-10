@@ -194,6 +194,7 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
   const [localSections, setLocalSections] = useState([]);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [builderPagePath, setBuilderPagePath] = useState('/nosotros');
   const [activeWebPage, setActiveWebPage] = useState(() => {
     if (adminUser) {
       if (adminUser.role === 'editor_noticias') return 'home';
