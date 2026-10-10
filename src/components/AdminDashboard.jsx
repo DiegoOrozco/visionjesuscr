@@ -5879,7 +5879,43 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px' }}>Estado / Badge</label>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '6px', color: '#1E293B' }}>Estado del Evento (Badge)</label>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                        {[
+                          { label: 'Entradas Disponibles', color: '#10B981', isFinished: false },
+                          { label: '🏁 Evento Finalizado', color: '#64748B', isFinished: true },
+                          { label: '⛔ Cupos Agotados', color: '#EF4444', isFinished: false },
+                          { label: '🔥 Últimos Cupos', color: '#F59E0B', isFinished: false },
+                          { label: '⏳ Próximamente', color: '#3B82F6', isFinished: false }
+                        ].map((preset) => {
+                          const isSelected = evt.status === preset.label;
+                          return (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => {
+                                const updated = [...localEventsList];
+                                updated[idx].status = preset.label;
+                                updated[idx].isFinished = preset.isFinished;
+                                setLocalEventsList(updated);
+                              }}
+                              style={{
+                                padding: '5px 11px',
+                                borderRadius: '9999px',
+                                fontSize: '0.74rem',
+                                fontWeight: isSelected ? 800 : 600,
+                                backgroundColor: isSelected ? preset.color : '#F1F5F9',
+                                border: isSelected ? `1.5px solid ${preset.color}` : '1px solid #CBD5E1',
+                                color: isSelected ? '#FFFFFF' : '#475569',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                       <input
                         type="text"
                         value={evt.status || ''}
