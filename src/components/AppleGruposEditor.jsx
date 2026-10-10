@@ -959,6 +959,50 @@ export default function AppleGruposEditor({
                           }}
                         />
                       </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#60A5FA', marginBottom: '6px' }}>
+                          Enlace Google Maps (Navegación)
+                        </label>
+                        <input
+                          type="url"
+                          value={grp.maps_url || ''}
+                          onChange={(e) => handleGroupChange(grp.id || idx, 'maps_url', e.target.value)}
+                          placeholder="Ej: https://maps.app.goo.gl/..."
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            borderRadius: '10px',
+                            color: '#FFFFFF',
+                            fontSize: '0.88rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#38BDF8', marginBottom: '6px' }}>
+                          Enlace Waze (Navegación)
+                        </label>
+                        <input
+                          type="url"
+                          value={grp.waze_url || ''}
+                          onChange={(e) => handleGroupChange(grp.id || idx, 'waze_url', e.target.value)}
+                          placeholder="Ej: https://waze.com/ul/..."
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            borderRadius: '10px',
+                            color: '#FFFFFF',
+                            fontSize: '0.88rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
                     </div>
 
                   </div>

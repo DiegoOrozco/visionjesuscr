@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Calendar, Clock, Users, Send, CheckCircle2, Filter, Heart, Sparkles, Phone, ArrowRight, X } from 'lucide-react';
+import { Search, MapPin, Calendar, Clock, Users, Send, CheckCircle2, Filter, Heart, Sparkles, Phone, ArrowRight, X, ExternalLink, Navigation } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -458,6 +458,62 @@ export default function GruposAmistadPage({ config = {}, onGoHome }) {
                       <MapPin size={16} style={{ color: '#977DFF', flexShrink: 0 }} />
                       <span>{grp.canton} — {grp.address_reference}</span>
                     </div>
+
+                    {(grp.maps_url || grp.waze_url) && (
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                        {grp.maps_url && (
+                          <a
+                            href={grp.maps_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '5px 12px',
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                              border: '1px solid rgba(59, 130, 246, 0.35)',
+                              color: '#60A5FA',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <Navigation size={13} />
+                            <span>Google Maps</span>
+                            <ExternalLink size={11} />
+                          </a>
+                        )}
+
+                        {grp.waze_url && (
+                          <a
+                            href={grp.waze_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '5px 12px',
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(14, 165, 233, 0.15)',
+                              border: '1px solid rgba(14, 165, 233, 0.35)',
+                              color: '#38BDF8',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <Navigation size={13} />
+                            <span>Waze</span>
+                            <ExternalLink size={11} />
+                          </a>
+                        )}
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Calendar size={16} style={{ color: '#977DFF', flexShrink: 0 }} />

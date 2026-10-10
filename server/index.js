@@ -2264,15 +2264,15 @@ app.get('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
 
 app.post('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
   try {
-    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone } = req.body;
+    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, maps_url, waze_url } = req.body;
     if (!name || !zone || !canton) {
       return res.status(400).json({ success: false, message: 'Nombre, zona y cantón son obligatorios.' });
     }
     const stmt = db.prepare(`
-      INSERT INTO friendship_groups (name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO friendship_groups (name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, maps_url, waze_url, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `);
-    const result = stmt.run(name, zone, canton, address_reference || '', meeting_day || 'Por coordinar', meeting_time || 'Por coordinar', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '');
+    const result = stmt.run(name, zone, canton, address_reference || '', meeting_day || 'Por coordinar', meeting_time || 'Por coordinar', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '', maps_url || '', waze_url || '');
     res.json({ success: true, message: 'Grupo de amistad creado con éxito.', id: result.lastInsertRowid });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
@@ -2281,13 +2281,13 @@ app.post('/api/admin/friendship-groups', verifyAdminToken, (req, res) => {
 
 app.put('/api/admin/friendship-groups/:id', verifyAdminToken, (req, res) => {
   try {
-    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, is_active } = req.body;
+    const { name, zone, canton, address_reference, meeting_day, meeting_time, modality, network_category, leaders, phone, maps_url, waze_url, is_active } = req.body;
     const stmt = db.prepare(`
       UPDATE friendship_groups 
-      SET name = ?, zone = ?, canton = ?, address_reference = ?, meeting_day = ?, meeting_time = ?, modality = ?, network_category = ?, leaders = ?, phone = ?, is_active = ?
+      SET name = ?, zone = ?, canton = ?, address_reference = ?, meeting_day = ?, meeting_time = ?, modality = ?, network_category = ?, leaders = ?, phone = ?, maps_url = ?, waze_url = ?, is_active = ?
       WHERE id = ?
     `);
-    stmt.run(name, zone, canton, address_reference || '', meeting_day || '', meeting_time || '', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '', is_active !== undefined ? is_active : 1, req.params.id);
+    stmt.run(name, zone, canton, address_reference || '', meeting_day || '', meeting_time || '', modality || 'Presencial', network_category || 'Mixto', leaders || '', phone || '', maps_url || '', waze_url || '', is_active !== undefined ? is_active : 1, req.params.id);
     res.json({ success: true, message: 'Grupo de amistad actualizado.' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });

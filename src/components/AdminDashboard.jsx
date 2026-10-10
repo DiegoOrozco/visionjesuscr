@@ -5901,6 +5901,29 @@ export default function AdminDashboard({ adminUser, onLogin, onLogout, homepageC
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Enlace Google Maps (Opcional)</label>
+                  <input
+                    type="url"
+                    value={editingGroupModal.maps_url || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, maps_url: e.target.value })}
+                    placeholder="ej: https://maps.app.goo.gl/..."
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Enlace Waze (Opcional)</label>
+                  <input
+                    type="url"
+                    value={editingGroupModal.waze_url || ''}
+                    onChange={(e) => setEditingGroupModal({ ...editingGroupModal, waze_url: e.target.value })}
+                    placeholder="ej: https://waze.com/ul/..."
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-coffee)', marginBottom: '4px' }}>Anfitriones / Líderes</label>
                   <input
                     type="text"

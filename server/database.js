@@ -147,6 +147,8 @@ function initDb() {
       network_category TEXT DEFAULT 'Mixto',
       leaders TEXT,
       phone TEXT,
+      maps_url TEXT,
+      waze_url TEXT,
       is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -198,6 +200,8 @@ function initDb() {
   try { db.exec(`ALTER TABLE reservations ADD COLUMN amount_usd REAL`); } catch (e) {}
   try { db.exec(`ALTER TABLE reservations ADD COLUMN event_id TEXT DEFAULT 'autenticas-2026'`); } catch (e) {}
   try { db.exec(`UPDATE reservations SET event_id = 'autenticas-2026' WHERE event_id IS NULL OR event_id = ''`); } catch (e) {}
+  try { db.exec(`ALTER TABLE friendship_groups ADD COLUMN maps_url TEXT`); } catch (e) {}
+  try { db.exec(`ALTER TABLE friendship_groups ADD COLUMN waze_url TEXT`); } catch (e) {}
 
   // Cleanup abandoned PAYPAL_PENDING draft reservations if any exist from pre-refactor
   try {
